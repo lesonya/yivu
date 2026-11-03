@@ -5,6 +5,8 @@ import '../../core/theme/app_theme.dart';
 import '../../core/database/database_helper.dart';
 import '../../shared/widgets/dpad_focusable.dart';
 import '../gamification/presentation/tv_leaderboard_podium.dart';
+import '../gamification/presentation/profile_switcher_dialog.dart';
+import '../curriculum/presentation/subject_materials_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -15,7 +17,16 @@ class HomeScreen extends StatefulWidget {
 
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedDivision = 'standards'; // 'standards' or 'forms'
-  String _selectedGradeKey = 'std_2';
+  Map<String, dynamic> _activeChild = {
+    'id': 'child_1',
+    'display_name': 'Kagiso',
+    'avatar_mascot': 'owl',
+    'grade_key': 'std_4',
+    'division': 'standard',
+    'total_xp': 420,
+    'total_stars': 24,
+  };
+
   List<Map<String, dynamic>> _leaderboard = [];
   Map<String, dynamic>? _curriculumData;
   bool _isLoading = true;
@@ -28,12 +39,9 @@ class _HomeScreenState extends State<HomeScreen> {
 
   Future<void> _loadInitialData() async {
     try {
-      // 1. Load curriculum taxonomy JSON
       final rawCurriculum = await rootBundle.loadString('assets/data/curriculum.json');
       _curriculumData = json.decode(rawCurriculum) as Map<String, dynamic>;
 
-      // 2. Fetch weekly leaderboard
-      // For baseline preview, we populate mock siblings if DB has none yet
       _leaderboard = [
         {
           'child_id': 'child_1',
@@ -65,6 +73,47 @@ class _HomeScreenState extends State<HomeScreen> {
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  void _openProfileDialog() {
+    showDialog(
+      context: context,
+      builder: (_) => ProfileSwitcherDialog(
+        activeChildId: _activeChild['id'],
+        onProfileSelected: (child) {
+          setState(() {
+            _activeChild = child;
+            _selectedDivision = child['division'] == 'form' ? 'forms' : 'standards';
+          });
+        },
+        onProfileCreated: (newChild) {
+          setState(() {
+            _activeChild = newChild;
+            _selectedDivision = newChild['division'] == 'form' ? 'forms' : 'standards';
+            _leaderboard.add({
+              'child_id': newChild['id'],
+              'display_name': newChild['display_name'],
+              'avatar_mascot': newChild['avatar_mascot'],
+              'grade_key': newChild['grade_key'],
+              'weekly_xp': 0,
+              'weekly_stars': 0,
+            });
+          });
+        },
+      ),
+    );
+  }
+
+  void _openSubjectMaterials(Map<String, dynamic> subject) {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => SubjectMaterialsScreen(
+          activeChild: _activeChild,
+          subject: subject,
+          division: _selectedDivision == 'forms' ? 'form' : 'standard',
+        ),
+      ),
+    );
   }
 
   List<dynamic> get _currentSubjects {
@@ -152,33 +201,31 @@ class _HomeScreenState extends State<HomeScreen> {
                       borderRadius: 30,
                       padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
                       backgroundColor: AppTheme.surfaceNavy,
-                      onSelect: () {
-                        // Switch active learner dialog
-                      },
-                      child: const Row(
+                      onSelect: _openProfileDialog,
+                      child: Row(
                         children: [
                           CircleAvatar(
                             radius: 16,
                             backgroundColor: AppTheme.cobaltBlue,
                             child: Text(
-                              "K",
-                              style: TextStyle(
+                              (_activeChild['display_name'] as String? ?? 'K')[0],
+                              style: const TextStyle(
                                 fontWeight: FontWeight.bold,
                                 color: Colors.white,
                               ),
                             ),
                           ),
-                          SizedBox(width: 10),
+                          const SizedBox(width: 10),
                           Text(
-                            "Learner: Kagiso (Std 4)",
-                            style: TextStyle(
+                            "Learner: ${_activeChild['display_name']} (${(_activeChild['grade_key'] as String).toUpperCase().replaceAll('_', ' ')})",
+                            style: const TextStyle(
                               color: Colors.white,
                               fontWeight: FontWeight.bold,
                               fontSize: 14,
                             ),
                           ),
-                          SizedBox(width: 6),
-                          Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20),
+                          const SizedBox(width: 6),
+                          const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20),
                         ],
                       ),
                     ),
@@ -238,9 +285,7 @@ class _HomeScreenState extends State<HomeScreen> {
                     return DPadFocusableCard(
                       borderRadius: 22,
                       backgroundColor: AppTheme.surfaceNavy,
-                      onSelect: () {
-                        // Open subject past papers and flashcards
-                      },
+                      onSelect: () => _openSubjectMaterials(subject),
                       child: Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
