@@ -1,0 +1,40 @@
+# Yivu (.gitignore)
+
+# Environment variables & API tokens
+.env
+*.env
+!.env.example
+
+# Keystores & sensitive credentials
+*.jks
+*.keystore
+google-services.json
+
+# Flutter / Dart build artifacts
+.dart_tool/
+.flutter-plugins
+.flutter-plugins-dependencies
+.packages
+build/
+*.mode1v3
+*.mode2v3
+*.moved-aside
+*.pbxuser
+*.perspectivev3
+
+# Android Studio / IntelliJ / VSCode
+.idea/
+*.iml
+.vscode/
+local.properties
+
+# Node / JS
+node_modules/
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS metadata
+.DS_Store
+Thumbs.db
+

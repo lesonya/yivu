@@ -1,0 +1,96 @@
+{
+  "version": "1.0.0",
+  "generated_at": "2026-11-03",
+  "seed_materials": [
+    {
+      "id": "mat_std4_env_living",
+      "grade_key": "std_4",
+      "subject_id": "std_env_science",
+      "title": "Living vs Non-Living Things (Notes & Practice)",
+      "type": "NOTES_WITH_MCQ",
+      "reading_content": "All things around us can be grouped into living and non-living things.\n\n1. Living Things:\n- They breathe air.\n- They need food and clean water.\n- They grow bigger over time.\n- They reproduce (have young ones).\n- Examples: Cattle (dikgomo), acacia trees (mogonono), birds, and children.\n\n2. Non-Living Things:\n- They do not breathe, eat, or grow.\n- Examples: Rocks, school desks, pencils, water, and soil.\n\nRemember: Plants are living things even though they do not walk around!",
+      "questions": [
+        {
+          "id": "q_std4_env_01",
+          "prompt": "Which of the following is a living thing?",
+          "options": ["A river pebble", "An Acacia tree", "A plastic ruler", "A brick house"],
+          "correct_index": 1,
+          "explanation": "An Acacia tree is a living plant! It grows, breathes, and needs sunlight and water to live."
+        },
+        {
+          "id": "q_std4_env_02",
+          "prompt": "What do all living things need to stay alive?",
+          "options": ["Candy and soda", "Food, water, and air", "Shoes and umbrellas", "Toys and batteries"],
+          "correct_index": 1,
+          "explanation": "All living things (humans, animals, and plants) need nourishment, hydration, and air/oxygen to survive."
+        }
+      ]
+    },
+    {
+      "id": "mat_std3_math_add",
+      "grade_key": "std_3",
+      "subject_id": "std_math",
+      "title": "Adding with Fun Animals: Double Digits",
+      "type": "PAST_PAPER_SAMPLE",
+      "reading_content": "Quick Math Reminder:\nWhen adding two numbers like 25 + 14, always start by adding the units (5 + 4 = 9), then add the tens (2 + 1 = 3). 25 + 14 = 39!",
+      "questions": [
+        {
+          "id": "q_std3_math_01",
+          "prompt": "Kabo has 24 marbles. Thabo gives him 15 more marbles. How many marbles does Kabo have now?",
+          "options": ["35", "38", "39", "40"],
+          "correct_index": 2,
+          "explanation": "24 + 15: Add units (4 + 5 = 9), add tens (20 + 10 = 30). Total is 39 marbles!"
+        },
+        {
+          "id": "q_std3_math_02",
+          "prompt": "What is the shape of a full moon in the night sky?",
+          "options": ["Triangle", "Square", "Circle", "Rectangle"],
+          "correct_index": 2,
+          "explanation": "A full moon is round like a ball or a circle."
+        }
+      ]
+    },
+    {
+      "id": "mat_form2_int_sci_cells",
+      "grade_key": "form_2",
+      "subject_id": "form_integrated_science",
+      "title": "Cell Biology: Plant vs Animal Cell Architecture",
+      "type": "NOTES_WITH_MCQ",
+      "reading_content": "### Cells: The Fundamental Units of Life\n\nAll living organisms are made up of microscopic units called cells.\n\n#### Organelles Shared by Plant & Animal Cells:\n- **Nucleus**: Controls all cellular activities and contains genetic material (DNA).\n- **Cytoplasm**: Jelly-like substance where metabolic reactions take place.\n- **Cell Membrane**: Semi-permeable barrier controlling entry and exit of substances.\n- **Mitochondria**: The powerhouse of the cell, responsible for aerobic respiration.\n\n#### Organelles Found ONLY in Plant Cells:\n- **Cell Wall**: Made of rigid cellulose; provides structural support and protection.\n- **Chloroplasts**: Contain green chlorophyll pigment to absorb light energy for photosynthesis.\n- **Large Central Vacuole**: Stores cell sap, maintaining turgidity.",
+      "questions": [
+        {
+          "id": "q_f2_sci_01",
+          "prompt": "Which organelle is responsible for synthesizing chemical energy (ATP) via cellular respiration?",
+          "options": ["Ribosome", "Mitochondrion", "Chloroplast", "Golgi Body"],
+          "correct_index": 1,
+          "explanation": "Mitochondria are the primary sites of cellular respiration where glucose and oxygen produce ATP energy."
+        },
+        {
+          "id": "q_f2_sci_02",
+          "prompt": "A junior science student views an unknown cell under a light microscope and identifies a rigid cellulose cell wall and large chloroplasts. This cell is:",
+          "options": ["A human cheek cell", "An amoeba", "A plant palisade mesophyll cell", "A bacterial virus"],
+          "correct_index": 2,
+          "explanation": "Cellulose cell walls and chloroplasts are definitive characteristics of photosynthetic plant cells, such as palisade mesophyll cells."
+        }
+      ]
+    },
+    {
+      "id": "mat_form3_social_economy",
+      "grade_key": "form_3",
+      "subject_id": "form_social_studies",
+      "title": "Botswana Economic History: Diamonds & Diversification",
+      "type": "PAST_PAPER_SAMPLE",
+      "reading_content": "### Botswana Economic Overview\n\nFollowing independence in 1966, Botswana transitioned from one of the poorest nations to an upper-middle-income economy, largely propelled by diamond mining discovery at Orapa, Jwaneng, and Letlhakane in partnership with Debswana.\n\nKey policy focuses today:\n- **Economic Diversification**: Developing tourism (Okavango Delta & Chobe), agriculture, manufacturing, and financial services.\n- **Vision 2036**: Sustainable growth, human capital development, and high-income status.",
+      "questions": [
+        {
+          "id": "q_f3_soc_01",
+          "prompt": "Which major mineral discovery in 1967 played the single most transformative role in Botswana's post-independence economic expansion?",
+          "options": ["Copper-Nickel in Selebi-Phikwe", "Diamonds at Orapa", "Coal at Morupule", "Soda Ash at Sua Pan"],
+          "correct_index": 1,
+          "explanation": "The discovery of the kimberlite pipe at Orapa in 1967 laid the foundation for the diamond revenues that drove Botswana's infrastructure and education development."
+        }
+      ]
+    }
+  ]
+}
+
