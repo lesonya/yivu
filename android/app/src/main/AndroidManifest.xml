@@ -1,5 +1,4 @@
-<manifest xmlns:android="http://schemas.android.com/apk/res/android"
-    package="com.yivu.learning">
+<manifest xmlns:android="http://schemas.android.com/apk/res/android">
 
     <!-- Internet permission for ChatGPT AI features and updates -->
     <uses-permission android:name="android.permission.INTERNET" />
