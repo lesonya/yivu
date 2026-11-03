@@ -1,9 +1,9 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/dpad_focusable.dart';
-import '../../quiz/presentation/quiz_runner_screen.dart';
+import 'package:yivu/core/theme/app_theme.dart';
+import 'package:yivu/shared/widgets/dpad_focusable.dart';
+import 'package:yivu/features/quiz/presentation/quiz_runner_screen.dart';
 
 class SubjectMaterialsScreen extends StatefulWidget {
   final Map<String, dynamic> activeChild;
@@ -327,3 +327,4 @@ class _SubjectMaterialsScreenState extends State<SubjectMaterialsScreen> {
     );
   }
 }
+

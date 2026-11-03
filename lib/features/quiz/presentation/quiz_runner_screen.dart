@@ -1,8 +1,7 @@
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/network/chatgpt_service.dart';
-import '../../shared/widgets/dpad_focusable.dart';
+import 'package:yivu/core/theme/app_theme.dart';
+import 'package:yivu/core/network/chatgpt_service.dart';
+import 'package:yivu/shared/widgets/dpad_focusable.dart';
 
 class QuizRunnerScreen extends StatefulWidget {
   final String gradeKey;
@@ -264,15 +263,12 @@ class _QuizRunnerScreenState extends State<QuizRunnerScreen> {
                 final isCorrect = index == correctIndex;
 
                 Color optionColor = AppTheme.surfaceNavy;
-                Color borderColor = Colors.white12;
 
                 if (_isSubmitted) {
                   if (isCorrect) {
                     optionColor = AppTheme.successGreen.withOpacity(0.2);
-                    borderColor = AppTheme.successGreen;
                   } else if (isSelected) {
                     optionColor = AppTheme.errorCoral.withOpacity(0.2);
-                    borderColor = AppTheme.errorCoral;
                   }
                 }
 

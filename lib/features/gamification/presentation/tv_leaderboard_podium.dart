@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../core/theme/app_theme.dart';
-import '../../../shared/widgets/dpad_focusable.dart';
+import 'package:yivu/core/theme/app_theme.dart';
+import 'package:yivu/shared/widgets/dpad_focusable.dart';
 
 class TVLeaderboardPodium extends StatelessWidget {
   final List<Map<String, dynamic>> leaderboard;

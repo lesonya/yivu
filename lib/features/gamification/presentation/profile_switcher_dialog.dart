@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
-import '../../../core/theme/app_theme.dart';
-import '../../../shared/widgets/dpad_focusable.dart';
+import 'package:yivu/core/theme/app_theme.dart';
+import 'package:yivu/shared/widgets/dpad_focusable.dart';
 
 class ProfileSwitcherDialog extends StatefulWidget {
   final String activeChildId;
@@ -419,3 +419,4 @@ class _ProfileSwitcherDialogState extends State<ProfileSwitcherDialog> {
     );
   }
 }
+

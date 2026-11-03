@@ -1,12 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import '../../core/theme/app_theme.dart';
-import '../../core/database/database_helper.dart';
-import '../../shared/widgets/dpad_focusable.dart';
-import '../gamification/presentation/tv_leaderboard_podium.dart';
-import '../gamification/presentation/profile_switcher_dialog.dart';
-import '../curriculum/presentation/subject_materials_screen.dart';
+import 'package:yivu/core/theme/app_theme.dart';
+import 'package:yivu/shared/widgets/dpad_focusable.dart';
+import 'package:yivu/features/gamification/presentation/tv_leaderboard_podium.dart';
+import 'package:yivu/features/gamification/presentation/profile_switcher_dialog.dart';
+import 'package:yivu/features/curriculum/presentation/subject_materials_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});

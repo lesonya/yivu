@@ -25,7 +25,7 @@ class AppTheme {
         surface: surfaceNavy,
       ),
       fontFamily: 'Nunito',
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: surfaceNavy,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
@@ -45,7 +45,7 @@ class AppTheme {
         surface: Colors.white,
       ),
       fontFamily: 'Nunito',
-      cardTheme: CardTheme(
+      cardTheme: CardThemeData(
         color: Colors.white,
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(24),
