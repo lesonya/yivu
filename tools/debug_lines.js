@@ -20,3 +20,4 @@ extractPdfText(mathPdf).then(text => {
   console.log("Meaningful lines sample (lines 10-40):");
   lines.slice(10, 40).forEach((l, idx) => console.log(`${idx}: ${l}`));
 }).catch(console.error);
+

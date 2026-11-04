@@ -25,3 +25,4 @@ console.log(`Found ${files.length} PDF files.`);
 files.slice(0, 15).forEach(f => {
   console.log(path.relative(baseDir, f));
 });
+

@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:flutter/foundation.dart';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:yivu/core/config/env_config.dart';
 
 class GeminiTutorService {
-  final String _apiKey = dotenv.env['GEMINI_API_KEY'] ?? dotenv.env['OPENAI_API_KEY'] ?? '';
-  final String _model = dotenv.env['GEMINI_MODEL'] ?? 'gemini-1.5-flash';
+  String get _apiKey => EnvConfig.get('GEMINI_API_KEY', fallback: EnvConfig.get('OPENAI_API_KEY'));
+  String get _model => EnvConfig.get('GEMINI_MODEL', fallback: 'gemini-1.5-flash');
 
   /// Age-adaptive mistake explanation powered by Google Gemini
   Future<String> explainMistake({
@@ -90,3 +90,4 @@ Explain kindly why "$correctOption" is correct and resolve the misconception.
     }
   }
 }
+

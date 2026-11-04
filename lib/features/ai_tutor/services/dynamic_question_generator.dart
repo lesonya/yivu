@@ -1,11 +1,11 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:yivu/core/config/env_config.dart';
 
 class DynamicQuestionGenerator {
-  final String _apiKey = dotenv.env['OPENAI_API_KEY'] ?? '';
-  final String _model = dotenv.env['OPENAI_MODEL'] ?? 'gpt-4o-mini';
-  final String _baseUrl = dotenv.env['OPENAI_BASE_URL'] ?? 'https://api.openai.com/v1';
+  String get _apiKey => EnvConfig.get('OPENAI_API_KEY');
+  String get _model => EnvConfig.get('OPENAI_MODEL', fallback: 'gpt-4o-mini');
+  String get _baseUrl => EnvConfig.get('OPENAI_BASE_URL', fallback: 'https://api.openai.com/v1');
 
   /// Generates 3-5 syllabus-aligned multiple-choice questions from raw notes
   Future<List<Map<String, dynamic>>> generateQuestionsFromNotes({

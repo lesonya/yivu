@@ -19,3 +19,4 @@ extractPdfText(sample2).then(text => {
   console.log("SUCCESS Math 2021! Extracted length:", text.length);
   console.log("Preview:\n", text.slice(0, 1200));
 }).catch(console.error);
+

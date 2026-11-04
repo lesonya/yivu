@@ -20,3 +20,4 @@ extractPdfText(sampleFile).then(text => {
   console.log("SUCCESS! Extracted length:", text.length);
   console.log("Preview:\n", text.slice(0, 1000));
 }).catch(console.error);
+

@@ -1,10 +1,10 @@
 import 'dart:convert';
 import 'package:http/http.dart' as http;
-import 'package:flutter_dotenv/flutter_dotenv.dart';
+import 'package:yivu/core/config/env_config.dart';
 
 class GeminiPastPaperExtractorService {
-  final String _apiKey = dotenv.env['GEMINI_API_KEY'] ?? dotenv.env['OPENAI_API_KEY'] ?? '';
-  final String _model = dotenv.env['GEMINI_MODEL'] ?? 'gemini-1.5-flash';
+  String get _apiKey => EnvConfig.get('GEMINI_API_KEY', fallback: EnvConfig.get('OPENAI_API_KEY'));
+  String get _model => EnvConfig.get('GEMINI_MODEL', fallback: 'gemini-1.5-flash');
 
   /// Extracts individual MCQs, options [A,B,C,D], correct index, and explanations
   /// directly using Google Gemini's native JSON output mode.
@@ -71,3 +71,4 @@ Format the output as a strict JSON object with a single key "questions" containi
     }
   }
 }
+

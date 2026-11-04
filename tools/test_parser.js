@@ -65,3 +65,4 @@ extractPdfText(mathPdf).then(text => {
   console.log(`Parsed ${qs.length} questions from 2021 Standard 4 Mathematics:`);
   console.log(JSON.stringify(qs.slice(0, 3), null, 2));
 }).catch(console.error);
+

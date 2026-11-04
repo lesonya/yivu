@@ -38,6 +38,7 @@ flutter:
   uses-material-design: true
 
   assets:
+    - .env
     - resources/img/branding.png
     - assets/data/curriculum.json
     - assets/data/seed_materials.json
