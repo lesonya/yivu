@@ -27,6 +27,15 @@ class _ProfileSwitcherDialogState extends State<ProfileSwitcherDialog> {
   // Sample local profiles (loaded from SQLite or seed)
   final List<Map<String, dynamic>> _profiles = [
     {
+      'id': 'child_aaba',
+      'display_name': 'Aaba',
+      'avatar_mascot': 'owl',
+      'grade_key': 'std_5',
+      'division': 'standard',
+      'total_xp': 0,
+      'total_stars': 0,
+    },
+    {
       'id': 'child_1',
       'display_name': 'Kagiso',
       'avatar_mascot': 'owl',

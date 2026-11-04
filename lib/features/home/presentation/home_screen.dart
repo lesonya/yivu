@@ -20,13 +20,13 @@ class HomeScreen extends StatefulWidget {
 class _HomeScreenState extends State<HomeScreen> {
   String _selectedDivision = 'standards'; // 'standards' or 'forms'
   Map<String, dynamic> _activeChild = {
-    'id': 'child_1',
-    'display_name': 'Kagiso',
+    'id': 'child_aaba',
+    'display_name': 'Aaba',
     'avatar_mascot': 'owl',
-    'grade_key': 'std_4',
+    'grade_key': 'std_5',
     'division': 'standard',
-    'total_xp': 420,
-    'total_stars': 24,
+    'total_xp': 0,
+    'total_stars': 0,
   };
 
   List<Map<String, dynamic>> _leaderboard = [];
@@ -35,7 +35,7 @@ class _HomeScreenState extends State<HomeScreen> {
 
   // Last active task tracking (Dynamic Resume Link)
   int _lastProgressPercent = 0;
-  String _lastTaskTitle = "Standard 4 • Mathematics";
+  String _lastTaskTitle = "Standard 5 • Mathematics";
   Map<String, dynamic>? _lastSubject;
 
   @override
@@ -53,6 +53,14 @@ class _HomeScreenState extends State<HomeScreen> {
       );
 
       _leaderboard = [
+        {
+          'child_id': 'child_aaba',
+          'display_name': 'Aaba',
+          'avatar_mascot': 'owl',
+          'grade_key': 'std_5',
+          'weekly_xp': 500,
+          'weekly_stars': 30,
+        },
         {
           'child_id': 'child_1',
           'display_name': 'Kagiso',
