@@ -4,10 +4,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:yivu/core/theme/app_theme.dart';
 import 'package:yivu/shared/widgets/dpad_focusable.dart';
-import 'package:yivu/features/gamification/presentation/tv_leaderboard_podium.dart';
 import 'package:yivu/features/gamification/presentation/profile_switcher_dialog.dart';
+import 'package:yivu/features/gamification/presentation/leaderboard_screen.dart';
 import 'package:yivu/features/curriculum/presentation/subject_materials_screen.dart';
 import 'package:yivu/features/curriculum/presentation/upload_past_paper_screen.dart';
+import 'widgets/dashboard_resume_and_ranks_cards.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -31,6 +32,11 @@ class _HomeScreenState extends State<HomeScreen> {
   List<Map<String, dynamic>> _leaderboard = [];
   Map<String, dynamic>? _curriculumData;
   bool _isLoading = true;
+
+  // Last active task tracking (Dynamic Resume Link)
+  int _lastProgressPercent = 0;
+  String _lastTaskTitle = "Standard 4 • Mathematics";
+  Map<String, dynamic>? _lastSubject;
 
   @override
   void initState() {
@@ -79,6 +85,26 @@ class _HomeScreenState extends State<HomeScreen> {
     }
   }
 
+  void _resumeLastTask() {
+    if (_lastSubject != null) {
+      _openSubjectMaterials(_lastSubject!);
+    } else {
+      // If no task stored yet, open first subject of active division
+      final subjects = _currentSubjects;
+      if (subjects.isNotEmpty) {
+        _openSubjectMaterials(Map<String, dynamic>.from(subjects.first));
+      }
+    }
+  }
+
+  void _openLeaderboardScreen() {
+    Navigator.of(context).push(
+      MaterialPageRoute(
+        builder: (_) => LeaderboardScreen(leaderboard: _leaderboard),
+      ),
+    );
+  }
+
   void _openProfileDialog() {
     showDialog(
       context: context,
@@ -109,6 +135,12 @@ class _HomeScreenState extends State<HomeScreen> {
   }
 
   void _openSubjectMaterials(Map<String, dynamic> subject) {
+    setState(() {
+      _lastSubject = subject;
+      _lastTaskTitle = "${_activeChild['grade_key'].toString().toUpperCase().replaceAll('_', ' ')} • ${subject['name']}";
+      _lastProgressPercent = 35; // Carried forward active progress
+    });
+
     Navigator.of(context).push(
       MaterialPageRoute(
         builder: (_) => SubjectMaterialsScreen(
@@ -271,11 +303,16 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Sibling Leaderboard (Passive TV Dashboard Component)
+            // Two-Column Dashboard Card Layout: Dynamic Resume & Leaderboard Ranks
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                child: TVLeaderboardPodium(leaderboard: _leaderboard),
+                child: DashboardResumeAndRanksCards(
+                  progressPercent: _lastProgressPercent,
+                  activeTaskTitle: _lastTaskTitle,
+                  onResume: _resumeLastTask,
+                  onOpenLeaderboard: _openLeaderboardScreen,
+                ),
               ),
             ),
 

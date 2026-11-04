@@ -8,3 +8,4 @@ class EnvConfig {
     return dotenv.env[key] ?? fallback;
   }
 }
+
