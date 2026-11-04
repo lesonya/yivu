@@ -1,6 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:yivu/core/theme/app_theme.dart';
-import 'package:yivu/core/network/chatgpt_service.dart';
+import 'package:yivu/core/network/gemini_tutor_service.dart';
 import 'package:yivu/shared/widgets/dpad_focusable.dart';
 
 class QuizRunnerScreen extends StatefulWidget {
@@ -33,7 +33,7 @@ class _QuizRunnerScreenState extends State<QuizRunnerScreen> {
   bool _isExplainingWithAI = false;
   String? _aiExplanation;
 
-  final ChatGPTService _chatGPTService = ChatGPTService();
+  final GeminiTutorService _tutorService = GeminiTutorService();
 
   Map<String, dynamic> get _currentQuestion => widget.questions[_currentIndex];
 
@@ -63,7 +63,7 @@ class _QuizRunnerScreenState extends State<QuizRunnerScreen> {
     final chosen = _selectedAnswerIndex != null ? options[_selectedAnswerIndex!] : 'None';
     final correct = options[_currentQuestion['correct_index'] as int];
 
-    final explanation = await _chatGPTService.explainMistake(
+    final explanation = await _tutorService.explainMistake(
       division: widget.division,
       gradeKey: widget.gradeKey,
       subjectName: widget.subjectName,

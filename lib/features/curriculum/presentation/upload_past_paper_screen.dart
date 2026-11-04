@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:yivu/core/theme/app_theme.dart';
 import 'package:yivu/core/database/database_helper.dart';
 import 'package:yivu/shared/widgets/dpad_focusable.dart';
-import '../services/past_paper_extractor_service.dart';
+import '../services/gemini_past_paper_extractor_service.dart';
 
 class UploadPastPaperScreen extends StatefulWidget {
   final String? preselectedGradeKey;
@@ -107,7 +107,7 @@ class _UploadPastPaperScreenState extends State<UploadPastPaperScreen> {
 
     try {
       final subjectName = _currentSubjects.firstWhere((s) => s['id'] == _selectedSubjectId)['name']!;
-      final extractor = PastPaperExtractorService();
+      final extractor = GeminiPastPaperExtractorService();
 
       final questions = await extractor.extractQuestionsFromPaperText(
         division: _currentDivision,
@@ -444,3 +444,4 @@ class _UploadPastPaperScreenState extends State<UploadPastPaperScreen> {
     );
   }
 }
+
