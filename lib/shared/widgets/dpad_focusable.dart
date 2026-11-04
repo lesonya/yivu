@@ -11,6 +11,7 @@ class DPadFocusableCard extends StatefulWidget {
   final double borderRadius;
   final EdgeInsetsGeometry padding;
   final Color? backgroundColor;
+  final Gradient? gradient;
 
   const DPadFocusableCard({
     super.key,
@@ -20,6 +21,7 @@ class DPadFocusableCard extends StatefulWidget {
     this.borderRadius = 24.0,
     this.padding = const EdgeInsets.all(16.0),
     this.backgroundColor,
+    this.gradient,
   });
 
   @override
@@ -65,7 +67,8 @@ class _DPadFocusableCardState extends State<DPadFocusableCard> {
               curve: Curves.easeOutCubic,
               padding: widget.padding,
               decoration: BoxDecoration(
-                color: widget.backgroundColor ?? const Color(0xFF1E293B), // Navy Surface
+                color: widget.gradient != null ? null : (widget.backgroundColor ?? const Color(0xFF1E293B)), // Navy Surface
+                gradient: widget.gradient,
                 borderRadius: BorderRadius.circular(widget.borderRadius),
                 border: Border.all(
                   color: _isActive ? focusGlowColor : defaultBorder,

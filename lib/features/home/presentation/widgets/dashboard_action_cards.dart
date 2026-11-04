@@ -24,11 +24,14 @@ class DashboardActionCards extends StatelessWidget {
     required this.onSelectGrade,
   });
 
+  static const double _cardHeight = 160.0;
+  static const double _cardRadius = 26.0;
+  static const EdgeInsets _cardPadding = EdgeInsets.symmetric(horizontal: 20, vertical: 18);
+
   @override
   Widget build(BuildContext context) {
     return LayoutBuilder(
       builder: (context, constraints) {
-        // Automatically adapt spacing or horizontal scrolling if screen is compact
         final isWide = constraints.maxWidth > 900;
 
         return Row(
@@ -36,17 +39,17 @@ class DashboardActionCards extends StatelessWidget {
             // Card 1: Dynamic Resume / Progress Card
             Expanded(
               child: DPadFocusableCard(
-                borderRadius: 26,
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+                borderRadius: _cardRadius,
+                padding: _cardPadding,
                 backgroundColor: AppTheme.surfaceNavy,
                 onSelect: onResume,
                 child: SizedBox(
-                  height: 140,
+                  height: _cardHeight,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
-                      // Top Left: Activity / Bar Chart Icon
+                      // Top row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -77,7 +80,7 @@ class DashboardActionCards extends StatelessWidget {
                         ],
                       ),
 
-                      // Main Headline: Progress [X]%
+                      // Middle headline: Progress [X]%
                       Row(
                         crossAxisAlignment: CrossAxisAlignment.baseline,
                         textBaseline: TextBaseline.alphabetic,
@@ -96,7 +99,7 @@ class DashboardActionCards extends StatelessWidget {
                             "$progressPercent%",
                             style: const TextStyle(
                               color: Colors.white,
-                              fontSize: 24,
+                              fontSize: 26,
                               fontWeight: FontWeight.bold,
                               letterSpacing: -0.5,
                             ),
@@ -104,7 +107,7 @@ class DashboardActionCards extends StatelessWidget {
                         ],
                       ),
 
-                      // Bottom Action Label: → continue
+                      // Bottom action
                       const Text(
                         "→ continue",
                         style: TextStyle(
@@ -125,16 +128,17 @@ class DashboardActionCards extends StatelessWidget {
             // Card 2: Select Subject Card
             Expanded(
               child: DPadFocusableCard(
-                borderRadius: 26,
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+                borderRadius: _cardRadius,
+                padding: _cardPadding,
                 backgroundColor: AppTheme.surfaceNavy,
                 onSelect: onSelectSubject,
                 child: SizedBox(
-                  height: 140,
+                  height: _cardHeight,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Top row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -164,6 +168,8 @@ class DashboardActionCards extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      // Middle headline
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -188,6 +194,8 @@ class DashboardActionCards extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      // Bottom action
                       const Text(
                         "browse all →",
                         style: TextStyle(
@@ -204,19 +212,20 @@ class DashboardActionCards extends StatelessWidget {
 
             const SizedBox(width: 14),
 
-            // Card 3: Select Standard/Grade Card
+            // Card 3: Select Standard / Grade Card
             Expanded(
               child: DPadFocusableCard(
-                borderRadius: 26,
-                padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
+                borderRadius: _cardRadius,
+                padding: _cardPadding,
                 backgroundColor: AppTheme.surfaceNavy,
                 onSelect: onSelectGrade,
                 child: SizedBox(
-                  height: 140,
+                  height: _cardHeight,
                   child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Top row
                       Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -246,6 +255,8 @@ class DashboardActionCards extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      // Middle headline
                       const Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -270,6 +281,8 @@ class DashboardActionCards extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      // Bottom action
                       const Text(
                         "switch level →",
                         style: TextStyle(
@@ -289,34 +302,32 @@ class DashboardActionCards extends StatelessWidget {
             // Card 4: Leaderboard Ranks (Brand Gradient Card)
             Expanded(
               child: DPadFocusableCard(
-                borderRadius: 26,
-                padding: const EdgeInsets.all(0),
-                backgroundColor: Colors.transparent,
+                borderRadius: _cardRadius,
+                padding: _cardPadding,
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF8B5CF6), // Purple
+                    Color(0xFF6366F1), // Indigo
+                    Color(0xFF2563EB), // Cobalt Blue
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
                 onSelect: onOpenLeaderboard,
-                child: Container(
-                  height: 140,
-                  decoration: BoxDecoration(
-                    gradient: const LinearGradient(
-                      colors: [
-                        Color(0xFF8B5CF6), // Purple
-                        Color(0xFF6366F1), // Indigo
-                        Color(0xFF2563EB), // Cobalt Blue
-                      ],
-                      begin: Alignment.topLeft,
-                      end: Alignment.bottomRight,
-                    ),
-                    borderRadius: BorderRadius.circular(24),
-                  ),
-                  padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 18),
-                  child: const Column(
+                child: const SizedBox(
+                  height: _cardHeight,
+                  child: Column(
                     crossAxisAlignment: CrossAxisAlignment.start,
                     mainAxisAlignment: MainAxisAlignment.spaceBetween,
                     children: [
+                      // Top row: Trophy Icon
                       Icon(
                         Icons.emoji_events_rounded,
                         color: Colors.white,
                         size: 26,
                       ),
+
+                      // Middle headline: Leaderboard Ranks
                       Column(
                         crossAxisAlignment: CrossAxisAlignment.start,
                         children: [
@@ -342,6 +353,8 @@ class DashboardActionCards extends StatelessWidget {
                           ),
                         ],
                       ),
+
+                      // Bottom action
                       Text(
                         "view podium →",
                         style: TextStyle(
