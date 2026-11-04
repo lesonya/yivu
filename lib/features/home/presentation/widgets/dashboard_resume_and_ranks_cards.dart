@@ -183,3 +183,4 @@ class DashboardResumeAndRanksCards extends StatelessWidget {
     );
   }
 }
+

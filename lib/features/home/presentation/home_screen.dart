@@ -8,7 +8,7 @@ import 'package:yivu/features/gamification/presentation/profile_switcher_dialog.
 import 'package:yivu/features/gamification/presentation/leaderboard_screen.dart';
 import 'package:yivu/features/curriculum/presentation/subject_materials_screen.dart';
 import 'package:yivu/features/curriculum/presentation/upload_past_paper_screen.dart';
-import 'widgets/dashboard_resume_and_ranks_cards.dart';
+import 'widgets/dashboard_action_cards.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -83,6 +83,16 @@ class _HomeScreenState extends State<HomeScreen> {
     } finally {
       setState(() => _isLoading = false);
     }
+  }
+
+  final ScrollController _scrollController = ScrollController();
+
+  void _scrollToSubjects() {
+    _scrollController.animateTo(
+      420,
+      duration: const Duration(milliseconds: 350),
+      curve: Curves.easeOutCubic,
+    );
   }
 
   void _resumeLastTask() {
@@ -177,6 +187,7 @@ class _HomeScreenState extends State<HomeScreen> {
       backgroundColor: AppTheme.darkNavy,
       body: SafeArea(
         child: CustomScrollView(
+          controller: _scrollController,
           slivers: [
             // Top App Bar: Brand Logo & Active Child Profile Pill
             SliverToBoxAdapter(
@@ -303,14 +314,18 @@ class _HomeScreenState extends State<HomeScreen> {
               ),
             ),
 
-            // Two-Column Dashboard Card Layout: Dynamic Resume & Leaderboard Ranks
+            // Four-Column Dashboard Action Cards: Resume, Select Subject, Select Grade, Leaderboard Ranks
             SliverToBoxAdapter(
               child: Padding(
                 padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-                child: DashboardResumeAndRanksCards(
+                child: DashboardActionCards(
                   progressPercent: _lastProgressPercent,
                   activeTaskTitle: _lastTaskTitle,
+                  currentSubjectName: _lastSubject != null ? _lastSubject!['name'] : 'Mathematics',
+                  currentGradeLabel: (_activeChild['grade_key'] as String).toUpperCase().replaceAll('_', ' '),
                   onResume: _resumeLastTask,
+                  onSelectSubject: _scrollToSubjects,
+                  onSelectGrade: _openProfileDialog,
                   onOpenLeaderboard: _openLeaderboardScreen,
                 ),
               ),
