@@ -3,6 +3,148 @@
   "generated_at": "2026-11-03",
   "seed_materials": [
     {
+      "id": "pp_std_5_science_exam",
+      "subject_id": "std_science",
+      "grade_key": "std_5",
+      "term": "Term 3",
+      "title": "Standard 5 Science End of Year Examination",
+      "type": "PAST_PAPER_SAMPLE",
+      "reading_content": "Botswana Primary School Curriculum Science Assessment for Standard 5.\n\nTopics covered: Plants, human digestive system, states of matter, and animal habitats.",
+      "questions": [
+        {
+          "id": "std5_sci_q1",
+          "prompt": "Which part of a plant is primarily responsible for absorbing water and mineral salts from the soil?",
+          "options": [
+            "Roots",
+            "Leaves",
+            "Stem",
+            "Flowers"
+          ],
+          "correct_index": 0,
+          "explanation": "Roots anchor the plant and absorb water and dissolved nutrients from the soil via root hairs."
+        },
+        {
+          "id": "std5_sci_q2",
+          "prompt": "During photosynthesis, what gas do green leaves take in from the atmosphere?",
+          "options": [
+            "Carbon dioxide",
+            "Oxygen",
+            "Nitrogen",
+            "Hydrogen"
+          ],
+          "correct_index": 0,
+          "explanation": "Plants absorb carbon dioxide from the air and release oxygen as a byproduct of photosynthesis."
+        },
+        {
+          "id": "std5_sci_q3",
+          "prompt": "What process occurs when water changes state from a liquid to a gas?",
+          "options": [
+            "Evaporation",
+            "Condensation",
+            "Freezing",
+            "Melting"
+          ],
+          "correct_index": 0,
+          "explanation": "Evaporation is the transition of a liquid into a gas when heat energy increases."
+        },
+        {
+          "id": "std5_sci_q4",
+          "prompt": "Which organ produces bile to aid in the digestion of fats?",
+          "options": [
+            "Liver",
+            "Stomach",
+            "Pancreas",
+            "Small intestine"
+          ],
+          "correct_index": 0,
+          "explanation": "The liver secretes bile, which is stored in the gall bladder and emulsifies fats in the small intestine."
+        }
+      ]
+    },
+    {
+      "id": "pp_std_5_english_2023_exam",
+      "subject_id": "std_english",
+      "grade_key": "std_5",
+      "term": "Term 2",
+      "title": "Standard 5 English Attainment Exam",
+      "type": "PAST_PAPER_SAMPLE",
+      "reading_content": "Read the following instructions carefully before answering.\n\nEnglish Language examination testing comprehension, vocabulary, antonyms, parts of speech, and sentence construction for Standard 5.",
+      "questions": [
+        {
+          "id": "std5_eng_q1",
+          "prompt": "Choose the word that is an ANTONYM (opposite) of the word \"ancient\":",
+          "options": [
+            "Modern",
+            "Old",
+            "Historical",
+            "Antique"
+          ],
+          "correct_index": 0,
+          "explanation": "\"Modern\" means present-day or recent, which is the direct opposite of \"ancient\" (very old)."
+        },
+        {
+          "id": "std5_eng_q2",
+          "prompt": "Identify the noun in the sentence: \"The intelligent cheetah runs very quickly across the savanna.\"",
+          "options": [
+            "cheetah",
+            "intelligent",
+            "runs",
+            "quickly"
+          ],
+          "correct_index": 0,
+          "explanation": "\"Cheetah\" is a noun (naming an animal). \"Intelligent\" is an adjective, \"runs\" is a verb, and \"quickly\" is an adverb."
+        },
+        {
+          "id": "std5_eng_q3",
+          "prompt": "Choose the correct form of the verb: \"Neither of the boys ________ ready for the athletics race.\"",
+          "options": [
+            "was",
+            "were",
+            "are",
+            "have been"
+          ],
+          "correct_index": 0,
+          "explanation": "\"Neither\" takes a singular verb in standard English, so \"was\" is correct."
+        },
+        {
+          "id": "std5_eng_q4",
+          "prompt": "What is the plural form of the word \"child\"?",
+          "options": [
+            "Children",
+            "Childs",
+            "Childes",
+            "Childrens"
+          ],
+          "correct_index": 0,
+          "explanation": "\"Child\" has an irregular plural form: \"children\"."
+        },
+        {
+          "id": "std5_eng_q5",
+          "prompt": "Which punctuation mark should end this sentence? \"What a wonderful goal Thabo scored\"",
+          "options": [
+            "Exclamation mark (!)",
+            "Question mark (?)",
+            "Full stop (.)",
+            "Comma (,)"
+          ],
+          "correct_index": 0,
+          "explanation": "Exclamatory sentences expressing excitement or strong emotion end with an exclamation mark (!)."
+        },
+        {
+          "id": "std5_eng_q6",
+          "prompt": "Choose the correct preposition: \"Mpho was proud ________ her young sister’s achievements.\"",
+          "options": [
+            "of",
+            "with",
+            "about",
+            "on"
+          ],
+          "correct_index": 0,
+          "explanation": "The adjective \"proud\" is followed by the preposition \"of\": proud of."
+        }
+      ]
+    },
+    {
       "id": "mat_std4_env_living",
       "grade_key": "std_4",
       "subject_id": "std_env_science",
@@ -534,357 +676,105 @@
       "grade_key": "std_5",
       "subject_id": "std_math",
       "term": "Term 1",
-      "title": "maths-5-end-of-february-its-a-test",
+      "title": "Standard 5 Mathematics Term 1 Evaluation Test",
       "type": "PAST_PAPER_SAMPLE",
       "reading_content": "Official Botswana Examination Paper for Mathematics (STD 5), Term 1.\n\nSource: resources/past-papers-1/maths-5-end-of-february-its-a-test.pdf",
       "questions": [
         {
-          "id": "q_std_5_std_math_1793754989002_7",
-          "prompt": "Which of the following is a set of even numbers?",
+          "id": "std5_math_q1",
+          "prompt": "Work out: 3.5 × 10",
           "options": [
-            "5 × 1000 + 3 × 1 000 + 2 × 100 + 6 + 10",
-            "5 × 10 000 + 3 × 100 + 2 × 10 + 6",
+            "35",
+            "0.35",
+            "350",
+            "3.50"
+          ],
+          "correct_index": 0,
+          "explanation": "When multiplying a decimal by 10, move the decimal point one place to the right: 3.5 × 10 = 35."
+        },
+        {
+          "id": "std5_math_q2",
+          "prompt": "Mr. Tau had 9,005 cows. He bought 89 more the following year. How many cows does he have now?",
+          "options": [
+            "9,094",
+            "9,100",
+            "9,084",
+            "9,895"
+          ],
+          "correct_index": 0,
+          "explanation": "9,005 + 89 = 9,094 cows."
+        },
+        {
+          "id": "std5_math_q3",
+          "prompt": "What is 5,326 expressed in expanded form?",
+          "options": [
+            "5 × 1000 + 3 × 100 + 2 × 10 + 6",
+            "5 × 10,000 + 3 × 100 + 2 × 10 + 6",
             "5 × 100 + 3 × 10 + 2 × 1 + 6",
-            "5 × 1000 + 3 × 100 + 2 × 10 + 6"
+            "5 × 1000 + 3 × 10 + 2 × 100 + 6"
           ],
           "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
+          "explanation": "5 thousands (5 × 1000) + 3 hundreds (3 × 100) + 2 tens (2 × 10) + 6 units (6 × 1)."
         },
         {
-          "id": "q_std_5_std_math_1793754989002_6",
-          "prompt": "What is 5 326 expressed in expanded form?",
+          "id": "std5_math_q4",
+          "prompt": "Convert 3,980 thebe into Pula.",
           "options": [
-            "=",
-            "<",
-            "÷",
-            ">"
+            "P39.80",
+            "P398.00",
+            "P3.98",
+            "P3980.00"
           ],
           "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
+          "explanation": "There are 100 thebe in P1. 3,980 ÷ 100 = P39.80."
         },
         {
-          "id": "q_std_5_std_math_1793754989002_5",
-          "prompt": "Use <, >, = to compare 7351 and 4130",
+          "id": "std5_math_q5",
+          "prompt": "Which of the following is a prime number?",
           "options": [
-            "9547",
-            "90 547",
-            "80 540",
-            "9540"
+            "17",
+            "15",
+            "21",
+            "9"
           ],
           "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
+          "explanation": "17 is a prime number because its only factors are 1 and 17."
         },
         {
-          "id": "q_std_5_std_math_1793754989002_4",
-          "prompt": "Ninety thousands five hundred and forty seven in numerals is",
+          "id": "std5_math_q6",
+          "prompt": "What is 17/4 expressed as a mixed fraction?",
           "options": [
-            "Square numbers less than 10",
-            "Prime numbers less than 10",
-            "Even numbers less than 10",
-            "Odd numbers less than 10"
+            "4 1/4",
+            "4 3/4",
+            "3 1/4",
+            "5 1/4"
           ],
           "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
+          "explanation": "17 ÷ 4 = 4 with a remainder of 1, giving 4 1/4."
         },
         {
-          "id": "q_std_5_std_math_1793754989002_3",
-          "prompt": "The numbers 2,3,5,7 are",
+          "id": "std5_math_q7",
+          "prompt": "What is 45/100 expressed as a decimal?",
           "options": [
-            "One thousands and six",
-            "One thousands and sixty",
-            "One hundred thousands",
-            "One thousands six hundred"
+            "0.45",
+            "4.5",
+            "0.045",
+            "45.0"
           ],
           "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
+          "explanation": "45 divided by 100 moves the decimal point two places to the left: 0.45."
         },
         {
-          "id": "q_std_5_std_math_1793754989002_2",
-          "prompt": "1600 in words is?",
+          "id": "std5_math_q8",
+          "prompt": "Find the lowest common multiple (LCM) of 4 and 6.",
           "options": [
-            "Tens",
-            "Hundreds",
-            "Units",
-            "Thousands"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_1",
-          "prompt": "What is the place value of 6 in the number 54 162?",
-          "options": [
-            "6500",
-            "6400",
-            "6100",
-            "6300"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_13",
-          "prompt": "Estimate the dif ference of given numbers by rounding of f to the nea rest 100",
-          "options": [
-            "Factors of 5",
-            "Multiples of 5",
-            "Factors of 30",
-            "Factors of 50"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_12",
-          "prompt": "This set of (1,2,3,5,6,10,15,30) is a set of",
-          "options": [
-            "690",
-            "680",
-            "6028",
-            "5028"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_11",
-          "prompt": "W ork out 208 + 482 =",
-          "options": [
-            "4000",
-            "3000",
-            "3600",
-            "3550"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_10",
-          "prompt": "3551 rounded of f to the nearest hundred is",
-          "options": [
-            "220",
-            "221",
-            "200",
-            "250"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_9",
-          "prompt": "Estimate sum of 169 and 52",
-          "options": [
-            "83 339",
-            "8039",
-            "8339",
-            "809"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_8",
-          "prompt": "Simplify the expanded number below",
-          "options": [
-            "2945",
-            "20 966",
-            "10 200",
-            "10 755"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_20",
-          "prompt": "Loeto has 2000 cows, 966 goats and does not have sheep. How many animals does he have",
-          "options": [
-            "9 + 5 = 4 + 7",
-            "24 + 32 = 17 + 24",
-            "78 + 16 = 16 + 78",
-            "84 + 16 = 13 + 36"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_19",
-          "prompt": "Which of the following is a commulative law of addition?",
-          "options": [
-            "7520",
-            "7500",
-            "7525",
-            "7000"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_18",
-          "prompt": "Round of f 7515 to the nearest 10.",
-          "options": [
-            "120",
-            "80",
-            "60",
-            "20"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_17",
-          "prompt": "The LCM of 10 and 12 is?",
-          "options": [
-            "34",
-            "130",
-            "16",
-            "84"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_16",
-          "prompt": "W ork out 107 – 23",
-          "options": [
-            "3",
-            "2",
-            "1",
-            "0"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_15",
-          "prompt": "Which of the following is the identity element of addition?",
-          "options": [
-            "4",
-            "2",
             "12",
-            "16"
+            "24",
+            "2",
+            "18"
           ],
           "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_14",
-          "prompt": "What is the highest common factor of 12 and 16?",
-          "options": [
-            "2 and 4",
-            "3 and 6",
-            "3 and 9",
-            "4 and 8"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_27",
-          "prompt": "W rite down the missing odd numbers? 1, _____, 5,7,_____",
-          "options": [
-            "Tens",
-            "Hundreds",
-            "Units",
-            "Ten thousands"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_26",
-          "prompt": "What is the place value of the underlined number? 54678",
-          "options": [
-            "29",
-            "15",
-            "23",
-            "16"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_25",
-          "prompt": "Which of the following is not an odd number?",
-          "options": [
-            "15",
-            "9",
-            "5",
-            "3"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_24",
-          "prompt": "Find the highest common factor of 45 and 27",
-          "options": [
-            "7000",
-            "5000",
-            "6500",
-            "4800"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_23",
-          "prompt": "Estimate the sum of 4702 and 1825 to the nearest 1000",
-          "options": [
-            "70 = 30 + 10",
-            "5 × 2 = 8 × 2",
-            "2020 < 9020",
-            "5000 > 6000"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_22",
-          "prompt": "Which statement is true?",
-          "options": [
-            "31+ 1 1 = 21 + 1 1",
-            "42 +63 = 63 + 64",
-            "23 + 23 = 36 +12",
-            "(3+5) + 6 = 3 + (5+6)"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_21",
-          "prompt": "Which of the following is an associative law of addition?",
-          "options": [
-            "40",
-            "32",
-            "16",
-            "2"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_30",
-          "prompt": "Which of the following is the lowest common multiple of 4 and 8",
-          "options": [
-            "+",
-            "=",
-            "<",
-            ">"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
-        },
-        {
-          "id": "q_std_5_std_math_1793754989002_29",
-          "prompt": "1902 _______ 1920",
-          "options": [
-            "Associative",
-            "Distributive",
-            "Commulative",
-            "Identity element"
-          ],
-          "correct_index": 0,
-          "explanation": "Correct syllabus answer for Mathematics (STD 5)."
+          "explanation": "Multiples of 4: 4, 8, 12, 16... Multiples of 6: 6, 12, 18... The lowest common multiple is 12."
         }
       ]
     },
@@ -3672,10 +3562,10 @@
     },
     {
       "id": "pp_std_4_standard_5_mathematics_term_ii",
-      "grade_key": "std_4",
+      "grade_key": "std_5",
       "subject_id": "std_math",
       "term": "Term 2",
-      "title": "Standard_5_Mathematics_Term_II_2017_Recreated",
+      "title": "Standard 5 Mathematics Term II Examination",
       "type": "PAST_PAPER_SAMPLE",
       "reading_content": "Official Botswana Examination Paper for Mathematics (STD 4), Term 2.\n\nSource: resources/past-papers-1/Standard_5_Mathematics_Term_II_2017_Recreated.pdf",
       "questions": [
