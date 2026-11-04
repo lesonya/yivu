@@ -91,6 +91,7 @@ class DatabaseHelper {
           'id': mat['id'],
           'grade_key': mat['grade_key'],
           'subject_id': mat['subject_id'],
+          'term': mat['term'] ?? 'Term 1',
           'title': mat['title'],
           'type': mat['type'],
           'reading_content': mat['reading_content'],
@@ -117,6 +118,45 @@ class DatabaseHelper {
     }
 
     await batch.commit(noResult: true);
+  }
+
+  // Helper: Save dynamically extracted past paper and questions into local DB
+  Future<void> saveExtractedPaper({
+    required String gradeKey,
+    required String subjectId,
+    required String term,
+    required String title,
+    required String rawContent,
+    required List<Map<String, dynamic>> questions,
+  }) async {
+    final db = await database;
+    final materialId = 'paper_${DateTime.now().millisecondsSinceEpoch}';
+
+    await db.transaction((txn) async {
+      await txn.insert('learning_materials', {
+        'id': materialId,
+        'grade_key': gradeKey,
+        'subject_id': subjectId,
+        'term': term,
+        'title': title,
+        'type': 'PAST_PAPER_SAMPLE',
+        'reading_content': rawContent,
+        'is_precompiled': 0, // dynamic submission
+        'created_at': DateTime.now().millisecondsSinceEpoch ~/ 1000,
+      });
+
+      for (int i = 0; i < questions.length; i++) {
+        final q = questions[i];
+        await txn.insert('questions', {
+          'id': '${materialId}_q$i',
+          'material_id': materialId,
+          'prompt': q['prompt'],
+          'options_json': json.encode(q['options']),
+          'correct_index': q['correct_index'],
+          'explanation': q['explanation'] ?? '',
+        });
+      }
+    });
   }
 
   // Helper: Fetch weekly leaderboard for Android TV Home

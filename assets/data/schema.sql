@@ -61,6 +61,7 @@ CREATE TABLE IF NOT EXISTS learning_materials (
     id TEXT PRIMARY KEY NOT NULL,
     grade_key TEXT NOT NULL, -- 'std_2' .. 'std_7' or 'form_1' .. 'form_3'
     subject_id TEXT NOT NULL,
+    term TEXT NOT NULL DEFAULT 'Term 1' CHECK(term IN ('Term 1', 'Term 2', 'Term 3', 'Final Exam')),
     title TEXT NOT NULL,
     type TEXT NOT NULL CHECK(type IN ('PAST_PAPER_SAMPLE', 'NOTES_WITH_MCQ', 'AI_GENERATED_SET')),
     reading_content TEXT, -- Full markdown notes or summary
@@ -69,7 +70,7 @@ CREATE TABLE IF NOT EXISTS learning_materials (
     FOREIGN KEY (subject_id) REFERENCES subjects(id) ON DELETE CASCADE
 );
 
-CREATE INDEX IF NOT EXISTS idx_materials_grade_subject ON learning_materials(grade_key, subject_id);
+CREATE INDEX IF NOT EXISTS idx_materials_grade_subject ON learning_materials(grade_key, subject_id, term);
 
 -- -------------------------------------------------------------------------
 -- 5. MULTIPLE CHOICE QUESTIONS (MCQs) & FLASHCARDS

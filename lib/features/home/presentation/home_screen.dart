@@ -6,6 +6,7 @@ import 'package:yivu/shared/widgets/dpad_focusable.dart';
 import 'package:yivu/features/gamification/presentation/tv_leaderboard_podium.dart';
 import 'package:yivu/features/gamification/presentation/profile_switcher_dialog.dart';
 import 'package:yivu/features/curriculum/presentation/subject_materials_screen.dart';
+import 'package:yivu/features/curriculum/presentation/upload_past_paper_screen.dart';
 
 class HomeScreen extends StatefulWidget {
   const HomeScreen({super.key});
@@ -195,38 +196,71 @@ class _HomeScreenState extends State<HomeScreen> {
                       ],
                     ),
 
-                    // Active Learner Selector Pill
-                    DPadFocusableCard(
-                      borderRadius: 30,
-                      padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
-                      backgroundColor: AppTheme.surfaceNavy,
-                      onSelect: _openProfileDialog,
-                      child: Row(
-                        children: [
-                          CircleAvatar(
-                            radius: 16,
-                            backgroundColor: AppTheme.cobaltBlue,
-                            child: Text(
-                              (_activeChild['display_name'] as String? ?? 'K')[0],
-                              style: const TextStyle(
-                                fontWeight: FontWeight.bold,
-                                color: Colors.white,
+                    // Active Learner Selector Pill & Add Past Paper Button
+                    Row(
+                      children: [
+                        DPadFocusableCard(
+                          borderRadius: 20,
+                          padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 8),
+                          backgroundColor: AppTheme.cobaltBlue.withOpacity(0.2),
+                          onSelect: () {
+                            Navigator.of(context).push(
+                              MaterialPageRoute(
+                                builder: (_) => UploadPastPaperScreen(
+                                  preselectedGradeKey: _activeChild['grade_key'],
+                                ),
                               ),
-                            ),
+                            );
+                          },
+                          child: const Row(
+                            children: [
+                              Icon(Icons.add_circle_outline, color: AppTheme.tealAccent, size: 20),
+                              SizedBox(width: 8),
+                              Text(
+                                "Add Past Paper",
+                                style: TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 13,
+                                ),
+                              ),
+                            ],
                           ),
-                          const SizedBox(width: 10),
-                          Text(
-                            "Learner: ${_activeChild['display_name']} (${(_activeChild['grade_key'] as String).toUpperCase().replaceAll('_', ' ')})",
-                            style: const TextStyle(
-                              color: Colors.white,
-                              fontWeight: FontWeight.bold,
-                              fontSize: 14,
-                            ),
+                        ),
+                        const SizedBox(width: 14),
+                        DPadFocusableCard(
+                          borderRadius: 30,
+                          padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 8),
+                          backgroundColor: AppTheme.surfaceNavy,
+                          onSelect: _openProfileDialog,
+                          child: Row(
+                            children: [
+                              CircleAvatar(
+                                radius: 16,
+                                backgroundColor: AppTheme.cobaltBlue,
+                                child: Text(
+                                  (_activeChild['display_name'] as String? ?? 'K')[0],
+                                  style: const TextStyle(
+                                    fontWeight: FontWeight.bold,
+                                    color: Colors.white,
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(width: 10),
+                              Text(
+                                "Learner: ${_activeChild['display_name']} (${(_activeChild['grade_key'] as String).toUpperCase().replaceAll('_', ' ')})",
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 14,
+                                ),
+                              ),
+                              const SizedBox(width: 6),
+                              const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20),
+                            ],
                           ),
-                          const SizedBox(width: 6),
-                          const Icon(Icons.keyboard_arrow_down, color: Colors.white70, size: 20),
-                        ],
-                      ),
+                        ),
+                      ],
                     ),
                   ],
                 ),
