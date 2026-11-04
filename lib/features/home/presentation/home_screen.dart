@@ -87,11 +87,105 @@ class _HomeScreenState extends State<HomeScreen> {
 
   final ScrollController _scrollController = ScrollController();
 
-  void _scrollToSubjects() {
-    _scrollController.animateTo(
-      420,
-      duration: const Duration(milliseconds: 350),
-      curve: Curves.easeOutCubic,
+  void _showSubjectPickerDialog() {
+    final subjects = _currentSubjects;
+    showModalBottomSheet(
+      context: context,
+      backgroundColor: AppTheme.surfaceNavy,
+      shape: const RoundedRectangleBorder(
+        borderRadius: BorderRadius.vertical(top: Radius.circular(28)),
+      ),
+      builder: (ctx) {
+        return SafeArea(
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 20),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                  children: [
+                    const Text(
+                      "Select Subject",
+                      style: TextStyle(
+                        fontSize: 22,
+                        fontWeight: FontWeight.bold,
+                        color: Colors.white,
+                      ),
+                    ),
+                    IconButton(
+                      icon: const Icon(Icons.close, color: Colors.white70),
+                      onPressed: () => Navigator.of(ctx).pop(),
+                    ),
+                  ],
+                ),
+                const SizedBox(height: 12),
+                Flexible(
+                  child: ListView.separated(
+                    shrinkWrap: true,
+                    itemCount: subjects.length,
+                    separatorBuilder: (_, __) => const SizedBox(height: 10),
+                    itemBuilder: (_, index) {
+                      final subject = subjects[index] as Map<String, dynamic>;
+                      final colorHex = subject['accent_color'] as String? ?? '#2563EB';
+                      final color = Color(int.parse(colorHex.replaceAll('#', '0xFF')));
+                      return DPadFocusableCard(
+                        borderRadius: 16,
+                        backgroundColor: AppTheme.darkNavy,
+                        padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+                        onSelect: () {
+                          Navigator.of(ctx).pop();
+                          _openSubjectMaterials(subject);
+                        },
+                        child: Row(
+                          children: [
+                            Container(
+                              width: 36,
+                              height: 36,
+                              decoration: BoxDecoration(
+                                color: color.withValues(alpha: 0.18),
+                                borderRadius: BorderRadius.circular(10),
+                              ),
+                              child: Icon(Icons.menu_book_rounded, color: color, size: 20),
+                            ),
+                            const SizedBox(width: 14),
+                            Expanded(
+                              child: Text(
+                                subject['name'] ?? '',
+                                style: const TextStyle(
+                                  color: Colors.white,
+                                  fontSize: 16,
+                                  fontWeight: FontWeight.w600,
+                                ),
+                              ),
+                            ),
+                            Container(
+                              padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
+                              decoration: BoxDecoration(
+                                color: Colors.white10,
+                                borderRadius: BorderRadius.circular(8),
+                              ),
+                              child: Text(
+                                subject['code'] ?? '',
+                                style: TextStyle(
+                                  color: color,
+                                  fontWeight: FontWeight.bold,
+                                  fontSize: 11,
+                                ),
+                              ),
+                            ),
+                          ],
+                        ),
+                      );
+                    },
+                  ),
+                ),
+              ],
+            ),
+          ),
+        );
+      },
     );
   }
 
@@ -324,162 +418,11 @@ class _HomeScreenState extends State<HomeScreen> {
                   currentSubjectName: _lastSubject != null ? _lastSubject!['name'] : 'Mathematics',
                   currentGradeLabel: (_activeChild['grade_key'] as String).toUpperCase().replaceAll('_', ' '),
                   onResume: _resumeLastTask,
-                  onSelectSubject: _scrollToSubjects,
+                  onSelectSubject: _showSubjectPickerDialog,
                   onSelectGrade: _openProfileDialog,
                   onOpenLeaderboard: _openLeaderboardScreen,
                 ),
               ),
-            ),
-
-            // Division Switcher (Standards Std 2-7 vs Forms Form 1-3)
-            SliverToBoxAdapter(
-              child: Padding(
-                padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 16),
-                child: Row(
-                  children: [
-                    _buildDivisionTab(
-                      id: 'standards',
-                      title: 'Primary Standards (Std 2 to 7)',
-                      subtitle: '10 Foundation Subjects',
-                      icon: Icons.school,
-                    ),
-                    const SizedBox(width: 16),
-                    _buildDivisionTab(
-                      id: 'forms',
-                      title: 'Junior Secondary (Form 1 to 3)',
-                      subtitle: '14 Core & Elective Subjects',
-                      icon: Icons.auto_stories,
-                    ),
-                  ],
-                ),
-              ),
-            ),
-
-            // Subject Grid
-            SliverPadding(
-              padding: const EdgeInsets.symmetric(horizontal: 32, vertical: 12),
-              sliver: SliverGrid(
-                gridDelegate: const SliverGridDelegateWithMaxCrossAxisExtent(
-                  maxCrossAxisExtent: 260,
-                  mainAxisSpacing: 16,
-                  crossAxisSpacing: 16,
-                  childAspectRatio: 1.25,
-                ),
-                delegate: SliverChildBuilderDelegate(
-                  (context, index) {
-                    final subject = _currentSubjects[index];
-                    final colorHex = subject['accent_color'] as String? ?? '#2563EB';
-                    final color = Color(int.parse(colorHex.replaceAll('#', '0xFF')));
-
-                    return DPadFocusableCard(
-                      borderRadius: 22,
-                      backgroundColor: AppTheme.surfaceNavy,
-                      onSelect: () => _openSubjectMaterials(subject),
-                      child: Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              Container(
-                                width: 42,
-                                height: 42,
-                                decoration: BoxDecoration(
-                                  color: color.withOpacity(0.18),
-                                  borderRadius: BorderRadius.circular(12),
-                                ),
-                                child: Icon(Icons.menu_book_rounded, color: color, size: 22),
-                              ),
-                              Container(
-                                padding: const EdgeInsets.symmetric(horizontal: 8, vertical: 4),
-                                decoration: BoxDecoration(
-                                  color: Colors.white10,
-                                  borderRadius: BorderRadius.circular(8),
-                                ),
-                                child: Text(
-                                  subject['code'] ?? '',
-                                  style: TextStyle(
-                                    color: color,
-                                    fontWeight: FontWeight.w800,
-                                    fontSize: 11,
-                                  ),
-                                ),
-                              ),
-                            ],
-                          ),
-                          Column(
-                            crossAxisAlignment: CrossAxisAlignment.start,
-                            children: [
-                              Text(
-                                subject['name'] ?? '',
-                                maxLines: 2,
-                                overflow: TextOverflow.ellipsis,
-                                style: const TextStyle(
-                                  color: Colors.white,
-                                  fontSize: 16,
-                                  fontWeight: FontWeight.bold,
-                                ),
-                              ),
-                              const SizedBox(height: 4),
-                              Text(
-                                "${(subject['topics'] as List<dynamic>? ?? []).length} Topics / Past Papers",
-                                style: const TextStyle(color: Colors.white54, fontSize: 12),
-                              ),
-                            ],
-                          ),
-                        ],
-                      ),
-                    );
-                  },
-                  childCount: _currentSubjects.length,
-                ),
-              ),
-            ),
-          ],
-        ),
-      ),
-    );
-  }
-
-  Widget _buildDivisionTab({
-    required String id,
-    required String title,
-    required String subtitle,
-    required IconData icon,
-  }) {
-    final isSelected = _selectedDivision == id;
-
-    return Expanded(
-      child: DPadFocusableCard(
-        borderRadius: 20,
-        backgroundColor: isSelected ? AppTheme.cobaltBlue.withOpacity(0.25) : AppTheme.surfaceNavy,
-        padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
-        onSelect: () => setState(() => _selectedDivision = id),
-        child: Row(
-          children: [
-            Icon(
-              icon,
-              color: isSelected ? AppTheme.tealAccent : Colors.white60,
-              size: 28,
-            ),
-            const SizedBox(width: 14),
-            Column(
-              crossAxisAlignment: CrossAxisAlignment.start,
-              children: [
-                Text(
-                  title,
-                  style: TextStyle(
-                    color: isSelected ? Colors.white : Colors.white70,
-                    fontWeight: FontWeight.bold,
-                    fontSize: 16,
-                  ),
-                ),
-                Text(
-                  subtitle,
-                  style: const TextStyle(color: Colors.white54, fontSize: 12),
-                ),
-              ],
             ),
           ],
         ),
