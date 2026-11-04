@@ -125,7 +125,79 @@ class DashboardActionCards extends StatelessWidget {
 
             const SizedBox(width: 14),
 
-            // Card 2: Select Subject Card
+            // Card 2: Leaderboard Ranks (Brand Gradient Card)
+            Expanded(
+              child: DPadFocusableCard(
+                borderRadius: _cardRadius,
+                padding: _cardPadding,
+                gradient: const LinearGradient(
+                  colors: [
+                    Color(0xFF8B5CF6), // Purple
+                    Color(0xFF6366F1), // Indigo
+                    Color(0xFF2563EB), // Cobalt Blue
+                  ],
+                  begin: Alignment.topLeft,
+                  end: Alignment.bottomRight,
+                ),
+                onSelect: onOpenLeaderboard,
+                child: const SizedBox(
+                  height: _cardHeight,
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                    children: [
+                      // Top row: Trophy Icon
+                      Icon(
+                        Icons.emoji_events_rounded,
+                        color: Colors.white,
+                        size: 26,
+                      ),
+
+                      // Middle headline: Leaderboard Ranks
+                      Column(
+                        crossAxisAlignment: CrossAxisAlignment.start,
+                        children: [
+                          Text(
+                            "Leaderboard",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 18,
+                              fontWeight: FontWeight.normal,
+                              height: 1.1,
+                              letterSpacing: -0.3,
+                            ),
+                          ),
+                          Text(
+                            "Ranks",
+                            style: TextStyle(
+                              color: Colors.white,
+                              fontSize: 24,
+                              fontWeight: FontWeight.bold,
+                              height: 1.15,
+                              letterSpacing: -0.5,
+                            ),
+                          ),
+                        ],
+                      ),
+
+                      // Bottom action
+                      Text(
+                        "view podium →",
+                        style: TextStyle(
+                          color: Colors.white70,
+                          fontSize: 14,
+                          fontWeight: FontWeight.w500,
+                        ),
+                      ),
+                    ],
+                  ),
+                ),
+              ),
+            ),
+
+            const SizedBox(width: 14),
+
+            // Card 3: Select Subject Card
             Expanded(
               child: DPadFocusableCard(
                 borderRadius: _cardRadius,
@@ -212,7 +284,7 @@ class DashboardActionCards extends StatelessWidget {
 
             const SizedBox(width: 14),
 
-            // Card 3: Select Standard / Grade Card
+            // Card 4: Select Standard / Grade Card
             Expanded(
               child: DPadFocusableCard(
                 borderRadius: _cardRadius,
@@ -287,78 +359,6 @@ class DashboardActionCards extends StatelessWidget {
                         "switch level →",
                         style: TextStyle(
                           color: Colors.white54,
-                          fontSize: 14,
-                          fontWeight: FontWeight.w500,
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
-              ),
-            ),
-
-            const SizedBox(width: 14),
-
-            // Card 4: Leaderboard Ranks (Brand Gradient Card)
-            Expanded(
-              child: DPadFocusableCard(
-                borderRadius: _cardRadius,
-                padding: _cardPadding,
-                gradient: const LinearGradient(
-                  colors: [
-                    Color(0xFF8B5CF6), // Purple
-                    Color(0xFF6366F1), // Indigo
-                    Color(0xFF2563EB), // Cobalt Blue
-                  ],
-                  begin: Alignment.topLeft,
-                  end: Alignment.bottomRight,
-                ),
-                onSelect: onOpenLeaderboard,
-                child: const SizedBox(
-                  height: _cardHeight,
-                  child: Column(
-                    crossAxisAlignment: CrossAxisAlignment.start,
-                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                    children: [
-                      // Top row: Trophy Icon
-                      Icon(
-                        Icons.emoji_events_rounded,
-                        color: Colors.white,
-                        size: 26,
-                      ),
-
-                      // Middle headline: Leaderboard Ranks
-                      Column(
-                        crossAxisAlignment: CrossAxisAlignment.start,
-                        children: [
-                          Text(
-                            "Leaderboard",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 18,
-                              fontWeight: FontWeight.normal,
-                              height: 1.1,
-                              letterSpacing: -0.3,
-                            ),
-                          ),
-                          Text(
-                            "Ranks",
-                            style: TextStyle(
-                              color: Colors.white,
-                              fontSize: 24,
-                              fontWeight: FontWeight.bold,
-                              height: 1.15,
-                              letterSpacing: -0.5,
-                            ),
-                          ),
-                        ],
-                      ),
-
-                      // Bottom action
-                      Text(
-                        "view podium →",
-                        style: TextStyle(
-                          color: Colors.white70,
                           fontSize: 14,
                           fontWeight: FontWeight.w500,
                         ),
