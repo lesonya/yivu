@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:yivu/core/theme/app_theme.dart';
@@ -40,7 +41,10 @@ class _HomeScreenState extends State<HomeScreen> {
   Future<void> _loadInitialData() async {
     try {
       final rawCurriculum = await rootBundle.loadString('assets/data/curriculum.json');
-      _curriculumData = json.decode(rawCurriculum) as Map<String, dynamic>;
+      _curriculumData = await compute(
+        (String jsonStr) => json.decode(jsonStr) as Map<String, dynamic>,
+        rawCurriculum,
+      );
 
       _leaderboard = [
         {
