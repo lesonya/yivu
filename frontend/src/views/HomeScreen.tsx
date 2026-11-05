@@ -78,7 +78,7 @@ export const HomeScreen: React.FC = () => {
         </div>
 
         {/* 1.2 Leaderboard Card */}
-        <div 
+        <div
           onClick={() => navigate('/leaderboard')}
           className="cognix-card cognix-card-hover p-6 flex flex-col justify-between cursor-pointer group"
         >
@@ -119,7 +119,7 @@ export const HomeScreen: React.FC = () => {
         </div>
 
         {/* 1.3 Analytics Card */}
-        <div 
+        <div
           onClick={() => navigate('/analytics')}
           className="cognix-card cognix-card-hover p-6 flex flex-col justify-between cursor-pointer group"
         >
@@ -256,7 +256,7 @@ export const HomeScreen: React.FC = () => {
             <div className="flex items-center space-x-1.5 text-amber-400 font-bold text-[11px] bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:fire-bold" width="12" height="12"></iconify-icon>
-              <span>5-Day Synapse Streak</span>
+              <span>5-Day Streak</span>
             </div>
           </div>
 
@@ -269,7 +269,7 @@ export const HomeScreen: React.FC = () => {
             <div className="text-[11px] text-cyan-300 font-semibold flex items-center space-x-1">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:round-transfer-vertical-bold" width="12" height="12"></iconify-icon>
-              <span>{activeProfile.weeklyXP} Synapse XP</span>
+              <span>{activeProfile.weeklyXP} XP</span>
             </div>
           </div>
 
@@ -280,7 +280,7 @@ export const HomeScreen: React.FC = () => {
             >
               {/* @ts-ignore */}
               <iconify-icon icon="solar:magic-stick-3-bold" width="16" height="16"></iconify-icon>
-              <span>Generate Synapse Practice Test</span>
+              <span>Generate Practice Test</span>
             </button>
           </div>
         </div>
