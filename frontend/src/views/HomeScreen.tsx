@@ -127,7 +127,7 @@ export const HomeScreen: React.FC = () => {
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:graph-bold-duotone" class="text-cyan-400" width="18" height="18"></iconify-icon>
-              <span>Attainment Analytics</span>
+              <span>Analytics</span>
             </span>
             <div className="flex items-center space-x-1 text-emerald-400 text-[10px] font-semibold bg-emerald-500/10 px-2.5 py-0.5 rounded-full border border-emerald-500/20">
               {/* @ts-ignore */}
