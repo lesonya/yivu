@@ -86,7 +86,7 @@ export const HomeScreen: React.FC = () => {
             <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:cup-star-bold-duotone" class="text-amber-400" width="18" height="18"></iconify-icon>
-              <span>National Leaderboard</span>
+              <span>Leaderboard</span>
             </span>
             <span className="text-[10px] font-bold text-amber-300 bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
               Rank #{activeRank || 1}
