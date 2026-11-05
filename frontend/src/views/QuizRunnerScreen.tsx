@@ -38,6 +38,8 @@ export const QuizRunnerScreen: React.FC = () => {
   const [earnedXP, setEarnedXP] = useState(0);
   const [earnedStars, setEarnedStars] = useState(0);
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
+  const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [isReviewMode, setIsReviewMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
@@ -100,6 +102,7 @@ export const QuizRunnerScreen: React.FC = () => {
     setSelectedAnswerIndex(index);
     setIsSubmitted(true);
     setAiExplanation(null);
+    setUserAnswers((prev) => ({ ...prev, [currentIndex]: index }));
 
     const isCorrect = index === currentQ.correct_index;
     if (isCorrect) {
@@ -243,7 +246,7 @@ export const QuizRunnerScreen: React.FC = () => {
     );
   }
 
-  // Finished Results Screen with Attainment Grade
+  // Finished Results Screen with Attainment Grade & Interactive Review
   if (isFinished) {
     const finalScore = correctAnswersCount;
     const finalPercent = questions.length > 0 ? Math.round((finalScore / questions.length) * 100) : 0;
@@ -251,6 +254,84 @@ export const QuizRunnerScreen: React.FC = () => {
     if (finalPercent >= 80) attainmentBand = 'Grade A (Distinction)';
     else if (finalPercent >= 70) attainmentBand = 'Grade B (Credit)';
     else if (finalPercent >= 60) attainmentBand = 'Grade C (Pass)';
+
+    const incorrectIndices = questions
+      .map((q, idx) => ({ q, idx }))
+      .filter(({ q, idx }) => userAnswers[idx] !== undefined && userAnswers[idx] !== q.correct_index)
+      .map(({ idx }) => idx);
+
+    if (isReviewMode) {
+      return (
+        <div className="max-w-3xl mx-auto space-y-6 pb-16">
+          <div className="bg-surface-navy border border-border-navy p-6 rounded-3xl flex items-center justify-between shadow-xl">
+            <div>
+              <h2 className="text-xl font-bold text-white">Question by Question Review</h2>
+              <p className="text-xs text-slate-400">Review your choices vs. official syllabus answers</p>
+            </div>
+            <button
+              onClick={() => setIsReviewMode(false)}
+              className="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-xs font-semibold text-white"
+            >
+              Back to Summary
+            </button>
+          </div>
+
+          <div className="space-y-4">
+            {questions.map((q, idx) => {
+              const userChoice = userAnswers[idx];
+              const isRight = userChoice === q.correct_index;
+              return (
+                <div
+                  key={q.id || idx}
+                  className={`p-5 rounded-2xl border space-y-3 ${
+                    isRight ? 'bg-emerald-950/20 border-emerald-500/40' : 'bg-rose-950/20 border-rose-500/40'
+                  }`}
+                >
+                  <div className="flex items-center justify-between text-xs">
+                    <span className="font-bold text-white">Question {q.question_number || idx + 1}</span>
+                    <span
+                      className={`px-2.5 py-0.5 rounded-full font-bold text-[11px] ${
+                        isRight ? 'bg-emerald-500/20 text-emerald-300' : 'bg-rose-500/20 text-rose-300'
+                      }`}
+                    >
+                      {isRight ? '✓ Correct' : '✗ Incorrect'}
+                    </span>
+                  </div>
+
+                  <div className="text-sm font-semibold text-slate-200">
+                    <MathRenderer text={q.prompt} />
+                  </div>
+
+                  <div className="text-xs space-y-1 pt-1 border-t border-border-navy/60">
+                    <div className="flex items-center space-x-2">
+                      <span className="text-slate-400">Your Answer:</span>
+                      <span className={`font-bold ${isRight ? 'text-emerald-400' : 'text-rose-400'}`}>
+                        {userChoice !== undefined ? (
+                          <MathRenderer text={q.options[userChoice]} />
+                        ) : (
+                          'Unanswered'
+                        )}
+                      </span>
+                    </div>
+                    {!isRight && (
+                      <div className="flex items-center space-x-2">
+                        <span className="text-slate-400">Official Correct Answer:</span>
+                        <span className="font-bold text-emerald-400">
+                          <MathRenderer text={q.options[q.correct_index]} />
+                        </span>
+                      </div>
+                    )}
+                    {q.explanation && (
+                      <p className="text-[11px] text-slate-400 pt-1 italic">{q.explanation}</p>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      );
+    }
 
     return (
       <div className="max-w-md mx-auto mt-6 bg-surface-navy border border-border-navy rounded-3xl p-8 text-center shadow-2xl space-y-6">
@@ -291,29 +372,40 @@ export const QuizRunnerScreen: React.FC = () => {
         </div>
 
         <div className="space-y-2 pt-1">
+          {/* Review Answers Button */}
+          <button
+            onClick={() => setIsReviewMode(true)}
+            className="w-full flex items-center justify-center space-x-2 py-3 bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-lg transition active:scale-95"
+          >
+            <span>Review All Answers & Explanations</span>
+          </button>
+
+          {/* Retry Missed Questions */}
+          {incorrectIndices.length > 0 && (
+            <button
+              onClick={() => {
+                const retryQuestions = questions.filter((_, idx) => incorrectIndices.includes(idx));
+                setQuestions(retryQuestions);
+                setCurrentIndex(0);
+                setSelectedAnswerIndex(null);
+                setIsSubmitted(false);
+                setIsFinished(false);
+                setAiExplanation(null);
+                setUserAnswers({});
+              }}
+              className="w-full flex items-center justify-center space-x-2 py-2.5 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl shadow transition active:scale-95"
+            >
+              <RotateCcw className="w-4 h-4" />
+              <span>Retry {incorrectIndices.length} Incorrect Questions</span>
+            </button>
+          )}
+
           <button
             onClick={() => navigate('/analytics')}
-            className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition active:scale-95"
+            className="w-full flex items-center justify-center space-x-2 py-2.5 bg-dark-navy hover:bg-slate-800 text-slate-300 border border-border-navy font-semibold text-xs rounded-xl shadow transition active:scale-95"
           >
             <FileCheck className="w-4 h-4" />
             <span>View Full Diagnostic Report</span>
-          </button>
-          <button
-            onClick={() => {
-              setCurrentIndex(0);
-              setSelectedAnswerIndex(null);
-              setIsSubmitted(false);
-              setIsFinished(false);
-              setAiExplanation(null);
-              setCorrectAnswersCount(0);
-              setTimeRemainingSeconds(2700);
-              setIsTimerRunning(true);
-              startTimeRef.current = Date.now();
-            }}
-            className="w-full flex items-center justify-center space-x-2 py-2.5 bg-brand-blue hover:bg-blue-600 text-white font-semibold text-xs rounded-xl shadow transition active:scale-95"
-          >
-            <RotateCcw className="w-4 h-4" />
-            <span>Practice Again</span>
           </button>
         </div>
       </div>

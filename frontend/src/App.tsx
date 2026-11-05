@@ -8,6 +8,7 @@ import { QuizRunnerScreen } from './views/QuizRunnerScreen';
 import { LeaderboardScreen } from './views/LeaderboardScreen';
 import { UploadPastPaperScreen } from './views/UploadPastPaperScreen';
 import { PerformanceAnalyticsScreen } from './views/PerformanceAnalyticsScreen';
+import { CustomTestGeneratorScreen } from './views/CustomTestGeneratorScreen';
 
 function AppLayout() {
   const [isProfileModalOpen, setIsProfileModalOpen] = useState(false);
@@ -16,12 +17,13 @@ function AppLayout() {
   const isQuizView = location.pathname.startsWith('/quiz/');
   const isSubjectView = location.pathname.startsWith('/subject/');
   const isAnalyticsView = location.pathname.startsWith('/analytics');
+  const isCustomTestView = location.pathname.startsWith('/custom-test');
 
   return (
     <div className="min-h-screen bg-dark-navy text-slate-100 flex flex-col font-sans">
       <TopNav
         onOpenProfileSwitcher={() => setIsProfileModalOpen(true)}
-        showBack={isQuizView || isSubjectView || isAnalyticsView}
+        showBack={isQuizView || isSubjectView || isAnalyticsView || isCustomTestView}
         backTitle={isQuizView ? 'Leave Quiz' : 'Curriculum Home'}
       />
 
@@ -32,6 +34,7 @@ function AppLayout() {
           <Route path="/quiz/:materialId" element={<QuizRunnerScreen />} />
           <Route path="/leaderboard" element={<LeaderboardScreen />} />
           <Route path="/analytics" element={<PerformanceAnalyticsScreen />} />
+          <Route path="/custom-test" element={<CustomTestGeneratorScreen />} />
           <Route path="/upload" element={<UploadPastPaperScreen />} />
         </Routes>
       </main>

@@ -48,6 +48,11 @@ if (fs.existsSync(reactDistPath)) {
   app.use(express.static(path.join(__dirname, 'public')));
 }
 
+// 3. Static Assets: Extracted diagrams and public icons
+const imagesDir = path.resolve(__dirname, '../extracted_images');
+if (!fs.existsSync(imagesDir)) fs.mkdirSync(imagesDir, { recursive: true });
+app.use('/extracted_images', express.static(imagesDir));
+
 // Configure Multer for file uploads
 const uploadDir = path.join(__dirname, 'uploads');
 if (!fs.existsSync(uploadDir)) {

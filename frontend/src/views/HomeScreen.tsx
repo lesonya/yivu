@@ -70,6 +70,13 @@ export const HomeScreen: React.FC = () => {
               <span>Resume Last Revision</span>
               <ChevronRight className="w-4 h-4" />
             </button>
+            <button
+              onClick={() => navigate('/custom-test')}
+              className="flex items-center space-x-2 bg-dark-navy hover:bg-slate-800 text-brand-cyan border border-brand-cyan/40 font-bold text-xs px-4 py-2.5 rounded-xl shadow transition active:scale-95"
+            >
+              <Sparkles className="w-3.5 h-3.5" />
+              <span>Generate Practice Test</span>
+            </button>
             <div className="text-xs text-slate-400 font-medium">
               Target: <span className="text-white font-bold">Standard 5 Attainment & JC</span>
             </div>
