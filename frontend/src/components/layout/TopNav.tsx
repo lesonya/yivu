@@ -1,4 +1,4 @@
-import { Link, useLocation } from 'react-router-dom';
+import { Link } from 'react-router-dom';
 import { useUserStore } from '../../store/useUserStore';
 
 interface TopNavProps {
@@ -14,7 +14,6 @@ export const TopNav: React.FC<TopNavProps> = ({
   backTitle,
   onBack,
 }) => {
-  const location = useLocation();
   const { activeProfile } = useUserStore();
 
   const getMascotEmoji = (mascot: string) => {
@@ -61,34 +60,8 @@ export const TopNav: React.FC<TopNavProps> = ({
           )}
         </div>
 
-        {/* Right Controls: Learner Profile & Actions (Pill/Capsule Styled) */}
+        {/* Right Controls: Learner Profile & Upload Action */}
         <div className="flex items-center space-x-2.5">
-          <Link
-            to="/leaderboard"
-            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition active:scale-95 backdrop-blur-md ${
-              location.pathname === '/leaderboard'
-                ? 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-lg shadow-amber-500/10'
-                : 'bg-slate-900/40 text-slate-300 border-white/10 hover:border-white/20 hover:text-white'
-            }`}
-          >
-            {/* @ts-ignore */}
-            <iconify-icon icon="solar:cup-star-bold" width="14" class="text-amber-400"></iconify-icon>
-            <span className="hidden sm:inline">Leaderboard</span>
-          </Link>
-
-          <Link
-            to="/analytics"
-            className={`flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-semibold border transition active:scale-95 backdrop-blur-md ${
-              location.pathname === '/analytics'
-                ? 'bg-cyan-500/20 text-cyan-300 border-cyan-500/40 shadow-lg shadow-cyan-500/10'
-                : 'bg-slate-900/40 text-slate-300 border-white/10 hover:border-white/20 hover:text-white'
-            }`}
-          >
-            {/* @ts-ignore */}
-            <iconify-icon icon="solar:chart-2-bold" width="14" class="text-cyan-400"></iconify-icon>
-            <span className="hidden sm:inline">Analytics</span>
-          </Link>
-
           <Link
             to="/upload"
             className="flex items-center space-x-2 px-3.5 py-1.5 rounded-full text-xs font-semibold bg-slate-900/40 text-slate-300 border border-white/10 hover:border-white/20 hover:text-white transition active:scale-95 backdrop-blur-md"
