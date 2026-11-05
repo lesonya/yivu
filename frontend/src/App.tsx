@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { TopNav } from './components/layout/TopNav';
+import { BottomBar } from './components/layout/BottomBar';
 import { AnimatedMovingBackground } from './components/layout/AnimatedMovingBackground';
 import { ProfileSwitcherModal } from './components/gamification/ProfileSwitcherModal';
 import { HomeScreen } from './views/HomeScreen';
@@ -28,7 +29,6 @@ function AppLayout() {
       {/* App Foreground Shell */}
       <div className="relative z-10 flex flex-col min-h-screen">
         <TopNav
-          onOpenProfileSwitcher={() => setIsProfileModalOpen(true)}
           showBack={isQuizView || isSubjectView || isAnalyticsView || isCustomTestView}
           backTitle={isQuizView ? 'Leave Quiz' : 'Curriculum Home'}
         />
@@ -44,6 +44,9 @@ function AppLayout() {
             <Route path="/upload" element={<UploadPastPaperScreen />} />
           </Routes>
         </main>
+
+        {/* Bottom Bar containing Upload and Profile Switcher */}
+        <BottomBar onOpenProfileSwitcher={() => setIsProfileModalOpen(true)} />
       </div>
 
       <ProfileSwitcherModal
