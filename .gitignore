@@ -10,19 +10,18 @@
 *.keystore
 google-services.json
 
-# Flutter / Dart build artifacts
-.dart_tool/
-.flutter-plugins
-.flutter-plugins-dependencies
-.packages
+# Builds & Binaries
+*.apk
+dist/
 build/
-*.mode1v3
-*.mode2v3
-*.moved-aside
-*.pbxuser
-*.perspectivev3
+.dart_tool/
 
-# Android Studio / IntelliJ / VSCode
+# Database temporary files
+backend/*.db-wal
+backend/*.db-shm
+backend/uploads/
+
+# IDE & Editor
 .idea/
 *.iml
 .vscode/
@@ -37,4 +36,3 @@ yarn-error.log*
 # OS metadata
 .DS_Store
 Thumbs.db
-
