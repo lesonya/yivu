@@ -1,0 +1,929 @@
+<!DOCTYPE html>
+<html lang="en" class="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Yivu Exam Studio — Papers & Questions Management</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+      theme: {
+        extend: {
+          fontFamily: { sans: ['"Plus Jakarta Sans"', 'sans-serif'] },
+          colors: {
+            darkNavy: '#0F172A',
+            surfaceNavy: '#1E293B',
+            borderNavy: '#334155',
+            brandBlue: '#2563EB',
+            brandTeal: '#14B8A6',
+            brandCyan: '#06B6D4',
+            goldStar: '#F59E0B'
+          }
+        }
+      }
+    }
+  </script>
+  <style>
+    body { background-color: #0F172A; color: #F8FAFC; }
+    ::-webkit-scrollbar { width: 8px; height: 8px; }
+    ::-webkit-scrollbar-track { background: #0F172A; }
+    ::-webkit-scrollbar-thumb { background: #334155; border-radius: 4px; }
+    ::-webkit-scrollbar-thumb:hover { background: #475569; }
+  </style>
+</head>
+<body class="min-h-screen flex flex-col">
+
+  <!-- TOP NAVBAR -->
+  <header class="bg-surfaceNavy/90 backdrop-blur-md border-b border-borderNavy sticky top-0 z-40 px-6 py-3.5 flex items-center justify-between">
+    <div class="flex items-center space-x-3.5">
+      <img src="logo.png" alt="Yivu Logo" class="w-10 h-10 object-contain drop-shadow">
+      <div>
+        <div class="flex items-center space-x-2">
+          <span class="text-xl font-extrabold tracking-tight text-white">yivu</span>
+          <span class="text-xs font-bold uppercase tracking-wider bg-brandBlue/30 text-brandCyan px-2 py-0.5 rounded-md border border-brandCyan/40">Studio</span>
+          <span class="text-xs text-slate-400">v1.0.0</span>
+        </div>
+        <p class="text-xs text-slate-400 font-medium">Botswana Curriculum Exam Management Hub</p>
+      </div>
+    </div>
+
+    <div class="flex items-center space-x-3">
+      <button onclick="syncToFlutter()" id="btnSync" class="flex items-center space-x-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-95">
+        <i data-lucide="refresh-cw" class="w-4 h-4"></i>
+        <span>Sync to Flutter App</span>
+      </button>
+      <button onclick="openUploadModal()" class="flex items-center space-x-2 bg-brandBlue hover:bg-blue-600 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-95">
+        <i data-lucide="upload-cloud" class="w-4 h-4"></i>
+        <span>Upload Exam Paper</span>
+      </button>
+      <button onclick="openBatchUploadModal()" class="flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-95">
+        <i data-lucide="folder-up" class="w-4 h-4"></i>
+        <span>Batch Exam Papers</span>
+      </button>
+    </div>
+  </header>
+
+  <!-- MAIN CONTAINER -->
+  <main class="flex-1 max-w-7xl w-full mx-auto p-6 space-y-6">
+
+    <!-- DATA MANAGEMENT & CLEAR ACTIONS BANNER -->
+    <div class="bg-surfaceNavy border border-borderNavy/80 p-4 rounded-2xl flex flex-wrap items-center justify-between gap-4">
+      <div class="flex items-center space-x-3">
+        <div class="p-2.5 bg-rose-500/20 text-rose-400 rounded-xl">
+          <i data-lucide="shield-alert" class="w-5 h-5"></i>
+        </div>
+        <div>
+          <h4 class="text-xs font-bold text-white uppercase tracking-wider">Frontend Content Controls</h4>
+          <p class="text-[11px] text-slate-400">Instantly remove, clear, or reset materials loaded by the Flutter app.</p>
+        </div>
+      </div>
+
+      <div class="flex flex-wrap items-center gap-2.5">
+        <!-- Button 1: Clear all Exams -->
+        <button onclick="clearData('exams')" id="btnClearExams" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-rose-950/40 border border-rose-600/50 hover:bg-rose-900/50 text-rose-300 transition active:scale-95 shadow">
+          <i data-lucide="trash-2" class="w-3.5 h-3.5 text-rose-400"></i>
+          <span>Clear All Exams</span>
+        </button>
+
+        <!-- Button 2: Clear all Notes -->
+        <button onclick="clearData('notes')" id="btnClearNotes" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-amber-950/40 border border-amber-600/50 hover:bg-amber-900/50 text-amber-300 transition active:scale-95 shadow">
+          <i data-lucide="file-x" class="w-3.5 h-3.5 text-amber-400"></i>
+          <span>Clear All Notes</span>
+        </button>
+
+        <!-- Button 3: Clear all Quizzes -->
+        <button onclick="clearData('quizzes')" id="btnClearQuizzes" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-bold bg-purple-950/40 border border-purple-600/50 hover:bg-purple-900/50 text-purple-300 transition active:scale-95 shadow">
+          <i data-lucide="help-circle" class="w-3.5 h-3.5 text-purple-400"></i>
+          <span>Clear All Quizzes</span>
+        </button>
+
+        <div class="h-5 w-px bg-borderNavy mx-1"></div>
+
+        <!-- Restore Defaults -->
+        <button onclick="restoreDefaults()" id="btnRestore" class="flex items-center space-x-1.5 px-3.5 py-2 rounded-xl text-xs font-semibold bg-darkNavy border border-borderNavy hover:bg-slate-800 text-slate-300 transition active:scale-95">
+          <i data-lucide="rotate-ccw" class="w-3.5 h-3.5 text-slate-400"></i>
+          <span>Restore Default Data</span>
+        </button>
+      </div>
+    </div>
+
+    <!-- STATS CARDS -->
+    <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+      <div class="bg-surfaceNavy border border-borderNavy p-5 rounded-2xl flex items-center space-x-4">
+        <div class="p-3 bg-brandBlue/20 text-brandCyan rounded-xl">
+          <i data-lucide="book-open" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Exam Papers</p>
+          <h3 id="statTotalPapers" class="text-2xl font-black text-white">--</h3>
+        </div>
+      </div>
+
+      <div class="bg-surfaceNavy border border-borderNavy p-5 rounded-2xl flex items-center space-x-4">
+        <div class="p-3 bg-teal-500/20 text-brandTeal rounded-xl">
+          <i data-lucide="help-circle" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Total Questions</p>
+          <h3 id="statTotalQuestions" class="text-2xl font-black text-white">--</h3>
+        </div>
+      </div>
+
+      <div class="bg-surfaceNavy border border-borderNavy p-5 rounded-2xl flex items-center space-x-4">
+        <div class="p-3 bg-amber-500/20 text-goldStar rounded-xl">
+          <i data-lucide="graduation-cap" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Grades Covered</p>
+          <h3 id="statGrades" class="text-lg font-bold text-white">Std 4 & Std 5</h3>
+        </div>
+      </div>
+
+      <div class="bg-surfaceNavy border border-borderNavy p-5 rounded-2xl flex items-center space-x-4">
+        <div class="p-3 bg-purple-500/20 text-purple-400 rounded-xl">
+          <i data-lucide="layers" class="w-6 h-6"></i>
+        </div>
+        <div>
+          <p class="text-xs font-semibold text-slate-400 uppercase tracking-wider">Subjects</p>
+          <h3 id="statSubjects" class="text-lg font-bold text-white">8 Subjects</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- FILTER & SEARCH BAR -->
+    <div class="bg-surfaceNavy border border-borderNavy p-4 rounded-2xl flex flex-wrap gap-3 items-center justify-between">
+      <div class="flex flex-wrap items-center gap-3">
+        <!-- Grade Filter -->
+        <select id="filterGrade" onchange="loadPapers()" class="bg-darkNavy border border-borderNavy rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brandCyan">
+          <option value="">All Grades</option>
+          <option value="std_5">Standard 5</option>
+          <option value="std_4">Standard 4</option>
+          <option value="form_1">Form 1</option>
+          <option value="form_2">Form 2</option>
+          <option value="form_3">Form 3</option>
+        </select>
+
+        <!-- Subject Filter -->
+        <select id="filterSubject" onchange="loadPapers()" class="bg-darkNavy border border-borderNavy rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brandCyan">
+          <option value="">All Subjects</option>
+          <option value="std_math">Mathematics</option>
+          <option value="std_english">English</option>
+          <option value="std_science">Science</option>
+          <option value="std_setswana">Setswana</option>
+          <option value="std_social_studies">Social Studies</option>
+          <option value="std_capa">Creative & Performing Arts (CAPA)</option>
+          <option value="std_agriculture">Agriculture</option>
+          <option value="std_rme">Religious & Moral Education (RME)</option>
+        </select>
+
+        <!-- Term Filter -->
+        <select id="filterTerm" onchange="loadPapers()" class="bg-darkNavy border border-borderNavy rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brandCyan">
+          <option value="">All Terms</option>
+          <option value="Term 1">Term 1</option>
+          <option value="Term 2">Term 2</option>
+          <option value="Term 3">Term 3</option>
+        </select>
+      </div>
+
+      <!-- Search Box -->
+      <div class="relative w-full sm:w-72">
+        <i data-lucide="search" class="w-4 h-4 text-slate-400 absolute left-3.5 top-1/2 -translate-y-1/2"></i>
+        <input type="text" id="searchInput" oninput="debounceSearch()" placeholder="Search papers, topics..." class="w-full bg-darkNavy border border-borderNavy rounded-xl pl-10 pr-4 py-2 text-xs font-medium text-slate-200 placeholder-slate-500 focus:outline-none focus:border-brandCyan">
+      </div>
+    </div>
+
+    <!-- PAPERS LIST TABLE -->
+    <div class="bg-surfaceNavy border border-borderNavy rounded-2xl overflow-hidden shadow-xl">
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between">
+        <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+          <i data-lucide="file-text" class="w-4 h-4 text-brandCyan"></i>
+          <span>Curriculum Exam Papers (<span id="papersFilteredCount">0</span>)</span>
+        </h2>
+      </div>
+
+      <div class="overflow-x-auto">
+        <table class="w-full text-left text-xs">
+          <thead class="bg-darkNavy/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-borderNavy">
+            <tr>
+              <th class="px-6 py-3.5">Grade</th>
+              <th class="px-6 py-3.5">Subject</th>
+              <th class="px-6 py-3.5">Term</th>
+              <th class="px-6 py-3.5">Paper Title & Source</th>
+              <th class="px-6 py-3.5 text-center">Questions</th>
+              <th class="px-6 py-3.5 text-right">Actions</th>
+            </tr>
+          </thead>
+          <tbody id="papersTableBody" class="divide-y divide-borderNavy/50 font-medium">
+            <tr>
+              <td colspan="6" class="px-6 py-12 text-center text-slate-400">Loading exam papers...</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+  </main>
+
+  <!-- VIEW / EDIT PAPER QUESTIONS MODAL (DRAWER) -->
+  <div id="paperModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex justify-end">
+    <div class="bg-surfaceNavy border-l border-borderNavy w-full max-w-4xl h-full flex flex-col shadow-2xl">
+      <!-- Modal Header -->
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
+        <div>
+          <h3 id="modalPaperTitle" class="text-base font-bold text-white truncate max-w-xl">Exam Paper Details</h3>
+          <div class="flex items-center space-x-3 mt-1">
+            <p id="modalPaperMeta" class="text-xs text-brandCyan font-semibold">STD 5 • Mathematics • Term 2</p>
+            <span class="text-slate-600">•</span>
+            <button id="modalViewSourceBtn" onclick="openPdfViewer(currentPaperId, currentPaperTitle, currentPaperSourceFile)" class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline">
+              <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+              <span>View Source Document</span>
+            </button>
+          </div>
+        </div>
+        <button onclick="closePaperModal()" class="p-2 text-slate-400 hover:text-white rounded-xl hover:bg-surfaceNavy transition">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <!-- Modal Body (Questions List) -->
+      <div class="flex-1 overflow-y-auto p-6 space-y-4" id="modalQuestionsList">
+        <!-- Rendered dynamically -->
+      </div>
+
+      <!-- Modal Footer -->
+      <div class="px-6 py-4 border-t border-borderNavy bg-darkNavy flex items-center justify-between">
+        <button onclick="deleteCurrentPaper()" class="text-rose-400 hover:text-rose-300 font-semibold text-xs flex items-center space-x-1.5 px-3 py-2 rounded-xl hover:bg-rose-950/30">
+          <i data-lucide="trash-2" class="w-4 h-4"></i>
+          <span>Delete Paper</span>
+        </button>
+        <button onclick="closePaperModal()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">
+          Close
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- IN-BROWSER PDF VIEWER MODAL -->
+  <div id="pdfViewerModal" class="fixed inset-0 bg-black/85 backdrop-blur-md z-50 hidden flex flex-col p-4 md:p-8">
+    <div class="bg-surfaceNavy border border-borderNavy w-full max-w-6xl h-full mx-auto rounded-2xl flex flex-col overflow-hidden shadow-2xl">
+      <!-- Viewer Header -->
+      <div class="px-6 py-3.5 border-b border-borderNavy flex items-center justify-between bg-darkNavy shrink-0">
+        <div class="flex items-center space-x-3 overflow-hidden">
+          <div class="p-2 bg-emerald-500/20 text-emerald-400 rounded-lg shrink-0">
+            <i data-lucide="file-text" class="w-4 h-4"></i>
+          </div>
+          <div class="truncate">
+            <h3 id="pdfViewerTitle" class="text-sm font-bold text-white truncate">Document Viewer</h3>
+            <p id="pdfViewerSubtitle" class="text-xs text-slate-400 font-medium truncate">Original Exam Paper</p>
+          </div>
+        </div>
+
+        <div class="flex items-center space-x-2 shrink-0">
+          <a id="pdfOpenNewTabBtn" href="#" target="_blank" class="px-3 py-1.5 bg-surfaceNavy hover:bg-borderNavy text-slate-300 hover:text-white rounded-lg text-xs font-semibold flex items-center space-x-1.5 border border-borderNavy transition" title="Open in browser tab">
+            <i data-lucide="external-link" class="w-3.5 h-3.5"></i>
+            <span>Open in Tab</span>
+          </a>
+          <button onclick="closePdfViewer()" class="p-1.5 text-slate-400 hover:text-white rounded-lg hover:bg-surfaceNavy transition" title="Close (Esc)">
+            <i data-lucide="x" class="w-5 h-5"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Iframe Container for in-browser PDF rendering -->
+      <div class="flex-1 w-full bg-slate-900 relative">
+        <iframe id="pdfViewerFrame" class="w-full h-full border-0" src="about:blank"></iframe>
+      </div>
+    </div>
+  </div>
+
+  <!-- UPLOAD EXAM PAPER MODAL -->
+  <div id="uploadModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-surfaceNavy border border-borderNavy w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl">
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+          <i data-lucide="upload-cloud" class="w-4 h-4 text-brandCyan"></i>
+          <span>Upload & Ingest Exam Paper</span>
+        </h3>
+        <button onclick="closeUploadModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="uploadForm" onsubmit="handleUpload(event)" class="p-6 space-y-4 text-xs font-medium">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Paper Document (PDF or DOCX) *</label>
+          <input type="file" id="paperFile" name="paper_file" required accept=".pdf,.docx" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-brandBlue file:text-white file:font-semibold">
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Marking Scheme / Answers (Optional PDF/DOCX)</label>
+          <input type="file" id="markingFile" name="marking_file" accept=".pdf,.docx" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-surfaceNavy file:text-slate-300 file:font-semibold">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Grade Level *</label>
+            <select id="uploadGrade" name="grade_key" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="std_5">Standard 5</option>
+              <option value="std_4">Standard 4</option>
+              <option value="form_1">Form 1</option>
+              <option value="form_2">Form 2</option>
+              <option value="form_3">Form 3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Term *</label>
+            <select id="uploadTerm" name="term" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="Term 1">Term 1</option>
+              <option value="Term 2">Term 2</option>
+              <option value="Term 3">Term 3</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Subject *</label>
+          <select id="uploadSubject" name="subject_id" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+            <option value="std_math">Mathematics</option>
+            <option value="std_english">English</option>
+            <option value="std_science">Science</option>
+            <option value="std_setswana">Setswana</option>
+            <option value="std_social_studies">Social Studies</option>
+            <option value="std_capa">Creative & Performing Arts (CAPA)</option>
+            <option value="std_agriculture">Agriculture</option>
+            <option value="std_rme">Religious & Moral Education (RME)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Custom Title (Optional)</label>
+          <input type="text" id="uploadTitle" name="title" placeholder="Leave blank to auto-generate from file" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+        </div>
+
+        <div id="uploadStatus" class="hidden p-3 rounded-xl bg-blue-950/40 border border-blue-500/30 text-blue-300 text-xs flex items-center space-x-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i>
+          <span id="uploadStatusText">Parsing document and extracting questions...</span>
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="closeUploadModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-white">Cancel</button>
+          <button type="submit" id="btnSubmitUpload" class="px-5 py-2 bg-brandBlue hover:bg-blue-600 font-semibold text-white rounded-xl shadow-lg">Start Extraction</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- BATCH UPLOAD MODAL -->
+  <div id="batchUploadModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-surfaceNavy border border-borderNavy w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+          <i data-lucide="folder-up" class="w-4 h-4 text-purple-400"></i>
+          <span>Batch Ingest Exam Papers & Marking Schemes</span>
+        </h3>
+        <button onclick="closeBatchUploadModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="batchUploadForm" onsubmit="handleBatchUpload(event)" class="p-6 space-y-4 text-xs font-medium overflow-y-auto">
+        <div class="p-3 bg-purple-950/30 border border-purple-500/30 rounded-xl text-purple-200 text-xs">
+          <p class="font-bold flex items-center space-x-1.5 mb-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span>Intelligent Auto-Matching Pipeline</span>
+          </p>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Select multiple exam PDFs/DOCX and their marking schemes. The system will automatically detect grades, subjects, terms, match answers with papers, and extract questions.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Select Exam Files & Marking Keys (Multiple PDF / DOCX) *</label>
+          <input type="file" id="batchFiles" name="files" multiple required accept=".pdf,.docx" onchange="updateBatchFileList(this)" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-indigo-600 file:to-purple-600 file:text-white file:font-semibold">
+          <div id="batchFileCount" class="text-[11px] text-slate-400 mt-1">No files chosen</div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Grade Level</label>
+            <select id="batchGrade" name="default_grade" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="auto">Auto-Detect from Filename</option>
+              <option value="std_5">Standard 5</option>
+              <option value="std_4">Standard 4</option>
+              <option value="form_1">Form 1</option>
+              <option value="form_2">Form 2</option>
+              <option value="form_3">Form 3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Term</label>
+            <select id="batchTerm" name="default_term" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="auto">Auto-Detect from Filename</option>
+              <option value="Term 1">Term 1</option>
+              <option value="Term 2">Term 2</option>
+              <option value="Term 3">Term 3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Subject</label>
+            <select id="batchSubject" name="default_subject" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="auto">Auto-Detect from Filename</option>
+              <option value="std_math">Mathematics</option>
+              <option value="std_english">English</option>
+              <option value="std_science">Science</option>
+              <option value="std_setswana">Setswana</option>
+              <option value="std_social_studies">Social Studies</option>
+              <option value="std_capa">Creative & Performing Arts (CAPA)</option>
+              <option value="std_agriculture">Agriculture</option>
+              <option value="std_rme">Religious & Moral Education (RME)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="batchUploadStatus" class="hidden p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-purple-200 text-xs flex items-center space-x-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-purple-400"></i>
+          <span id="batchUploadStatusText">Batch parsing educational documents and extracting questions...</span>
+        </div>
+
+        <div id="batchSummaryBox" class="hidden p-3 rounded-xl bg-darkNavy border border-borderNavy text-xs max-h-48 overflow-y-auto space-y-1.5">
+          <!-- Populated dynamically with batch results -->
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="closeBatchUploadModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-white">Cancel</button>
+          <button type="submit" id="btnSubmitBatch" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-semibold text-white rounded-xl shadow-lg flex items-center space-x-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>Process Batch</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- JAVASCRIPT LOGIC -->
+  <script>
+    let currentPaperId = null;
+    let currentPaperTitle = '';
+    let currentPaperSourceFile = '';
+    let searchTimeout = null;
+
+    document.addEventListener('DOMContentLoaded', () => {
+      lucide.createIcons();
+      loadStats();
+      loadPapers();
+    });
+
+    async function loadStats() {
+      try {
+        const res = await fetch('/api/stats');
+        const data = await res.json();
+        document.getElementById('statTotalPapers').textContent = data.totalPapers || 0;
+        document.getElementById('statTotalQuestions').textContent = (data.totalQuestions || 0).toLocaleString();
+      } catch (e) {
+        console.error(e);
+      }
+    }
+
+    async function loadPapers() {
+      const grade = document.getElementById('filterGrade').value;
+      const subject = document.getElementById('filterSubject').value;
+      const term = document.getElementById('filterTerm').value;
+      const search = document.getElementById('searchInput').value;
+
+      const params = new URLSearchParams();
+      if (grade) params.append('grade_key', grade);
+      if (subject) params.append('subject_id', subject);
+      if (term) params.append('term', term);
+      if (search) params.append('search', search);
+
+      const tbody = document.getElementById('papersTableBody');
+      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Loading...</td></tr>';
+
+      try {
+        const res = await fetch(`/api/papers?${params.toString()}`);
+        const papers = await res.json();
+        document.getElementById('papersFilteredCount').textContent = papers.length;
+
+        if (papers.length === 0) {
+          tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No exam papers found matching criteria.</td></tr>';
+          return;
+        }
+
+        tbody.innerHTML = papers.map(p => {
+          const gradeBadge = p.grade_key === 'std_5' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
+          const subjectName = formatSubjectName(p.subject_id);
+          return `
+            <tr class="hover:bg-slate-800/40 transition">
+              <td class="px-6 py-4">
+                <span class="inline-block px-2.5 py-0.5 rounded-md text-[11px] font-bold border ${gradeBadge}">
+                  ${p.grade_key.toUpperCase().replace('_', ' ')}
+                </span>
+              </td>
+              <td class="px-6 py-4 font-semibold text-slate-200">${subjectName}</td>
+              <td class="px-6 py-4 text-slate-300">${p.term}</td>
+              <td class="px-6 py-4 max-w-md">
+                <div class="text-white font-medium truncate" title="${p.title}">${p.title}</div>
+                <div class="flex items-center space-x-2 mt-1">
+                  <span class="text-[11px] text-slate-400 font-normal truncate max-w-[200px]" title="${p.source_file || 'Document file'}">
+                    📄 ${p.source_file ? p.source_file.split('\\').pop().split('/').pop() : 'Document file'}
+                  </span>
+                  <button onclick="openPdfViewer('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${(p.source_file || '').replace(/'/g, "\\'")}')" class="inline-flex items-center space-x-1 text-[11px] font-bold text-emerald-400 hover:text-emerald-300 hover:underline">
+                    <span>View Source</span>
+                    <i data-lucide="eye" class="w-3 h-3"></i>
+                  </button>
+                </div>
+              </td>
+              <td class="px-6 py-4 text-center">
+                <span class="inline-block px-2.5 py-1 rounded-full text-xs font-bold bg-brandBlue/20 text-brandCyan border border-brandCyan/30">
+                  ${p.question_count} Qs
+                </span>
+              </td>
+              <td class="px-6 py-4 text-right space-x-2 whitespace-nowrap">
+                <button onclick="openPdfViewer('${p.id}', '${p.title.replace(/'/g, "\\'")}', '${(p.source_file || '').replace(/'/g, "\\'")}')" class="px-2.5 py-1.5 bg-darkNavy hover:bg-slate-800 border border-emerald-500/40 text-emerald-400 font-semibold rounded-lg transition active:scale-95 inline-flex items-center space-x-1 text-xs" title="View original PDF in browser">
+                  <i data-lucide="eye" class="w-3.5 h-3.5"></i>
+                  <span>View Source</span>
+                </button>
+                <button onclick="viewPaper('${p.id}')" class="px-3 py-1.5 bg-surfaceNavy hover:bg-borderNavy border border-borderNavy text-white font-semibold rounded-lg transition active:scale-95 inline-flex items-center space-x-1 text-xs">
+                  <span>Manage</span>
+                  <i data-lucide="chevron-right" class="w-3.5 h-3.5 text-slate-400"></i>
+                </button>
+              </td>
+            </tr>
+          `;
+        }).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-rose-400">Error loading papers: ${err.message}</td></tr>`;
+      }
+    }
+
+    function formatSubjectName(subId) {
+      const map = {
+        'std_math': 'Mathematics',
+        'std_english': 'English',
+        'std_science': 'Science',
+        'std_setswana': 'Setswana',
+        'std_social_studies': 'Social Studies',
+        'std_capa': 'Creative & Performing Arts (CAPA)',
+        'std_agriculture': 'Agriculture',
+        'std_rme': 'Religious & Moral Education'
+      };
+      return map[subId] || subId;
+    }
+
+    function debounceSearch() {
+      clearTimeout(searchTimeout);
+      searchTimeout = setTimeout(loadPapers, 300);
+    }
+
+    async function viewPaper(id) {
+      currentPaperId = id;
+      const modal = document.getElementById('paperModal');
+      const qList = document.getElementById('modalQuestionsList');
+      modal.classList.remove('hidden');
+      qList.innerHTML = '<div class="py-12 text-center text-slate-400">Loading questions...</div>';
+
+      try {
+        const res = await fetch(`/api/papers/${id}`);
+        const paper = await res.json();
+
+        currentPaperTitle = paper.title || '';
+        currentPaperSourceFile = paper.source_file || '';
+
+        document.getElementById('modalPaperTitle').textContent = paper.title;
+        document.getElementById('modalPaperMeta').textContent = `${paper.grade_key.toUpperCase().replace('_', ' ')} • ${formatSubjectName(paper.subject_id)} • ${paper.term} (${paper.questions.length} Questions)`;
+
+        if (paper.questions.length === 0) {
+          qList.innerHTML = '<div class="py-12 text-center text-slate-400">No questions found in this paper.</div>';
+          return;
+        }
+
+        qList.innerHTML = paper.questions.map((q, idx) => {
+          const isMcq = q.question_type === 'MCQ' && q.options && q.options.length > 0;
+          return `
+            <div class="bg-darkNavy border border-borderNavy p-4 rounded-xl space-y-3">
+              <div class="flex items-center justify-between">
+                <div class="flex items-center space-x-2">
+                  <span class="w-6 h-6 rounded-md bg-brandCyan/20 text-brandCyan font-bold flex items-center justify-center text-xs">
+                    Q${q.question_number}
+                  </span>
+                  <span class="px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wider bg-slate-800 text-slate-300 border border-slate-700">
+                    ${q.question_type}
+                  </span>
+                  <span class="text-xs text-slate-400 font-semibold">[${q.marks} Mark${q.marks > 1 ? 's' : ''}]</span>
+                </div>
+                <button onclick="deleteQuestion('${q.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Delete Question">
+                  <i data-lucide="trash-2" class="w-4 h-4"></i>
+                </button>
+              </div>
+
+              <!-- Question Prompt -->
+              <p class="text-sm text-white font-medium leading-relaxed">${q.prompt}</p>
+
+              <!-- Diagram Preview if present -->
+              ${q.has_diagram ? `
+                <div class="p-2.5 rounded-lg bg-slate-900 border border-borderNavy flex items-center space-x-2 text-xs text-amber-300">
+                  <i data-lucide="image" class="w-4 h-4"></i>
+                  <span>Diagram: ${q.diagram_description || 'Visual Asset Required'}</span>
+                </div>
+              ` : ''}
+
+              <!-- MCQ Options -->
+              ${isMcq ? `
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-2 pt-1">
+                  ${q.options.map((opt, optIdx) => `
+                    <div class="px-3 py-2 rounded-lg text-xs font-semibold flex items-center space-x-2 border ${optIdx === q.correct_index ? 'bg-emerald-950/40 border-emerald-500/50 text-emerald-300' : 'bg-surfaceNavy border-borderNavy text-slate-300'}">
+                      <span class="w-4 h-4 rounded-full flex items-center justify-center text-[10px] ${optIdx === q.correct_index ? 'bg-emerald-500 text-black font-black' : 'bg-slate-700 text-slate-300'}">
+                        ${String.fromCharCode(65 + optIdx)}
+                      </span>
+                      <span>${opt}</span>
+                    </div>
+                  `).join('')}
+                </div>
+              ` : ''}
+
+              <!-- Marking Scheme / Explanation -->
+              <div class="pt-2 border-t border-borderNavy/50 text-xs text-slate-400 flex items-center justify-between">
+                <div>
+                  <span class="text-slate-500 font-semibold">Answer: </span>
+                  <span class="text-brandCyan font-semibold">${q.marking_scheme ? q.marking_scheme.correct_answer : (isMcq ? q.options[q.correct_index] : 'Inline Criteria')}</span>
+                </div>
+              </div>
+            </div>
+          `;
+        }).join('');
+
+        lucide.createIcons();
+      } catch (err) {
+        qList.innerHTML = `<div class="py-12 text-center text-rose-400">Failed to load: ${err.message}</div>`;
+      }
+    }
+
+    function closePaperModal() {
+      document.getElementById('paperModal').classList.add('hidden');
+      currentPaperId = null;
+    }
+
+    async function deleteCurrentPaper() {
+      if (!currentPaperId || !confirm("Are you sure you want to delete this entire exam paper and all its questions?")) return;
+      try {
+        await fetch(`/api/papers/${currentPaperId}`, { method: 'DELETE' });
+        closePaperModal();
+        loadStats();
+        loadPapers();
+      } catch (e) {
+        alert("Failed to delete paper: " + e.message);
+      }
+    }
+
+    async function deleteQuestion(qId) {
+      if (!confirm("Delete this question?")) return;
+      try {
+        await fetch(`/api/questions/${qId}`, { method: 'DELETE' });
+        viewPaper(currentPaperId);
+        loadStats();
+      } catch (e) {
+        alert("Failed to delete question: " + e.message);
+      }
+    }
+
+    function openUploadModal() {
+      document.getElementById('uploadModal').classList.remove('hidden');
+      document.getElementById('uploadStatus').classList.add('hidden');
+    }
+
+    function closeUploadModal() {
+      document.getElementById('uploadModal').classList.add('hidden');
+      document.getElementById('uploadForm').reset();
+    }
+
+    function openBatchUploadModal() {
+      document.getElementById('batchUploadModal').classList.remove('hidden');
+      document.getElementById('batchUploadStatus').classList.add('hidden');
+      document.getElementById('batchSummaryBox').classList.add('hidden');
+      document.getElementById('batchFileCount').textContent = 'No files chosen';
+    }
+
+    function closeBatchUploadModal() {
+      document.getElementById('batchUploadModal').classList.add('hidden');
+      document.getElementById('batchUploadForm').reset();
+      document.getElementById('batchFileCount').textContent = 'No files chosen';
+      document.getElementById('batchSummaryBox').classList.add('hidden');
+    }
+
+    function updateBatchFileList(input) {
+      const count = input.files ? input.files.length : 0;
+      const countEl = document.getElementById('batchFileCount');
+      if (count === 0) {
+        countEl.textContent = 'No files chosen';
+      } else if (count === 1) {
+        countEl.textContent = `1 file selected: ${input.files[0].name}`;
+      } else {
+        const fileNames = Array.from(input.files).map(f => f.name).slice(0, 3).join(', ');
+        countEl.textContent = `${count} files selected (${fileNames}${count > 3 ? '...' : ''})`;
+      }
+    }
+
+    async function handleBatchUpload(e) {
+      e.preventDefault();
+      const statusBox = document.getElementById('batchUploadStatus');
+      const statusText = document.getElementById('batchUploadStatusText');
+      const summaryBox = document.getElementById('batchSummaryBox');
+      const btn = document.getElementById('btnSubmitBatch');
+
+      statusBox.classList.remove('hidden');
+      summaryBox.classList.add('hidden');
+      summaryBox.innerHTML = '';
+      statusText.textContent = "Processing batch: extracting text and auto-linking questions...";
+      btn.disabled = true;
+
+      const formData = new FormData(document.getElementById('batchUploadForm'));
+
+      try {
+        const res = await fetch('/api/upload-batch', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Batch upload failed');
+
+        statusText.textContent = `Batch Completed! Processed ${result.processed_count} paper(s) with ${result.total_questions} total questions extracted.`;
+        
+        // Show summary list
+        summaryBox.classList.remove('hidden');
+        summaryBox.innerHTML = `
+          <div class="font-bold text-slate-200 border-b border-borderNavy pb-1 mb-1">Batch Ingestion Results:</div>
+          ${result.results.map(r => `
+            <div class="flex items-center justify-between py-1 border-b border-borderNavy/40 text-[11px]">
+              <span class="text-white truncate max-w-xs font-medium" title="${r.title}">📄 ${r.title}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'SUCCESS' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-rose-950/60 text-rose-400'}">
+                ${r.questions_count} Qs
+              </span>
+            </div>
+          `).join('')}
+        `;
+
+        loadStats();
+        loadPapers();
+      } catch (err) {
+        statusText.textContent = "Error: " + err.message;
+      } finally {
+        btn.disabled = false;
+        lucide.createIcons();
+      }
+    }
+
+    async function handleUpload(e) {
+      e.preventDefault();
+      const statusBox = document.getElementById('uploadStatus');
+      const statusText = document.getElementById('uploadStatusText');
+      const btn = document.getElementById('btnSubmitUpload');
+
+      statusBox.classList.remove('hidden');
+      statusText.textContent = "Uploading document and running AI parser pipeline...";
+      btn.disabled = true;
+
+      const formData = new FormData(document.getElementById('uploadForm'));
+
+      try {
+        const res = await fetch('/api/upload', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Upload failed');
+
+        statusText.textContent = `Success! Extracted ${result.extracted_questions_count} questions.`;
+        setTimeout(() => {
+          closeUploadModal();
+          loadStats();
+          loadPapers();
+          viewPaper(result.paper_id);
+        }, 1200);
+      } catch (err) {
+        statusText.textContent = "Error: " + err.message;
+      } finally {
+        btn.disabled = false;
+      }
+    }
+
+    async function clearData(type) {
+      const labels = {
+        'exams': 'all Exam Papers',
+        'notes': 'all Study Notes',
+        'quizzes': 'all Quizzes & Questions'
+      };
+      const label = labels[type] || type;
+      if (!confirm(`Are you sure you want to clear ${label} from the frontend?\n\nThis will update both the backend database and the Flutter seed_materials.json file.`)) {
+        return;
+      }
+
+      const btnId = type === 'exams' ? 'btnClearExams' : (type === 'notes' ? 'btnClearNotes' : 'btnClearQuizzes');
+      const btn = document.getElementById(btnId);
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Clearing...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch(`/api/actions/clear-${type}`, { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to clear data');
+        alert(data.message);
+        loadStats();
+        loadPapers();
+      } catch (err) {
+        alert("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }
+    }
+
+    async function restoreDefaults() {
+      if (!confirm("Restore the complete original set of 85 past paper exams and 1,965 questions to the database and frontend?")) {
+        return;
+      }
+
+      const btn = document.getElementById('btnRestore');
+      const originalHtml = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-3.5 h-3.5 animate-spin"></i><span>Restoring...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/actions/restore-defaults', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Failed to restore');
+        alert(data.message);
+        loadStats();
+        loadPapers();
+      } catch (err) {
+        alert("Error: " + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalHtml;
+        lucide.createIcons();
+      }
+    }
+
+    async function syncToFlutter() {
+      const btn = document.getElementById('btnSync');
+      btn.disabled = true;
+      btn.innerHTML = `<i data-lucide="loader-2" class="w-4 h-4 animate-spin"></i><span>Syncing...</span>`;
+      lucide.createIcons();
+
+      try {
+        const res = await fetch('/api/sync/to-flutter', { method: 'POST' });
+        const data = await res.json();
+        if (!res.ok) throw new Error(data.error || 'Sync failed');
+        alert(data.message);
+      } catch (e) {
+        alert("Sync error: " + e.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = `<i data-lucide="refresh-cw" class="w-4 h-4"></i><span>Sync to Flutter App</span>`;
+        lucide.createIcons();
+      }
+    }
+    function openPdfViewer(paperId, title, sourceFile) {
+      const modal = document.getElementById('pdfViewerModal');
+      const frame = document.getElementById('pdfViewerFrame');
+      const titleEl = document.getElementById('pdfViewerTitle');
+      const subtitleEl = document.getElementById('pdfViewerSubtitle');
+      const newTabBtn = document.getElementById('pdfOpenNewTabBtn');
+
+      const sourceUrl = `/api/papers/${paperId}/source`;
+      titleEl.textContent = title || 'Exam Paper Document';
+      subtitleEl.textContent = sourceFile ? `Source: ${sourceFile.split('\\').pop().split('/').pop()}` : 'Original Exam Paper';
+      newTabBtn.href = sourceUrl;
+
+      frame.src = sourceUrl;
+      modal.classList.remove('hidden');
+    }
+
+    function closePdfViewer() {
+      const modal = document.getElementById('pdfViewerModal');
+      const frame = document.getElementById('pdfViewerFrame');
+      modal.classList.add('hidden');
+      frame.src = 'about:blank';
+    }
+
+    // Keyboard shortcut (Escape to close any modal)
+    window.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape') {
+        closePdfViewer();
+        closePaperModal();
+        closeUploadModal();
+      }
+    });
+  </script>
+</body>
+</html>
+

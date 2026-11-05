@@ -32,7 +32,21 @@ const PORT = process.env.PORT || 5050;
 
 app.use(cors());
 app.use(express.json());
-app.use(express.static(path.join(__dirname, 'public')));
+
+// 1. Admin Studio static route (http://localhost:5050/admin)
+app.get('/admin', (req, res) => {
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+app.use('/admin-assets', express.static(path.join(__dirname, 'public')));
+
+// 2. Serve built React 19 Frontend (http://localhost:5050/)
+const reactDistPath = path.resolve(__dirname, '../frontend/dist');
+if (fs.existsSync(reactDistPath)) {
+  app.use(express.static(reactDistPath));
+} else {
+  // Fallback to backend public if frontend hasn't been built yet
+  app.use(express.static(path.join(__dirname, 'public')));
+}
 
 // Configure Multer for file uploads
 const uploadDir = path.join(__dirname, 'uploads');
@@ -652,11 +666,25 @@ app.post('/api/ai/explain', async (req, res) => {
   }
 });
 
+// SPA Catch-all Route: Send index.html from React build for any non-API routes
+app.get('*', (req, res, next) => {
+  if (req.path.startsWith('/api') || req.path.startsWith('/admin')) {
+    return next();
+  }
+  const reactIndexPath = path.resolve(__dirname, '../frontend/dist/index.html');
+  if (fs.existsSync(reactIndexPath)) {
+    return res.sendFile(reactIndexPath);
+  }
+  res.sendFile(path.join(__dirname, 'public', 'admin.html'));
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
-  console.log(`🚀 YIVU EXAM PAPERS MANAGEMENT BACKEND RUNNING`);
-  console.log(`📡 API & Admin Dashboard URL: http://localhost:${PORT}`);
+  console.log(`🚀 YIVU UNIFIED PLATFORM RUNNING ON PORT ${PORT}`);
+  console.log(`🎓 Learner Web App URL:      http://localhost:${PORT}/`);
+  console.log(`🛠️ Admin Studio Dashboard:   http://localhost:${PORT}/admin`);
+  console.log(`📡 REST API & AI Tutor URL:  http://localhost:${PORT}/api`);
   console.log(`======================================================\n`);
 });
 
