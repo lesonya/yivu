@@ -91,6 +91,56 @@ app.get('/api/papers/:id', (req, res) => {
   }
 });
 
+// 3b. View / Stream Original Source Document File (PDF or DOCX)
+app.get('/api/papers/:id/source', (req, res) => {
+  try {
+    const paper = db.prepare('SELECT source_file, reading_content FROM exam_papers WHERE id = ?').get(req.params.id);
+    if (!paper) return res.status(404).send('Paper not found');
+
+    let relPath = paper.source_file;
+    if (!relPath && paper.reading_content && paper.reading_content.includes('Source: ')) {
+      relPath = paper.reading_content.split('Source: ')[1].trim().split('\n')[0];
+    }
+
+    if (!relPath) {
+      return res.status(404).send('No source document file recorded for this paper');
+    }
+
+    // Candidate locations
+    const candidatePaths = [
+      path.resolve(__dirname, '../resources/past-papers-1', relPath),
+      path.resolve(__dirname, 'uploads', relPath),
+      path.resolve(__dirname, 'uploads', path.basename(relPath)),
+      path.resolve(__dirname, '../resources/past-papers-1', path.basename(relPath))
+    ];
+
+    let foundPath = null;
+    for (const p of candidatePaths) {
+      if (fs.existsSync(p)) {
+        foundPath = p;
+        break;
+      }
+    }
+
+    if (!foundPath) {
+      return res.status(404).send(`Source file not found on server disk: ${relPath}`);
+    }
+
+    const ext = path.extname(foundPath).toLowerCase();
+    if (ext === '.pdf') {
+      res.setHeader('Content-Type', 'application/pdf');
+      res.setHeader('Content-Disposition', 'inline');
+      res.setHeader('X-Content-Type-Options', 'nosniff');
+    } else if (ext === '.docx') {
+      res.setHeader('Content-Type', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document');
+      res.setHeader('Content-Disposition', `inline; filename="${path.basename(foundPath)}"`);
+    }
+    res.sendFile(foundPath);
+  } catch (err) {
+    res.status(500).send('Error retrieving source file: ' + err.message);
+  }
+});
+
 // 4. Update Paper Metadata
 app.put('/api/papers/:id', (req, res) => {
   try {
