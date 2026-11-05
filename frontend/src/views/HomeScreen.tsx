@@ -2,7 +2,6 @@ import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useUserStore } from '../store/useUserStore';
 import { useCurriculumStore } from '../store/useCurriculumStore';
-import { DeviceMockup } from '../components/layout/DeviceMockup';
 
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
@@ -54,7 +53,7 @@ export const HomeScreen: React.FC = () => {
   const topLearner = sortedProfiles[0] || activeProfile;
 
   return (
-    <div className="space-y-8 max-w-7xl mx-auto pb-16">
+    <div className="space-y-6 max-w-7xl mx-auto pb-16">
       {/* 1st ROW: LEARNER INFO / GREETING, LEADERBOARD, ANALYTICS */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
         {/* 1.1 Learner Info / Greeting */}
@@ -165,138 +164,130 @@ export const HomeScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* 2nd ROW: CONTROLS & DEVICE MOCKUP */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-start">
-        {/* Left Column: 2nd Row Controls (Select Grade, Select Subject, Quick Action) */}
-        <div className="lg:col-span-7 space-y-5">
-          {/* 2.1 Select Grade / Standard */}
-          <div className="cognix-card p-6 flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
-                  {/* @ts-ignore */}
-                  <iconify-icon icon="solar:graduation-cap-bold-duotone" class="text-cyan-400" width="18" height="18"></iconify-icon>
-                  <span>Select Grade / Standard</span>
-                </span>
-                <span className="text-[10px] font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
-                  {activeProfile.gradeKey.toUpperCase().replace('_', ' ')}
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Calibrate learning tier to stream matched syllabus questions and exam papers.
-              </p>
-            </div>
-
-            <div className="pt-4">
-              <div className="relative">
-                <select
-                  value={activeProfile.gradeKey}
-                  onChange={(e) => handleGradeChange(e.target.value)}
-                  className="w-full bg-slate-950/70 border border-white/10 hover:border-cyan-400/50 rounded-full px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-cyan-400 transition cursor-pointer appearance-none"
-                >
-                  <optgroup label="Primary Curriculum (Standards 1 – 7)" className="bg-slate-900 text-white">
-                    {gradeOptions.slice(0, 7).map(g => (
-                      <option key={g.key} value={g.key}>{g.label}</option>
-                    ))}
-                  </optgroup>
-                  <optgroup label="Junior Secondary (Forms 1 – 3)" className="bg-slate-900 text-white">
-                    {gradeOptions.slice(7).map(g => (
-                      <option key={g.key} value={g.key}>{g.label}</option>
-                    ))}
-                  </optgroup>
-                </select>
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                  {/* @ts-ignore */}
-                  <iconify-icon icon="solar:alt-arrow-down-bold" width="14" height="14"></iconify-icon>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 2.2 Select Subject (Quick Switcher / Jump) */}
-          <div className="cognix-card p-6 flex flex-col justify-between">
-            <div className="space-y-2">
-              <div className="flex items-center justify-between">
-                <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
-                  {/* @ts-ignore */}
-                  <iconify-icon icon="solar:book-bookmark-bold-duotone" class="text-fuchsia-400" width="18" height="18"></iconify-icon>
-                  <span>Select Subject</span>
-                </span>
-                <span className="text-[10px] font-bold text-fuchsia-300 bg-fuchsia-500/10 px-2.5 py-0.5 rounded-full border border-fuchsia-500/20">
-                  {subjects.length} Tracks Live
-                </span>
-              </div>
-              <p className="text-xs text-slate-400">
-                Direct neural jump into revision summaries, exercises, and past papers.
-              </p>
-            </div>
-
-            <div className="pt-4">
-              <div className="relative">
-                <select
-                  value={selectedSubjectId}
-                  onChange={(e) => handleSubjectDropdown(e.target.value)}
-                  className="w-full bg-slate-950/70 border border-white/10 hover:border-fuchsia-400/50 rounded-full px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-fuchsia-400 transition cursor-pointer appearance-none"
-                >
-                  <option value="" className="bg-slate-900 text-slate-400">-- Choose Subject Stream --</option>
-                  {subjects.map((sub) => (
-                    <option key={sub.id} value={sub.id} className="bg-slate-900 text-white">
-                      {sub.name} ({sub.code})
-                    </option>
-                  ))}
-                </select>
-                <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
-                  {/* @ts-ignore */}
-                  <iconify-icon icon="solar:alt-arrow-down-bold" width="14" height="14"></iconify-icon>
-                </div>
-              </div>
-            </div>
-          </div>
-
-          {/* 2.3 Quick Action / Stats */}
-          <div className="cognix-card p-6 flex flex-col justify-between">
+      {/* 2nd ROW: 3 COLUMNS (SELECT GRADE / STANDARD, SELECT SUBJECT, QUICK ACTION / STATS) */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-5">
+        {/* 2.1 Select Grade / Standard */}
+        <div className="cognix-card p-6 flex flex-col justify-between">
+          <div className="space-y-2">
             <div className="flex items-center justify-between">
               <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
                 {/* @ts-ignore */}
-                <iconify-icon icon="solar:bolt-bold-duotone" class="text-amber-400" width="18" height="18"></iconify-icon>
-                <span>Practice Pulse & Momentum</span>
+                <iconify-icon icon="solar:graduation-cap-bold-duotone" class="text-cyan-400" width="18" height="18"></iconify-icon>
+                <span>Select Grade / Standard</span>
               </span>
-              <div className="flex items-center space-x-1.5 text-amber-400 font-bold text-[11px] bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
-                {/* @ts-ignore */}
-                <iconify-icon icon="solar:fire-bold" width="12" height="12"></iconify-icon>
-                <span>5-Day Synapse Streak</span>
-              </div>
+              <span className="text-[10px] font-bold text-cyan-300 bg-cyan-500/10 px-2.5 py-0.5 rounded-full border border-cyan-500/20">
+                {activeProfile.gradeKey.toUpperCase().replace('_', ' ')}
+              </span>
             </div>
+            <p className="text-xs text-slate-400">
+              Calibrate learning tier to stream matched syllabus questions and exam papers.
+            </p>
+          </div>
 
-            <div className="my-3 flex items-center justify-between bg-slate-950/40 px-4 py-3 rounded-xl border border-white/5">
-              <div className="flex items-center space-x-2">
-                {/* @ts-ignore */}
-                <iconify-icon icon="solar:star-bold" class="text-amber-400" width="16" height="16"></iconify-icon>
-                <span className="text-xs font-extrabold text-white">{activeProfile.weeklyStars} Weekly Stars</span>
-              </div>
-              <div className="text-[11px] text-cyan-300 font-semibold flex items-center space-x-1">
-                {/* @ts-ignore */}
-                <iconify-icon icon="solar:round-transfer-vertical-bold" width="12" height="12"></iconify-icon>
-                <span>{activeProfile.weeklyXP} Synapse XP</span>
-              </div>
-            </div>
-
-            <div>
-              <button
-                onClick={() => navigate('/custom-test')}
-                className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-fuchsia-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white font-bold text-xs py-3 px-6 rounded-full shadow-[0_0_20px_rgba(217,70,239,0.3)] transition transform active:scale-95"
+          <div className="pt-4">
+            <div className="relative">
+              <select
+                value={activeProfile.gradeKey}
+                onChange={(e) => handleGradeChange(e.target.value)}
+                className="w-full bg-slate-950/70 border border-white/10 hover:border-cyan-400/50 rounded-full px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-cyan-400 transition cursor-pointer appearance-none"
               >
+                <optgroup label="Primary Curriculum (Standards 1 – 7)" className="bg-slate-900 text-white">
+                  {gradeOptions.slice(0, 7).map(g => (
+                    <option key={g.key} value={g.key}>{g.label}</option>
+                  ))}
+                </optgroup>
+                <optgroup label="Junior Secondary (Forms 1 – 3)" className="bg-slate-900 text-white">
+                  {gradeOptions.slice(7).map(g => (
+                    <option key={g.key} value={g.key}>{g.label}</option>
+                  ))}
+                </optgroup>
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
                 {/* @ts-ignore */}
-                <iconify-icon icon="solar:magic-stick-3-bold" width="16" height="16"></iconify-icon>
-                <span>Generate Synapse Practice Test</span>
-              </button>
+                <iconify-icon icon="solar:alt-arrow-down-bold" width="14" height="14"></iconify-icon>
+              </div>
             </div>
           </div>
         </div>
 
-        {/* Right Column: Device Mockup Presentation */}
-        <div className="lg:col-span-5 flex flex-col items-center">
-          <DeviceMockup />
+        {/* 2.2 Select Subject (Quick Switcher / Jump) */}
+        <div className="cognix-card p-6 flex flex-col justify-between">
+          <div className="space-y-2">
+            <div className="flex items-center justify-between">
+              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+                {/* @ts-ignore */}
+                <iconify-icon icon="solar:book-bookmark-bold-duotone" class="text-fuchsia-400" width="18" height="18"></iconify-icon>
+                <span>Select Subject</span>
+              </span>
+              <span className="text-[10px] font-bold text-fuchsia-300 bg-fuchsia-500/10 px-2.5 py-0.5 rounded-full border border-fuchsia-500/20">
+                {subjects.length} Tracks Live
+              </span>
+            </div>
+            <p className="text-xs text-slate-400">
+              Direct neural jump into revision summaries, exercises, and past papers.
+            </p>
+          </div>
+
+          <div className="pt-4">
+            <div className="relative">
+              <select
+                value={selectedSubjectId}
+                onChange={(e) => handleSubjectDropdown(e.target.value)}
+                className="w-full bg-slate-950/70 border border-white/10 hover:border-fuchsia-400/50 rounded-full px-4 py-3 text-xs font-semibold text-white focus:outline-none focus:border-fuchsia-400 transition cursor-pointer appearance-none"
+              >
+                <option value="" className="bg-slate-900 text-slate-400">-- Choose Subject Stream --</option>
+                {subjects.map((sub) => (
+                  <option key={sub.id} value={sub.id} className="bg-slate-900 text-white">
+                    {sub.name} ({sub.code})
+                  </option>
+                ))}
+              </select>
+              <div className="absolute inset-y-0 right-4 flex items-center pointer-events-none text-slate-400">
+                {/* @ts-ignore */}
+                <iconify-icon icon="solar:alt-arrow-down-bold" width="14" height="14"></iconify-icon>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        {/* 2.3 Quick Action / Stats */}
+        <div className="cognix-card p-6 flex flex-col justify-between">
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+              {/* @ts-ignore */}
+              <iconify-icon icon="solar:bolt-bold-duotone" class="text-amber-400" width="18" height="18"></iconify-icon>
+              <span>Practice Pulse & Momentum</span>
+            </span>
+            <div className="flex items-center space-x-1.5 text-amber-400 font-bold text-[11px] bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
+              {/* @ts-ignore */}
+              <iconify-icon icon="solar:fire-bold" width="12" height="12"></iconify-icon>
+              <span>5-Day Synapse Streak</span>
+            </div>
+          </div>
+
+          <div className="my-3 flex items-center justify-between bg-slate-950/40 px-4 py-3 rounded-xl border border-white/5">
+            <div className="flex items-center space-x-2">
+              {/* @ts-ignore */}
+              <iconify-icon icon="solar:star-bold" class="text-amber-400" width="16" height="16"></iconify-icon>
+              <span className="text-xs font-extrabold text-white">{activeProfile.weeklyStars} Weekly Stars</span>
+            </div>
+            <div className="text-[11px] text-cyan-300 font-semibold flex items-center space-x-1">
+              {/* @ts-ignore */}
+              <iconify-icon icon="solar:round-transfer-vertical-bold" width="12" height="12"></iconify-icon>
+              <span>{activeProfile.weeklyXP} Synapse XP</span>
+            </div>
+          </div>
+
+          <div>
+            <button
+              onClick={() => navigate('/custom-test')}
+              className="w-full flex items-center justify-center space-x-2 bg-gradient-to-r from-fuchsia-600 via-indigo-600 to-cyan-500 hover:opacity-95 text-white font-bold text-xs py-3 px-6 rounded-full shadow-[0_0_20px_rgba(217,70,239,0.3)] transition transform active:scale-95"
+            >
+              {/* @ts-ignore */}
+              <iconify-icon icon="solar:magic-stick-3-bold" width="16" height="16"></iconify-icon>
+              <span>Generate Synapse Practice Test</span>
+            </button>
+          </div>
         </div>
       </div>
     </div>
