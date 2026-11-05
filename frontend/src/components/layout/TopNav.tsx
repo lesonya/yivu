@@ -89,14 +89,6 @@ export const TopNav: React.FC<TopNavProps> = ({
           <span>Upload Paper</span>
         </Link>
 
-        <a
-          href="/admin"
-          className="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl text-xs font-semibold bg-dark-navy hover:bg-slate-800 text-purple-300 border border-purple-500/40 hover:border-purple-400 transition active:scale-95 shadow"
-        >
-          <span className="w-2 h-2 rounded-full bg-purple-400"></span>
-          <span>Admin Studio</span>
-        </a>
-
         {/* Profile Pill */}
         <button
           onClick={onOpenProfileSwitcher}
