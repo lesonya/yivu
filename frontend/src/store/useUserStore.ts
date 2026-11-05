@@ -78,6 +78,7 @@ export const useUserStore = create<UserState>((set) => ({
       activeProfile: {
         ...state.activeProfile,
         gradeKey,
+        division: gradeKey.startsWith('form') ? 'forms' : 'standards',
       },
     })),
 }));
