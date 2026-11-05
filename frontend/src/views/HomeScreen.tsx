@@ -83,7 +83,7 @@ export const HomeScreen: React.FC = () => {
           className="cognix-card cognix-card-hover p-6 flex flex-col justify-between cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-300 uppercase flex items-center space-x-2">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:cup-star-bold-duotone" class="text-amber-400" width="18" height="18"></iconify-icon>
               <span>Leaderboard</span>
@@ -124,7 +124,7 @@ export const HomeScreen: React.FC = () => {
           className="cognix-card cognix-card-hover p-6 flex flex-col justify-between cursor-pointer group"
         >
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-300 uppercase flex items-center space-x-2">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:graph-bold-duotone" class="text-cyan-400" width="18" height="18"></iconify-icon>
               <span>Analytics</span>
@@ -165,7 +165,7 @@ export const HomeScreen: React.FC = () => {
         <div className="cognix-card p-6 flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+              <span className="text-xs font-semibold text-slate-300 uppercase flex items-center space-x-2">
                 {/* @ts-ignore */}
                 <iconify-icon icon="solar:graduation-cap-bold-duotone" class="text-cyan-400" width="18" height="18"></iconify-icon>
                 <span>Select Grade / Standard</span>
@@ -209,7 +209,7 @@ export const HomeScreen: React.FC = () => {
         <div className="cognix-card p-6 flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
-              <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+              <span className="text-xs font-semibold text-slate-300 uppercase flex items-center space-x-2">
                 {/* @ts-ignore */}
                 <iconify-icon icon="solar:book-bookmark-bold-duotone" class="text-fuchsia-400" width="18" height="18"></iconify-icon>
                 <span>Select Subject</span>
@@ -248,7 +248,7 @@ export const HomeScreen: React.FC = () => {
         {/* 2.3 Quick Action / Stats */}
         <div className="cognix-card p-6 flex flex-col justify-between">
           <div className="flex items-center justify-between">
-            <span className="text-xs font-semibold text-slate-300 uppercase tracking-wider flex items-center space-x-2">
+            <span className="text-xs font-semibold text-slate-300 uppercase flex items-center space-x-2">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:bolt-bold-duotone" class="text-amber-400" width="18" height="18"></iconify-icon>
               <span>Practice Pulse & Momentum</span>
