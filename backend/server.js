@@ -23,7 +23,8 @@ const {
   extractPdfText,
   extractDocxText,
   parseMarkingScheme,
-  parseQuestionsFromText
+  parseQuestionsFromText,
+  extractMetadata
 } = require('./parser');
 
 const app = express();
@@ -291,6 +292,142 @@ app.post('/api/upload', upload.fields([
   } catch (err) {
     console.error('Upload error:', err);
     res.status(500).json({ error: 'Failed to process and parse document: ' + err.message });
+  }
+});
+
+// 9b. Batch Upload & Ingest Exam Papers (+ optional Marking Schemes)
+app.post('/api/upload-batch', upload.array('files', 50), async (req, res) => {
+  try {
+    if (!req.files || req.files.length === 0) {
+      return res.status(400).json({ error: 'No files uploaded. Select one or more exam papers.' });
+    }
+
+    const defaultGrade = req.body.default_grade || '';
+    const defaultSubject = req.body.default_subject || '';
+    const defaultTerm = req.body.default_term || '';
+
+    const markingFiles = [];
+    const questionPaperFiles = [];
+
+    // Segregate question papers vs marking schemes based on filename
+    for (const f of req.files) {
+      const name = f.originalname.toLowerCase();
+      if (name.includes('marking') || name.includes('mark_sc') || name.includes('scheme') || name.includes('key') || name.includes('answers')) {
+        markingFiles.push(f);
+      } else {
+        questionPaperFiles.push(f);
+      }
+    }
+
+    // Pre-parse all marking schemes
+    const markingMapByFile = {};
+    for (const mf of markingFiles) {
+      const ext = path.extname(mf.path).toLowerCase();
+      let text = '';
+      try {
+        if (ext === '.pdf') text = await extractPdfText(mf.path);
+        else if (ext === '.docx') text = await extractDocxText(mf.path);
+        markingMapByFile[mf.originalname] = parseMarkingScheme(text);
+      } catch (err) {
+        console.warn(`Could not parse batch marking scheme ${mf.originalname}:`, err.message);
+      }
+    }
+
+    const results = [];
+    let totalQuestionsExtracted = 0;
+
+    for (const pf of questionPaperFiles) {
+      const ext = path.extname(pf.path).toLowerCase();
+      let rawText = '';
+      try {
+        if (ext === '.pdf') {
+          rawText = await extractPdfText(pf.path);
+        } else if (ext === '.docx') {
+          rawText = await extractDocxText(pf.path);
+        } else {
+          results.push({ file: pf.originalname, status: 'SKIPPED', error: 'Unsupported format' });
+          continue;
+        }
+      } catch (err) {
+        results.push({ file: pf.originalname, status: 'FAILED', error: err.message });
+        continue;
+      }
+
+      // Metadata inference with fallback to user defaults
+      const autoMeta = extractMetadata(pf.originalname, rawText);
+      const gradeKey = (defaultGrade && defaultGrade !== 'auto') ? defaultGrade : autoMeta.gradeKey;
+      const subjectId = (defaultSubject && defaultSubject !== 'auto') ? defaultSubject : autoMeta.subjectId;
+      const term = (defaultTerm && defaultTerm !== 'auto') ? defaultTerm : autoMeta.termString;
+      const title = autoMeta.paperTitle;
+
+      // Find best marking scheme match
+      let matchedScheme = null;
+      let matchedSchemeName = null;
+      const baseName = path.basename(pf.originalname, ext).toLowerCase();
+      for (const mf of markingFiles) {
+        const msBase = path.basename(mf.originalname, path.extname(mf.originalname)).toLowerCase();
+        if (msBase.includes(baseName.slice(0, 8)) || baseName.includes(msBase.slice(0, 8))) {
+          matchedScheme = markingMapByFile[mf.originalname] || {};
+          matchedSchemeName = mf.originalname;
+          break;
+        }
+      }
+
+      const paperId = `pp_${gradeKey}_${autoMeta.year}_${subjectId}_${pf.originalname.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().slice(0, 30)}_${Date.now()}`;
+      const meta = {
+        paperId,
+        gradeKey,
+        subjectId,
+        year: autoMeta.year,
+        term,
+        markingFilePath: matchedSchemeName
+      };
+
+      const questions = parseQuestionsFromText(rawText, meta, matchedScheme || {});
+
+      // Insert paper & questions
+      insertPaper({
+        id: paperId,
+        grade_key: gradeKey,
+        subject_id: subjectId,
+        term,
+        title,
+        type: 'PAST_PAPER_SAMPLE',
+        reading_content: `Uploaded Examination Paper: ${title}.\n\nSource: ${pf.originalname}`,
+        source_file: pf.originalname
+      });
+
+      for (const q of questions) {
+        insertQuestion({
+          ...q,
+          paper_id: paperId
+        });
+      }
+
+      totalQuestionsExtracted += questions.length;
+      results.push({
+        paper_id: paperId,
+        file: pf.originalname,
+        title,
+        grade_key: gradeKey,
+        subject_id: subjectId,
+        term,
+        questions_count: questions.length,
+        has_marking_scheme: Boolean(matchedSchemeName),
+        status: 'SUCCESS'
+      });
+    }
+
+    res.json({
+      success: true,
+      processed_count: questionPaperFiles.length,
+      marking_schemes_count: markingFiles.length,
+      total_questions: totalQuestionsExtracted,
+      results
+    });
+  } catch (err) {
+    console.error('Batch upload error:', err);
+    res.status(500).json({ error: 'Batch processing failed: ' + err.message });
   }
 });
 

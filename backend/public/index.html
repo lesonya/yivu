@@ -60,6 +60,10 @@
         <i data-lucide="upload-cloud" class="w-4 h-4"></i>
         <span>Upload Exam Paper</span>
       </button>
+      <button onclick="openBatchUploadModal()" class="flex items-center space-x-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 text-white font-semibold text-xs px-4 py-2.5 rounded-xl shadow-lg transition-all active:scale-95">
+        <i data-lucide="folder-up" class="w-4 h-4"></i>
+        <span>Batch Exam Papers</span>
+      </button>
     </div>
   </header>
 
@@ -373,6 +377,93 @@
     </div>
   </div>
 
+  <!-- BATCH UPLOAD MODAL -->
+  <div id="batchUploadModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-surfaceNavy border border-borderNavy w-full max-w-xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+          <i data-lucide="folder-up" class="w-4 h-4 text-purple-400"></i>
+          <span>Batch Ingest Exam Papers & Marking Schemes</span>
+        </h3>
+        <button onclick="closeBatchUploadModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="batchUploadForm" onsubmit="handleBatchUpload(event)" class="p-6 space-y-4 text-xs font-medium overflow-y-auto">
+        <div class="p-3 bg-purple-950/30 border border-purple-500/30 rounded-xl text-purple-200 text-xs">
+          <p class="font-bold flex items-center space-x-1.5 mb-1">
+            <i data-lucide="sparkles" class="w-3.5 h-3.5 text-purple-400"></i>
+            <span>Intelligent Auto-Matching Pipeline</span>
+          </p>
+          <p class="text-[11px] text-slate-300 leading-relaxed">
+            Select multiple exam PDFs/DOCX and their marking schemes. The system will automatically detect grades, subjects, terms, match answers with papers, and extract questions.
+          </p>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Select Exam Files & Marking Keys (Multiple PDF / DOCX) *</label>
+          <input type="file" id="batchFiles" name="files" multiple required accept=".pdf,.docx" onchange="updateBatchFileList(this)" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-300 file:mr-3 file:py-1.5 file:px-3 file:rounded-lg file:border-0 file:bg-gradient-to-r file:from-indigo-600 file:to-purple-600 file:text-white file:font-semibold">
+          <div id="batchFileCount" class="text-[11px] text-slate-400 mt-1">No files chosen</div>
+        </div>
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Grade Level</label>
+            <select id="batchGrade" name="default_grade" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="auto">Auto-Detect from Filename</option>
+              <option value="std_5">Standard 5</option>
+              <option value="std_4">Standard 4</option>
+              <option value="form_1">Form 1</option>
+              <option value="form_2">Form 2</option>
+              <option value="form_3">Form 3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Term</label>
+            <select id="batchTerm" name="default_term" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="auto">Auto-Detect from Filename</option>
+              <option value="Term 1">Term 1</option>
+              <option value="Term 2">Term 2</option>
+              <option value="Term 3">Term 3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Subject</label>
+            <select id="batchSubject" name="default_subject" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="auto">Auto-Detect from Filename</option>
+              <option value="std_math">Mathematics</option>
+              <option value="std_english">English</option>
+              <option value="std_science">Science</option>
+              <option value="std_setswana">Setswana</option>
+              <option value="std_social_studies">Social Studies</option>
+              <option value="std_capa">Creative & Performing Arts (CAPA)</option>
+              <option value="std_agriculture">Agriculture</option>
+              <option value="std_rme">Religious & Moral Education (RME)</option>
+            </select>
+          </div>
+        </div>
+
+        <div id="batchUploadStatus" class="hidden p-3 rounded-xl bg-purple-950/40 border border-purple-500/30 text-purple-200 text-xs flex items-center space-x-2">
+          <i data-lucide="loader-2" class="w-4 h-4 animate-spin text-purple-400"></i>
+          <span id="batchUploadStatusText">Batch parsing educational documents and extracting questions...</span>
+        </div>
+
+        <div id="batchSummaryBox" class="hidden p-3 rounded-xl bg-darkNavy border border-borderNavy text-xs max-h-48 overflow-y-auto space-y-1.5">
+          <!-- Populated dynamically with batch results -->
+        </div>
+
+        <div class="pt-2 flex justify-end space-x-2">
+          <button type="button" onclick="closeBatchUploadModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-white">Cancel</button>
+          <button type="submit" id="btnSubmitBatch" class="px-5 py-2 bg-gradient-to-r from-indigo-600 to-purple-600 hover:from-indigo-500 hover:to-purple-500 font-semibold text-white rounded-xl shadow-lg flex items-center space-x-1.5">
+            <i data-lucide="play" class="w-3.5 h-3.5"></i>
+            <span>Process Batch</span>
+          </button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC -->
   <script>
     let currentPaperId = null;
@@ -609,6 +700,82 @@
     function closeUploadModal() {
       document.getElementById('uploadModal').classList.add('hidden');
       document.getElementById('uploadForm').reset();
+    }
+
+    function openBatchUploadModal() {
+      document.getElementById('batchUploadModal').classList.remove('hidden');
+      document.getElementById('batchUploadStatus').classList.add('hidden');
+      document.getElementById('batchSummaryBox').classList.add('hidden');
+      document.getElementById('batchFileCount').textContent = 'No files chosen';
+    }
+
+    function closeBatchUploadModal() {
+      document.getElementById('batchUploadModal').classList.add('hidden');
+      document.getElementById('batchUploadForm').reset();
+      document.getElementById('batchFileCount').textContent = 'No files chosen';
+      document.getElementById('batchSummaryBox').classList.add('hidden');
+    }
+
+    function updateBatchFileList(input) {
+      const count = input.files ? input.files.length : 0;
+      const countEl = document.getElementById('batchFileCount');
+      if (count === 0) {
+        countEl.textContent = 'No files chosen';
+      } else if (count === 1) {
+        countEl.textContent = `1 file selected: ${input.files[0].name}`;
+      } else {
+        const fileNames = Array.from(input.files).map(f => f.name).slice(0, 3).join(', ');
+        countEl.textContent = `${count} files selected (${fileNames}${count > 3 ? '...' : ''})`;
+      }
+    }
+
+    async function handleBatchUpload(e) {
+      e.preventDefault();
+      const statusBox = document.getElementById('batchUploadStatus');
+      const statusText = document.getElementById('batchUploadStatusText');
+      const summaryBox = document.getElementById('batchSummaryBox');
+      const btn = document.getElementById('btnSubmitBatch');
+
+      statusBox.classList.remove('hidden');
+      summaryBox.classList.add('hidden');
+      summaryBox.innerHTML = '';
+      statusText.textContent = "Processing batch: extracting text and auto-linking questions...";
+      btn.disabled = true;
+
+      const formData = new FormData(document.getElementById('batchUploadForm'));
+
+      try {
+        const res = await fetch('/api/upload-batch', {
+          method: 'POST',
+          body: formData
+        });
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || 'Batch upload failed');
+
+        statusText.textContent = `Batch Completed! Processed ${result.processed_count} paper(s) with ${result.total_questions} total questions extracted.`;
+        
+        // Show summary list
+        summaryBox.classList.remove('hidden');
+        summaryBox.innerHTML = `
+          <div class="font-bold text-slate-200 border-b border-borderNavy pb-1 mb-1">Batch Ingestion Results:</div>
+          ${result.results.map(r => `
+            <div class="flex items-center justify-between py-1 border-b border-borderNavy/40 text-[11px]">
+              <span class="text-white truncate max-w-xs font-medium" title="${r.title}">📄 ${r.title}</span>
+              <span class="px-2 py-0.5 rounded text-[10px] font-bold ${r.status === 'SUCCESS' ? 'bg-emerald-950/60 text-emerald-400 border border-emerald-500/30' : 'bg-rose-950/60 text-rose-400'}">
+                ${r.questions_count} Qs
+              </span>
+            </div>
+          `).join('')}
+        `;
+
+        loadStats();
+        loadPapers();
+      } catch (err) {
+        statusText.textContent = "Error: " + err.message;
+      } finally {
+        btn.disabled = false;
+        lucide.createIcons();
+      }
     }
 
     async function handleUpload(e) {

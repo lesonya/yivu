@@ -255,11 +255,97 @@ function parseQuestionsFromText(text, meta = {}, markingKeyMap = {}) {
   return questions;
 }
 
+function extractMetadata(filePath, rawText = '') {
+  const norm = (filePath + ' ' + (rawText ? rawText.slice(0, 1000) : '')).toLowerCase();
+
+  let gradeLevel = 'Standard 5';
+  let gradeKey = 'std_5';
+
+  if (norm.includes('std 4') || norm.includes('std4') || norm.includes('standard 4') || norm.includes('standard_4') || norm.includes('std_4')) {
+    gradeLevel = 'Standard 4';
+    gradeKey = 'std_4';
+  } else if (norm.includes('std 5') || norm.includes('std5') || norm.includes('standard 5') || norm.includes('standard_5') || norm.includes('std_5')) {
+    gradeLevel = 'Standard 5';
+    gradeKey = 'std_5';
+  } else if (norm.includes('form 1') || norm.includes('form1')) {
+    gradeLevel = 'Form 1';
+    gradeKey = 'form_1';
+  } else if (norm.includes('form 2') || norm.includes('form2')) {
+    gradeLevel = 'Form 2';
+    gradeKey = 'form_2';
+  } else if (norm.includes('form 3') || norm.includes('form3') || norm.includes('jc')) {
+    gradeLevel = 'Form 3';
+    gradeKey = 'form_3';
+  }
+
+  let subject = 'Mathematics';
+  let subjectId = gradeKey.startsWith('form') ? 'form_math' : 'std_math';
+
+  if (norm.includes('setswana')) {
+    subject = 'Setswana';
+    subjectId = gradeKey.startsWith('form') ? 'form_setswana' : 'std_setswana';
+  } else if (norm.includes('math')) {
+    subject = 'Mathematics';
+    subjectId = gradeKey.startsWith('form') ? 'form_math' : 'std_math';
+  } else if (norm.includes('english')) {
+    subject = 'English';
+    subjectId = gradeKey.startsWith('form') ? 'form_english' : 'std_english';
+  } else if (norm.includes('agric')) {
+    subject = 'Agriculture';
+    subjectId = 'std_agriculture';
+  } else if (norm.includes('cultural')) {
+    subject = 'Cultural Studies';
+    subjectId = 'std_cultural_studies';
+  } else if (norm.includes('rme') || norm.includes('religious')) {
+    subject = 'Religious & Moral Education';
+    subjectId = 'std_rme';
+  } else if (norm.includes('capa') || norm.includes('creative')) {
+    subject = 'Creative & Performing Arts (CAPA)';
+    subjectId = 'std_capa';
+  } else if (norm.includes('science')) {
+    subject = 'Science';
+    subjectId = gradeKey.startsWith('form') ? 'form_integrated_science' : 'std_science';
+  } else if (norm.includes('social')) {
+    subject = 'Social Studies';
+    subjectId = gradeKey.startsWith('form') ? 'form_social_studies' : 'std_social_studies';
+  }
+
+  let year = new Date().getFullYear();
+  const yearRangeMatch = norm.match(/(?:20\d{2})\s*[\/-]\s*(20\d{2}|\d{2})/);
+  if (yearRangeMatch) {
+    year = yearRangeMatch[1].length === 2 ? parseInt('20' + yearRangeMatch[1], 10) : parseInt(yearRangeMatch[1], 10);
+  } else {
+    const singleYearMatch = norm.match(/\b(20\d{2})\b/);
+    if (singleYearMatch) {
+      year = parseInt(singleYearMatch[1], 10);
+    }
+  }
+
+  let termNum = null;
+  let termString = 'Term 2';
+  if (norm.includes('term 1') || norm.includes('term one') || norm.includes('t 1') || norm.includes('february')) {
+    termNum = 1;
+    termString = 'Term 1';
+  } else if (norm.includes('term 2') || norm.includes('term two') || norm.includes('term_ii') || norm.includes('t 2') || norm.includes('mid-year') || norm.includes('june') || norm.includes('july')) {
+    termNum = 2;
+    termString = 'Term 2';
+  } else if (norm.includes('term 3') || norm.includes('term three') || norm.includes('t 3') || norm.includes('t3') || norm.includes('final exam') || norm.includes('end of year') || norm.includes('attainment') || norm.includes('october') || norm.includes('november')) {
+    termNum = 3;
+    termString = 'Term 3';
+  }
+
+  const baseTitle = path.basename(filePath, path.extname(filePath)).replace(/_/g, ' ').trim();
+  const paperTitle = `${gradeLevel} ${subject} ${termString} ${year} (${baseTitle})`;
+
+  return { paperTitle, subject, year, term: termNum, termString, gradeLevel, gradeKey, subjectId };
+}
+
 module.exports = {
   extractPdfText,
   extractDocxText,
   sanitizeText,
   parseMarkingScheme,
-  parseQuestionsFromText
+  parseQuestionsFromText,
+  extractMetadata
 };
 
