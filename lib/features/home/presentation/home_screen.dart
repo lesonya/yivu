@@ -301,27 +301,11 @@ class _HomeScreenState extends State<HomeScreen> {
                     // Brand Logo with Title
                     Row(
                       children: [
-                        Container(
+                        Image.asset(
+                          "resources/img/logo.png",
                           width: 48,
                           height: 48,
-                          decoration: BoxDecoration(
-                            gradient: const LinearGradient(
-                              colors: [AppTheme.cobaltBlue, AppTheme.tealAccent],
-                              begin: Alignment.topLeft,
-                              end: Alignment.bottomRight,
-                            ),
-                            borderRadius: BorderRadius.circular(16),
-                          ),
-                          child: const Center(
-                            child: Text(
-                              "Y",
-                              style: TextStyle(
-                                fontSize: 30,
-                                fontWeight: FontWeight.w900,
-                                color: Colors.white,
-                              ),
-                            ),
-                          ),
+                          fit: BoxFit.contain,
                         ),
                         const SizedBox(width: 14),
                         const Column(

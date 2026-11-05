@@ -39,6 +39,7 @@ flutter:
 
   assets:
     - .env
+    - resources/img/logo.png
     - resources/img/branding.png
     - assets/data/curriculum.json
     - assets/data/seed_materials.json
