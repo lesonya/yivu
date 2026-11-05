@@ -3,6 +3,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useCurriculumStore } from '../store/useCurriculumStore';
 import { useUserStore } from '../store/useUserStore';
 import type { Question } from '../core/types/curriculum';
+import { MathRenderer } from '../components/common/MathRenderer';
+import { useDpadNavigation } from '../core/hooks/useDpadNavigation';
 import {
   CheckCircle2,
   XCircle,
@@ -11,7 +13,8 @@ import {
   ChevronRight,
   RotateCcw,
   Star,
-  Award
+  Award,
+  Image as ImageIcon
 } from 'lucide-react';
 
 export const QuizRunnerScreen: React.FC = () => {
@@ -30,9 +33,17 @@ export const QuizRunnerScreen: React.FC = () => {
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
+  const [aiSource, setAiSource] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
 
+  // Enable Smart TV / Keyboard D-pad navigation across option buttons
+  useDpadNavigation({
+    itemSelector: '[data-dpad-quiz-item]',
+    enabled: !isLoading && !isFinished
+  });
+
   const materialTitle = location.state?.material?.title || 'Examination Practice';
+  const subjectName = location.state?.subjectName || 'Curriculum Subject';
 
   useEffect(() => {
     async function loadQuestions() {
@@ -75,30 +86,41 @@ export const QuizRunnerScreen: React.FC = () => {
     }
   };
 
-  const handleExplainWithAI = () => {
+  const handleExplainWithAI = async () => {
     setIsAiLoading(true);
     setAiExplanation(null);
 
-    // Dynamic educational tutor response mimicking Gemini
-    setTimeout(() => {
-      const correctText = currentQ.options[currentQ.correct_index] || 'The designated answer';
-      const chosenText = selectedAnswerIndex !== null ? currentQ.options[selectedAnswerIndex] : 'No choice';
+    try {
+      const res = await fetch('http://localhost:5050/api/ai/explain', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          grade_key: activeProfile.gradeKey,
+          subject_name: subjectName,
+          prompt: currentQ.prompt,
+          options: currentQ.options,
+          correct_index: currentQ.correct_index,
+          selected_index: selectedAnswerIndex ?? -1,
+          syllabus_explanation: currentQ.explanation
+        })
+      });
 
-      let promptExp = `Let's break down this concept carefully for ${activeProfile.gradeKey.toUpperCase().replace('_', ' ')}:\n\n`;
-      promptExp += `• Key Requirement: ${currentQ.prompt}\n`;
-      promptExp += `• Correct Answer: "${correctText}".\n`;
-      if (currentQ.explanation) {
-        promptExp += `• Syllabus Rule: ${currentQ.explanation}\n`;
-      }
-      if (selectedAnswerIndex !== currentQ.correct_index) {
-        promptExp += `\nYou chose "${chosenText}". Pay close attention to unit conversions or place values when solving this type of curriculum question.`;
+      if (res.ok) {
+        const data = await res.json();
+        setAiExplanation(data.explanation);
+        setAiSource(data.source);
       } else {
-        promptExp += `\nGreat job! You identified the proper rule. Keep going!`;
+        throw new Error('Server returned ' + res.status);
       }
-
-      setAiExplanation(promptExp);
+    } catch {
+      // Fallback
+      setAiExplanation(
+        `Curriculum Rule: ${currentQ.explanation || 'Ensure your calculations and unit steps follow the standard Botswana syllabus requirements.'}`
+      );
+      setAiSource('offline-cache');
+    } finally {
       setIsAiLoading(false);
-    }, 600);
+    }
   };
 
   if (isLoading) {
@@ -212,14 +234,29 @@ export const QuizRunnerScreen: React.FC = () => {
             {currentQ.question_type || 'Multiple Choice Question'}
           </span>
           <h2 className="text-lg sm:text-xl font-bold text-white mt-1 leading-snug">
-            {currentQ.prompt}
+            <MathRenderer text={currentQ.prompt} />
           </h2>
+
+          {/* Visual Diagram Asset (if present) */}
+          {currentQ.has_diagram && (
+            <div className="mt-4 p-4 rounded-2xl bg-dark-navy border border-border-navy flex flex-col items-center justify-center text-center">
+              <div className="w-12 h-12 rounded-xl bg-surface-navy text-brand-cyan flex items-center justify-center mb-2">
+                <ImageIcon className="w-6 h-6" />
+              </div>
+              <p className="text-xs font-bold text-slate-300">
+                {currentQ.diagram_description || 'Visual examination diagram'}
+              </p>
+              <span className="text-[10px] text-slate-500 mt-0.5">
+                Ref: {currentQ.diagram_filename || 'curriculum_figure.png'}
+              </span>
+            </div>
+          )}
         </div>
 
         {/* Options List */}
         <div className="space-y-3">
           {(currentQ.options || []).map((option, idx) => {
-            let optionStyles = 'bg-dark-navy/80 border-border-navy hover:bg-slate-800 text-slate-200';
+            let optionStyles = 'bg-dark-navy/80 border-border-navy hover:bg-slate-800 text-slate-200 focus:border-brand-cyan focus:bg-slate-800';
 
             if (isSubmitted) {
               if (idx === currentQ.correct_index) {
@@ -234,15 +271,18 @@ export const QuizRunnerScreen: React.FC = () => {
             return (
               <button
                 key={idx}
+                data-dpad-quiz-item
                 disabled={isSubmitted}
                 onClick={() => handleSelectAnswer(idx)}
-                className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition duration-150 active:scale-[0.99] ${optionStyles}`}
+                className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition duration-150 outline-none active:scale-[0.99] ${optionStyles}`}
               >
                 <div className="flex items-center space-x-3.5">
                   <span className="w-8 h-8 rounded-xl bg-surface-navy border border-border-navy flex items-center justify-center text-xs font-bold text-white">
                     {optionLetters[idx] || idx + 1}
                   </span>
-                  <span className="text-sm font-semibold">{option}</span>
+                  <span className="text-sm font-semibold">
+                    <MathRenderer text={option} />
+                  </span>
                 </div>
 
                 {isSubmitted && idx === currentQ.correct_index && (
@@ -265,12 +305,13 @@ export const QuizRunnerScreen: React.FC = () => {
               className="flex items-center space-x-2 text-xs font-bold text-purple-300 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 px-4 py-2.5 rounded-xl transition active:scale-95"
             >
               <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>{isAiLoading ? 'Gemini AI Analyzing...' : 'Explain with AI Tutor'}</span>
+              <span>{isAiLoading ? 'Analyzing Curriculum...' : 'Explain with AI Tutor'}</span>
             </button>
 
             <button
+              data-dpad-quiz-item
               onClick={handleNextQuestion}
-              className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-2.5 rounded-xl shadow-lg transition active:scale-95"
+              className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-2.5 rounded-xl shadow-lg transition active:scale-95 outline-none focus:ring-2 focus:ring-brand-cyan"
             >
               <span>{currentIndex + 1 < questions.length ? 'Next Question' : 'View Results'}</span>
               <ChevronRight className="w-4 h-4" />
@@ -281,14 +322,22 @@ export const QuizRunnerScreen: React.FC = () => {
         {/* AI Explanation Box */}
         {aiExplanation && (
           <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/40 to-slate-900 border border-purple-500/40 text-purple-200 text-xs leading-relaxed font-medium space-y-2">
-            <div className="flex items-center space-x-2 font-bold text-purple-300 uppercase tracking-wider text-[11px]">
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>Gemini AI Tutor Syllabus Breakdown</span>
+            <div className="flex items-center justify-between">
+              <div className="flex items-center space-x-2 font-bold text-purple-300 uppercase tracking-wider text-[11px]">
+                <Sparkles className="w-4 h-4 text-purple-400" />
+                <span>AI Tutor Syllabus Breakdown</span>
+              </div>
+              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-900/60 border border-purple-400/30 text-purple-300">
+                {aiSource || 'Curriculum Engine'}
+              </span>
             </div>
-            <p className="whitespace-pre-line text-slate-200">{aiExplanation}</p>
+            <p className="whitespace-pre-line text-slate-200">
+              <MathRenderer text={aiExplanation} />
+            </p>
           </div>
         )}
       </div>
     </div>
   );
 };
+

@@ -81,11 +81,10 @@ export const LeaderboardScreen: React.FC = () => {
           return (
             <div
               key={learner.id}
-              className={`flex items-center justify-between p-3.5 rounded-2xl border transition ${
-                isCurrentUser
+              className={`flex items-center justify-between p-3.5 rounded-2xl border transition ${isCurrentUser
                   ? 'bg-brand-blue/20 border-brand-cyan shadow'
                   : 'bg-dark-navy/60 border-border-navy'
-              }`}
+                }`}
             >
               <div className="flex items-center space-x-3.5">
                 <span className="w-6 text-center text-xs font-extrabold text-slate-400">

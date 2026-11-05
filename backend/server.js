@@ -597,6 +597,61 @@ app.post('/api/actions/restore-defaults', (req, res) => {
   }
 });
 
+// 15. AI Question Explainer & Tutor endpoint (Gemini API with fallback)
+app.post('/api/ai/explain', async (req, res) => {
+  try {
+    const { grade_key, subject_name, prompt, options, correct_index, selected_index, syllabus_explanation } = req.body;
+
+    const correctText = options && correct_index !== undefined ? options[correct_index] : 'The correct answer';
+    const chosenText = options && selected_index !== undefined ? options[selected_index] : 'Your answer';
+    const isCorrect = correct_index === selected_index;
+
+    // Check if GEMINI_API_KEY is available in process.env
+    const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+
+    if (apiKey) {
+      try {
+        const sysPrompt = `You are Yivu AI Tutor, a patient, encouraging teacher specializing in the Botswana Primary and Junior Secondary National Curriculum for ${grade_key}. Explain clearly and step-by-step why "${correctText}" is the correct answer to: "${prompt}". If the student selected "${chosenText}", kindly explain the misconception. Keep your answer concise (under 120 words).`;
+        
+        const geminiRes = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-1.5-flash:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            contents: [{ parts: [{ text: sysPrompt }] }]
+          })
+        });
+
+        if (geminiRes.ok) {
+          const gData = await geminiRes.json();
+          const reply = gData.candidates?.[0]?.content?.parts?.[0]?.text;
+          if (reply) {
+            return res.json({ explanation: reply, source: 'gemini' });
+          }
+        }
+      } catch (geminiErr) {
+        console.warn('Gemini live call error, using deterministic fallback:', geminiErr.message);
+      }
+    }
+
+    // High quality deterministic Botswana Curriculum breakdown fallback
+    let fallbackText = `Educational Breakdown for ${subject_name || 'Curriculum'} (${(grade_key || 'std_5').toUpperCase().replace('_', ' ')}):\n\n`;
+    fallbackText += `• Question Goal: ${prompt}\n`;
+    fallbackText += `• Official Solution: "${correctText}"\n`;
+    if (syllabus_explanation) {
+      fallbackText += `• Rule: ${syllabus_explanation}\n`;
+    }
+    if (!isCorrect) {
+      fallbackText += `\nNotice that you chose "${chosenText}". When answering this type of examination problem, remember to verify each term and ensure your units or place values align with the syllabus standard.`;
+    } else {
+      fallbackText += `\nExcellent work! You accurately applied the core concept to arrive at "${correctText}".`;
+    }
+
+    res.json({ explanation: fallbackText, source: 'curriculum-engine' });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
+
 // Start Server
 app.listen(PORT, () => {
   console.log(`\n======================================================`);
