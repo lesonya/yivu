@@ -209,7 +209,7 @@ function parseMarkingScheme(text) {
   return map;
 }
 
-function parseQuestions(text, meta, markingKeyMap, markingFilePath, paperId = null) {
+function parseQuestions(text, meta, markingKeyMap, markingFilePath) {
   const lines = text
     .split(/\r?\n/)
     .map(l => sanitizeText(l))
@@ -217,7 +217,6 @@ function parseQuestions(text, meta, markingKeyMap, markingFilePath, paperId = nu
 
   const questions = [];
   const seenQ = new Set();
-  const baseId = paperId || `${meta.gradeKey}_${meta.year}_${meta.subjectId}`;
 
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -287,7 +286,7 @@ function parseQuestions(text, meta, markingKeyMap, markingFilePath, paperId = nu
     // Diagram detection
     const promptLower = prompt.toLowerCase();
     const hasDiagram = promptLower.includes('diagram') || promptLower.includes('shape below') || promptLower.includes('figure') || promptLower.includes('shown below') || promptLower.includes('picture') || promptLower.includes('chart') || promptLower.includes('graph') || promptLower.includes('tessellation');
-    
+
     let diagramFilename = null;
     let diagramDescription = null;
     if (hasDiagram) {
@@ -304,7 +303,7 @@ function parseQuestions(text, meta, markingKeyMap, markingFilePath, paperId = nu
     if (schemeAns) {
       correctAnswer = schemeAns;
       gradingCriteria.push(`Official BEC Marking Scheme: ${schemeAns}`);
-      
+
       if (questionType === 'MCQ' && options.length > 0) {
         const letterIndex = ['a', 'b', 'c', 'd'].indexOf(schemeAns.toLowerCase().trim());
         if (letterIndex >= 0 && letterIndex < options.length) {
@@ -322,7 +321,7 @@ function parseQuestions(text, meta, markingKeyMap, markingFilePath, paperId = nu
     if (prompt.length >= 6) {
       seenQ.add(qFull);
       questions.push({
-        id: `q_${baseId}_${qFull}`,
+        id: `q_${meta.gradeKey}_${meta.year}_${meta.subjectId}_${qFull}`,
         question_number: qFull,
         parent_question_number: parentNum,
         question_type: questionType,
@@ -485,10 +484,10 @@ async function main() {
       });
     }
 
+    const questions = parseQuestions(rawText, meta, schemeMap, matchedSchemeFile ? path.relative(rootDir, matchedSchemeFile) : null);
+
     const filename = path.basename(paperFile, ext);
     const sanitizedId = `pp_${meta.gradeKey}_${meta.year}_${meta.subjectId}_${filename.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().slice(0, 30)}`;
-
-    const questions = parseQuestions(rawText, meta, schemeMap, matchedSchemeFile ? path.relative(rootDir, matchedSchemeFile) : null, sanitizedId);
 
     const examContainer = {
       id: sanitizedId,

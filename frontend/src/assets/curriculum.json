@@ -1,0 +1,215 @@
+{
+  "version": "1.0.0",
+  "country": "Botswana",
+  "divisions": [
+    {
+      "id": "standards",
+      "name": "Primary Standards",
+      "grades": ["Standard 2", "Standard 3", "Standard 4", "Standard 5", "Standard 6", "Standard 7"],
+      "grade_keys": ["std_2", "std_3", "std_4", "std_5", "std_6", "std_7"],
+      "subjects": [
+        {
+          "id": "std_english",
+          "name": "English",
+          "code": "ENG",
+          "icon": "book_open",
+          "accent_color": "#2563EB",
+          "topics": ["Phonics & Vocabulary", "Grammar & Sentence Construction", "Comprehension", "Creative Writing"]
+        },
+        {
+          "id": "std_setswana",
+          "name": "Setswana",
+          "code": "SET",
+          "icon": "chat_bubble",
+          "accent_color": "#14B8A6",
+          "topics": ["Mapele le Popego ya Mafoko", "Tekodiso", "Dipoko le Ditlhamo", "Ngwao le Ditso"]
+        },
+        {
+          "id": "std_math",
+          "name": "Mathematics",
+          "code": "MATH",
+          "icon": "calculator",
+          "accent_color": "#3B82F6",
+          "topics": ["Numbers & Operations", "Fractions & Decimals", "Geometry & Shapes", "Measurement & Time", "Data Handling"]
+        },
+        {
+          "id": "std_env_science",
+          "name": "Environmental Science",
+          "code": "ENV_SCI",
+          "icon": "leaf",
+          "accent_color": "#10B981",
+          "topics": ["Living and Non-Living Things", "Weather and Seasons", "Water & Sanitation", "Our Senses"]
+        },
+        {
+          "id": "std_science",
+          "name": "Science",
+          "code": "SCI",
+          "icon": "flask",
+          "accent_color": "#06B6D4",
+          "topics": ["Human Body & Health", "Plants and Animals", "Energy & Simple Machines", "Matter and Materials"]
+        },
+        {
+          "id": "std_social_studies",
+          "name": "Social Studies",
+          "code": "SOC",
+          "icon": "globe",
+          "accent_color": "#F59E0B",
+          "topics": ["Our Family & Community", "Districts of Botswana", "National Symbols & Heritage", "Civic Rights and Responsibilities"]
+        },
+        {
+          "id": "std_agriculture",
+          "name": "Agriculture",
+          "code": "AGRI",
+          "icon": "sprout",
+          "accent_color": "#84CC16",
+          "topics": ["Tools & Farm Safety", "Soil Types & Fertility", "Vegetable Gardening", "Livestock Basics (Goats, Cattle, Poultry)"]
+        },
+        {
+          "id": "std_cultural_studies",
+          "name": "Cultural Studies",
+          "code": "CULT",
+          "icon": "sparkles",
+          "accent_color": "#EC4899",
+          "topics": ["Botswana Traditions & Totems", "Traditional Food & Attire", "Folk Songs & Dances", "The Kgotla System"]
+        },
+        {
+          "id": "std_rme",
+          "name": "Religious and Moral Education (RME)",
+          "code": "RME",
+          "icon": "heart_handshake",
+          "accent_color": "#8B5CF6",
+          "topics": ["Honesty, Kindness & Respect", "Botho (Humanity to Others)", "Moral Choices & Stories", "World Religions Overview"]
+        },
+        {
+          "id": "std_capa",
+          "name": "Creative and Performing Arts (CAPA)",
+          "code": "CAPA",
+          "icon": "palette",
+          "accent_color": "#F97316",
+          "topics": ["Visual Arts & Crafts", "Rhythm, Instruments & Traditional Dance", "Drama & Role Play", "Design & Patterning"]
+        }
+      ]
+    },
+    {
+      "id": "forms",
+      "name": "Junior Secondary Forms",
+      "grades": ["Form 1", "Form 2", "Form 3"],
+      "grade_keys": ["form_1", "form_2", "form_3"],
+      "subjects": [
+        {
+          "id": "form_english",
+          "name": "English",
+          "code": "ENG",
+          "icon": "book_open",
+          "accent_color": "#2563EB",
+          "topics": ["Summary Writing", "Discursive & Argumentative Essays", "Grammar Mechanics", "Literature in English"]
+        },
+        {
+          "id": "form_setswana",
+          "name": "Setswana",
+          "code": "SET",
+          "icon": "chat_bubble",
+          "accent_color": "#14B8A6",
+          "topics": ["Thutapuo ya Setswana", "Mokwalo wa Ditlhamo", "Dikanelo le Dikwalo tsa Ditso", "Maele le Diane"]
+        },
+        {
+          "id": "form_math",
+          "name": "Mathematics",
+          "code": "MATH",
+          "icon": "calculator",
+          "accent_color": "#3B82F6",
+          "topics": ["Algebra & Equations", "Coordinate Geometry & Trigonometry", "Mensuration", "Probability & Statistics", "Matrices"]
+        },
+        {
+          "id": "form_integrated_science",
+          "name": "Integrated Science",
+          "code": "INT_SCI",
+          "icon": "atom",
+          "accent_color": "#06B6D4",
+          "topics": ["Cells & Genetics", "Acids, Bases & Chemical Reactions", "Electricity & Magnetism", "Ecology & Conservation"]
+        },
+        {
+          "id": "form_social_studies",
+          "name": "Social Studies",
+          "code": "SOC",
+          "icon": "globe",
+          "accent_color": "#F59E0B",
+          "topics": ["Economic Development & Mining in Botswana", "SADC & Global Relations", "Environmental Conservation", "Democracy & Governance"]
+        },
+        {
+          "id": "form_agriculture",
+          "name": "Agriculture",
+          "code": "AGRI",
+          "icon": "sprout",
+          "accent_color": "#84CC16",
+          "topics": ["Animal Nutrition & Husbandry", "Crop Protection & Agronomy", "Farm Economics & Records", "Agricultural Mechanization"]
+        },
+        {
+          "id": "form_moral_education",
+          "name": "Moral Education",
+          "code": "MORAL_ED",
+          "icon": "shield_check",
+          "accent_color": "#8B5CF6",
+          "topics": ["Ethics, Integrity & Botho", "Human Rights & Social Justice", "Substance Abuse & Mental Wellness", "Interpersonal Relationships"]
+        },
+        {
+          "id": "form_religious_education",
+          "name": "Religious Education",
+          "code": "REL_ED",
+          "icon": "landmark",
+          "accent_color": "#A855F7",
+          "topics": ["Comparative World Religions", "Scriptural Studies", "Faith in Society", "Peace & Conflict Resolution"]
+        },
+        {
+          "id": "form_design_technology",
+          "name": "Design and Technology",
+          "code": "DT",
+          "icon": "ruler_combined",
+          "accent_color": "#F97316",
+          "topics": ["Engineering Drawing & Orthographic Projection", "Materials Technology (Wood, Metal, Plastics)", "Electronics & Systems", "Product Design Process"]
+        },
+        {
+          "id": "form_home_economics",
+          "name": "Home Economics",
+          "code": "HOME_EC",
+          "icon": "utensils",
+          "accent_color": "#EC4899",
+          "topics": ["Food Science & Nutrition", "Textile Science & Clothing Construction", "Consumer Studies & Household Budgeting", "Child Development"]
+        },
+        {
+          "id": "form_art_craft_music",
+          "name": "Art and Craft / Music",
+          "code": "ART_MUS",
+          "icon": "music",
+          "accent_color": "#E11D48",
+          "topics": ["Fine Arts & Sculpture", "Ceramics & Printmaking", "Music Theory & Composition", "Traditional & Contemporary African Instruments"]
+        },
+        {
+          "id": "form_physical_education",
+          "name": "Physical Education",
+          "code": "PE",
+          "icon": "activity",
+          "accent_color": "#10B981",
+          "topics": ["Exercise Physiology & Nutrition", "Athletics & Track Events", "Team Sports & Tactics", "First Aid & Sports Safety"]
+        },
+        {
+          "id": "form_computer_awareness",
+          "name": "Computer Awareness / ICT",
+          "code": "ICT",
+          "icon": "cpu",
+          "accent_color": "#0284C7",
+          "topics": ["Computer Hardware & Operating Systems", "Word Processing & Spreadsheets", "Internet Safety & Cybersecurity", "Algorithms & Computational Thinking"]
+        },
+        {
+          "id": "form_third_languages",
+          "name": "Third Languages",
+          "code": "LANG_3",
+          "icon": "languages",
+          "accent_color": "#6366F1",
+          "topics": ["Basic Conversation & Greetings", "Grammar & Sentence Patterns", "Cultural Customs & Celebrations", "Reading Comprehension"]
+        }
+      ]
+    }
+  ]
+}
+

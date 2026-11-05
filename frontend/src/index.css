@@ -1,0 +1,36 @@
+@import "tailwindcss";
+
+@theme {
+  --color-dark-navy: #0F172A;
+  --color-surface-navy: #1E293B;
+  --color-border-navy: #334155;
+  --color-brand-blue: #2563EB;
+  --color-brand-teal: #14B8A6;
+  --color-brand-cyan: #06B6D4;
+  --color-gold-star: #F59E0B;
+}
+
+body {
+  background-color: #0F172A;
+  color: #F8FAFC;
+  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  margin: 0;
+  padding: 0;
+  overflow-x: hidden;
+}
+
+/* Custom scrollbars matching AppTheme */
+::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+::-webkit-scrollbar-track {
+  background: #0F172A;
+}
+::-webkit-scrollbar-thumb {
+  background: #334155;
+  border-radius: 4px;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: #475569;
+}
