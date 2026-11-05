@@ -234,7 +234,7 @@
           <div class="flex items-center space-x-3 mt-1">
             <p id="modalPaperMeta" class="text-xs text-brandCyan font-semibold">STD 5 • Mathematics • Term 2</p>
             <span class="text-slate-600">•</span>
-            <button onclick="openPdfViewer(currentPaperId, document.getElementById('modalPaperTitle').textContent)" class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline">
+            <button id="modalViewSourceBtn" onclick="openPdfViewer(currentPaperId, currentPaperTitle, currentPaperSourceFile)" class="inline-flex items-center space-x-1.5 text-xs font-bold text-emerald-400 hover:text-emerald-300 hover:underline">
               <i data-lucide="eye" class="w-3.5 h-3.5"></i>
               <span>View Source Document</span>
             </button>
@@ -376,6 +376,8 @@
   <!-- JAVASCRIPT LOGIC -->
   <script>
     let currentPaperId = null;
+    let currentPaperTitle = '';
+    let currentPaperSourceFile = '';
     let searchTimeout = null;
 
     document.addEventListener('DOMContentLoaded', () => {
@@ -499,9 +501,11 @@
         const res = await fetch(`/api/papers/${id}`);
         const paper = await res.json();
 
+        currentPaperTitle = paper.title || '';
+        currentPaperSourceFile = paper.source_file || '';
+
         document.getElementById('modalPaperTitle').textContent = paper.title;
         document.getElementById('modalPaperMeta').textContent = `${paper.grade_key.toUpperCase().replace('_', ' ')} • ${formatSubjectName(paper.subject_id)} • ${paper.term} (${paper.questions.length} Questions)`;
-        document.getElementById('modalViewSourceLink').href = `/api/papers/${id}/source`;
 
         if (paper.questions.length === 0) {
           qList.innerHTML = '<div class="py-12 text-center text-slate-400">No questions found in this paper.</div>';
