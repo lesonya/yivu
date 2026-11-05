@@ -71,6 +71,17 @@ export const TopNav: React.FC<TopNavProps> = ({
         </Link>
 
         <Link
+          to="/analytics"
+          className={`flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold border transition active:scale-95 ${
+            location.pathname === '/analytics'
+              ? 'bg-brand-cyan/20 text-brand-cyan border-brand-cyan/50'
+              : 'bg-dark-navy text-slate-300 border-border-navy hover:text-white'
+          }`}
+        >
+          <span>Analytics</span>
+        </Link>
+
+        <Link
           to="/upload"
           className="flex items-center space-x-2 px-3 py-1.5 rounded-xl text-xs font-semibold bg-dark-navy text-slate-300 border border-border-navy hover:text-white transition active:scale-95"
         >

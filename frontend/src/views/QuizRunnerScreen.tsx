@@ -1,10 +1,12 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import { useParams, useLocation, useNavigate } from 'react-router-dom';
 import { useCurriculumStore } from '../store/useCurriculumStore';
 import { useUserStore } from '../store/useUserStore';
+import { db } from '../core/database/offlineDb';
 import type { Question } from '../core/types/curriculum';
 import { MathRenderer } from '../components/common/MathRenderer';
 import { useDpadNavigation } from '../core/hooks/useDpadNavigation';
+import { soundManager } from '../core/services/soundEffects';
 import {
   CheckCircle2,
   XCircle,
@@ -14,7 +16,12 @@ import {
   RotateCcw,
   Star,
   Award,
-  Image as ImageIcon
+  Image as ImageIcon,
+  Clock,
+  Volume2,
+  VolumeX,
+  Volume1,
+  FileCheck
 } from 'lucide-react';
 
 export const QuizRunnerScreen: React.FC = () => {
@@ -30,11 +37,20 @@ export const QuizRunnerScreen: React.FC = () => {
   const [isSubmitted, setIsSubmitted] = useState(false);
   const [earnedXP, setEarnedXP] = useState(0);
   const [earnedStars, setEarnedStars] = useState(0);
+  const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [aiSource, setAiSource] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+
+  // Sound effects mute state
+  const [isMuted, setIsMuted] = useState(false);
+
+  // Timed Examination Mode: 45 Minutes Standard Countdown (2700s)
+  const [timeRemainingSeconds, setTimeRemainingSeconds] = useState(2700);
+  const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const startTimeRef = useRef<number>(Date.now());
 
   // Enable Smart TV / Keyboard D-pad navigation across option buttons
   useDpadNavigation({
@@ -44,6 +60,7 @@ export const QuizRunnerScreen: React.FC = () => {
 
   const materialTitle = location.state?.material?.title || 'Examination Practice';
   const subjectName = location.state?.subjectName || 'Curriculum Subject';
+  const subjectId = location.state?.material?.subject_id || 'std_math';
 
   useEffect(() => {
     async function loadQuestions() {
@@ -58,6 +75,24 @@ export const QuizRunnerScreen: React.FC = () => {
     loadQuestions();
   }, [materialId]);
 
+  // Countdown Timer Interval
+  useEffect(() => {
+    if (!isTimerRunning || isFinished || isLoading) return;
+
+    const timer = setInterval(() => {
+      setTimeRemainingSeconds((prev) => {
+        if (prev <= 1) {
+          clearInterval(timer);
+          handleFinishQuiz();
+          return 0;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(timer);
+  }, [isTimerRunning, isFinished, isLoading]);
+
   const currentQ = questions[currentIndex];
 
   const handleSelectAnswer = (index: number) => {
@@ -68,22 +103,75 @@ export const QuizRunnerScreen: React.FC = () => {
 
     const isCorrect = index === currentQ.correct_index;
     if (isCorrect) {
+      soundManager.playCorrect();
+      setCorrectAnswersCount((prev) => prev + 1);
       setEarnedXP((prev) => prev + 10);
       setEarnedStars((prev) => prev + 1);
       addXP(10);
       addStars(1);
+    } else {
+      soundManager.playIncorrect();
     }
   };
 
   const handleNextQuestion = () => {
+    soundManager.stopSpeaking();
     if (currentIndex + 1 < questions.length) {
       setCurrentIndex((prev) => prev + 1);
       setSelectedAnswerIndex(null);
       setIsSubmitted(false);
       setAiExplanation(null);
     } else {
-      setIsFinished(true);
+      handleFinishQuiz();
     }
+  };
+
+  const handleFinishQuiz = async () => {
+    soundManager.stopSpeaking();
+    soundManager.playFanfare();
+    setIsTimerRunning(false);
+    setIsFinished(true);
+
+    const timeSpent = Math.round((Date.now() - startTimeRef.current) / 1000);
+    const score = correctAnswersCount + (selectedAnswerIndex === currentQ?.correct_index ? 1 : 0);
+    const total = questions.length;
+    const percentage = total > 0 ? Math.round((score / total) * 100) : 0;
+
+    // Determine Botswana Attainment Grade Band
+    let gradeBand: 'A' | 'B' | 'C' | 'D' | 'E' = 'E';
+    if (percentage >= 80) gradeBand = 'A';
+    else if (percentage >= 70) gradeBand = 'B';
+    else if (percentage >= 60) gradeBand = 'C';
+    else if (percentage >= 50) gradeBand = 'D';
+
+    // Persist attempt into IndexedDB
+    try {
+      await db.attempts.put({
+        id: `att_${Date.now()}`,
+        learnerId: activeProfile.id,
+        learnerName: activeProfile.displayName,
+        materialId: materialId || 'exam',
+        materialTitle: materialTitle,
+        subjectId: subjectId,
+        gradeKey: activeProfile.gradeKey,
+        score,
+        totalQuestions: total,
+        percentage,
+        gradeBand,
+        timeSpentSeconds: timeSpent,
+        completedAt: new Date().toISOString(),
+      });
+    } catch (e) {
+      console.warn('Could not record attempt to IndexedDB:', e);
+    }
+  };
+
+  const handleSpeakQuestion = () => {
+    if (!currentQ) return;
+    const optionsText = (currentQ.options || [])
+      .map((opt, i) => `Option ${optionLetters[i]}: ${opt}`)
+      .join('. ');
+    soundManager.speakText(`${currentQ.prompt}. ${optionsText}`);
   };
 
   const handleExplainWithAI = async () => {
@@ -113,7 +201,6 @@ export const QuizRunnerScreen: React.FC = () => {
         throw new Error('Server returned ' + res.status);
       }
     } catch {
-      // Fallback
       setAiExplanation(
         `Curriculum Rule: ${currentQ.explanation || 'Ensure your calculations and unit steps follow the standard Botswana syllabus requirements.'}`
       );
@@ -121,6 +208,12 @@ export const QuizRunnerScreen: React.FC = () => {
     } finally {
       setIsAiLoading(false);
     }
+  };
+
+  const formatTimer = (seconds: number) => {
+    const mins = Math.floor(seconds / 60);
+    const secs = seconds % 60;
+    return `${mins}:${secs < 10 ? '0' : ''}${secs}`;
   };
 
   if (isLoading) {
@@ -150,37 +243,61 @@ export const QuizRunnerScreen: React.FC = () => {
     );
   }
 
-  // Finished Results Screen
+  // Finished Results Screen with Attainment Grade
   if (isFinished) {
+    const finalScore = correctAnswersCount;
+    const finalPercent = questions.length > 0 ? Math.round((finalScore / questions.length) * 100) : 0;
+    let attainmentBand = 'Grade D';
+    if (finalPercent >= 80) attainmentBand = 'Grade A (Distinction)';
+    else if (finalPercent >= 70) attainmentBand = 'Grade B (Credit)';
+    else if (finalPercent >= 60) attainmentBand = 'Grade C (Pass)';
+
     return (
-      <div className="max-w-md mx-auto mt-8 bg-surface-navy border border-border-navy rounded-3xl p-8 text-center shadow-2xl space-y-6">
+      <div className="max-w-md mx-auto mt-6 bg-surface-navy border border-border-navy rounded-3xl p-8 text-center shadow-2xl space-y-6">
         <div className="w-20 h-20 rounded-full bg-gold-star/20 border-2 border-gold-star text-gold-star flex items-center justify-center mx-auto text-4xl shadow-lg">
           🏆
         </div>
 
         <div>
-          <h2 className="text-2xl font-extrabold text-white">Quiz Completed!</h2>
-          <p className="text-xs text-slate-400 mt-1">Excellent practice session, {activeProfile.displayName}!</p>
+          <span className="text-[11px] font-bold uppercase tracking-wider text-brand-cyan bg-brand-cyan/20 px-3 py-1 rounded-full border border-brand-cyan/30">
+            Official Exam Result
+          </span>
+          <h2 className="text-2xl font-extrabold text-white mt-2">Examination Completed!</h2>
+          <p className="text-xs text-slate-400 mt-0.5">Learner: <span className="text-white font-bold">{activeProfile.displayName}</span></p>
         </div>
 
-        <div className="grid grid-cols-2 gap-3 py-2">
-          <div className="bg-dark-navy p-4 rounded-2xl border border-border-navy">
-            <div className="text-2xl font-extrabold text-gold-star flex items-center justify-center space-x-1">
-              <Star className="w-6 h-6 fill-current" />
+        {/* Attainment Grade Banner */}
+        <div className="bg-dark-navy p-4 rounded-2xl border border-border-navy">
+          <div className="text-xs text-slate-400 uppercase font-bold tracking-wider">Attainment Classification</div>
+          <div className="text-xl font-extrabold text-white mt-1">{attainmentBand}</div>
+          <div className="text-sm font-extrabold text-brand-cyan mt-0.5">{finalScore} / {questions.length} Correct ({finalPercent}%)</div>
+        </div>
+
+        <div className="grid grid-cols-2 gap-3 py-1">
+          <div className="bg-dark-navy p-3.5 rounded-2xl border border-border-navy">
+            <div className="text-xl font-extrabold text-gold-star flex items-center justify-center space-x-1">
+              <Star className="w-5 h-5 fill-current" />
               <span>+{earnedStars}</span>
             </div>
-            <div className="text-xs text-slate-400 font-semibold mt-1">Stars Earned</div>
+            <div className="text-[11px] text-slate-400 font-semibold mt-1">Stars Earned</div>
           </div>
-          <div className="bg-dark-navy p-4 rounded-2xl border border-border-navy">
-            <div className="text-2xl font-extrabold text-brand-cyan flex items-center justify-center space-x-1">
-              <Award className="w-6 h-6" />
+          <div className="bg-dark-navy p-3.5 rounded-2xl border border-border-navy">
+            <div className="text-xl font-extrabold text-brand-cyan flex items-center justify-center space-x-1">
+              <Award className="w-5 h-5" />
               <span>+{earnedXP}</span>
             </div>
-            <div className="text-xs text-slate-400 font-semibold mt-1">XP Gained</div>
+            <div className="text-[11px] text-slate-400 font-semibold mt-1">XP Gained</div>
           </div>
         </div>
 
-        <div className="space-y-2 pt-2">
+        <div className="space-y-2 pt-1">
+          <button
+            onClick={() => navigate('/analytics')}
+            className="w-full flex items-center justify-center space-x-2 py-3 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-bold text-xs rounded-xl shadow-lg transition active:scale-95"
+          >
+            <FileCheck className="w-4 h-4" />
+            <span>View Full Diagnostic Report</span>
+          </button>
           <button
             onClick={() => {
               setCurrentIndex(0);
@@ -188,17 +305,15 @@ export const QuizRunnerScreen: React.FC = () => {
               setIsSubmitted(false);
               setIsFinished(false);
               setAiExplanation(null);
+              setCorrectAnswersCount(0);
+              setTimeRemainingSeconds(2700);
+              setIsTimerRunning(true);
+              startTimeRef.current = Date.now();
             }}
-            className="w-full flex items-center justify-center space-x-2 py-3 bg-brand-blue hover:bg-blue-600 text-white font-bold text-xs rounded-xl shadow-lg transition active:scale-95"
+            className="w-full flex items-center justify-center space-x-2 py-2.5 bg-brand-blue hover:bg-blue-600 text-white font-semibold text-xs rounded-xl shadow transition active:scale-95"
           >
             <RotateCcw className="w-4 h-4" />
             <span>Practice Again</span>
-          </button>
-          <button
-            onClick={() => navigate(-1)}
-            className="w-full py-2.5 bg-dark-navy hover:bg-slate-800 text-slate-300 font-semibold text-xs rounded-xl border border-border-navy transition active:scale-95"
-          >
-            Back to Materials
           </button>
         </div>
       </div>
@@ -209,21 +324,47 @@ export const QuizRunnerScreen: React.FC = () => {
 
   return (
     <div className="max-w-3xl mx-auto space-y-6 pb-12">
-      {/* Top Question Tracker Header */}
+      {/* Top Question Tracker & Countdown Header */}
       <div className="flex items-center justify-between bg-surface-navy border border-border-navy p-4 rounded-2xl">
-        <div className="flex items-center space-x-2">
+        <div className="flex items-center space-x-3">
           <span className="text-xs font-bold text-brand-cyan bg-brand-cyan/20 px-2.5 py-1 rounded-md border border-brand-cyan/30">
             Q{currentQ.question_number || currentIndex + 1} of {questions.length}
           </span>
-          <span className="text-xs text-slate-400 font-medium hidden sm:inline truncate max-w-xs">
-            {materialTitle}
-          </span>
+
+          {/* Countdown Clock */}
+          <div className="flex items-center space-x-1.5 text-xs font-bold text-amber-400 bg-amber-400/10 px-2.5 py-1 rounded-md border border-amber-400/20">
+            <Clock className="w-3.5 h-3.5" />
+            <span>{formatTimer(timeRemainingSeconds)}</span>
+          </div>
         </div>
 
-        {/* Live Rewards */}
-        <div className="flex items-center space-x-3 text-xs font-bold">
-          <span className="text-gold-star">⭐ {earnedStars}</span>
-          <span className="text-brand-cyan">⚡ {earnedXP} XP</span>
+        {/* Audio Mute & TTS Read Aloud */}
+        <div className="flex items-center space-x-2">
+          <button
+            onClick={handleSpeakQuestion}
+            title="Read Question Aloud"
+            className="p-1.5 rounded-lg bg-dark-navy border border-border-navy text-slate-300 hover:text-brand-cyan transition active:scale-95"
+          >
+            <Volume2 className="w-4 h-4" />
+          </button>
+
+          <button
+            onClick={() => {
+              const muted = soundManager.toggleMute();
+              setIsMuted(muted);
+            }}
+            title={isMuted ? 'Unmute Game Audio' : 'Mute Game Audio'}
+            className="p-1.5 rounded-lg bg-dark-navy border border-border-navy text-slate-300 hover:text-white transition active:scale-95"
+          >
+            {isMuted ? <VolumeX className="w-4 h-4 text-rose-400" /> : <Volume1 className="w-4 h-4 text-emerald-400" />}
+          </button>
+
+          <div className="h-4 w-px bg-border-navy mx-1"></div>
+
+          <div className="flex items-center space-x-2 text-xs font-bold">
+            <span className="text-gold-star">⭐ {earnedStars}</span>
+            <span className="text-brand-cyan">⚡ {earnedXP} XP</span>
+          </div>
         </div>
       </div>
 
@@ -340,4 +481,5 @@ export const QuizRunnerScreen: React.FC = () => {
     </div>
   );
 };
+
 
