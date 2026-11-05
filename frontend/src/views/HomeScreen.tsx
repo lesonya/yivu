@@ -60,7 +60,7 @@ export const HomeScreen: React.FC = () => {
         <div className="cognix-card p-6 flex flex-col justify-between">
           <div className="space-y-3">
             <h1 className="text-2xl font-bold text-white tracking-tight">
-              Dumela, {activeProfile.displayName}! 🇧🇼
+              Dumela, {activeProfile.displayName}!
             </h1>
             <p className="text-xs text-slate-400 leading-relaxed">
               Curriculum Neural Pathway: <span className="text-cyan-400 font-medium">{activeProfile.gradeKey.toUpperCase().replace('_', ' ')}</span>
