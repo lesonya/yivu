@@ -45,47 +45,6 @@ class _SubjectMaterialsScreenState extends State<SubjectMaterialsScreen> {
           .map((m) => Map<String, dynamic>.from(m))
           .toList();
 
-      // If no pre-compiled items exist for this subject, generate fallback decks
-      if (filtered.isEmpty) {
-        final topics = (widget.subject['topics'] as List<dynamic>? ?? ['General Revision', 'Core Principles']);
-        for (int i = 0; i < topics.length; i++) {
-          filtered.add({
-            'id': 'topic_${widget.subject['id']}_$i',
-            'grade_key': widget.activeChild['grade_key'] ?? 'std_5',
-            'subject_id': subjectId,
-            'title': "${topics[i]} — Topic Notes & Practice",
-            'type': i % 2 == 0 ? 'NOTES_WITH_MCQ' : 'PAST_PAPER_SAMPLE',
-            'reading_content': "Comprehensive revision notes for ${topics[i]} covering core curriculum principles.",
-            'questions': [
-              {
-                'id': 'gen_q1_$i',
-                'prompt': "What is the primary rule or principle when studying ${topics[i]}?",
-                'options': [
-                  "Understand foundational definitions first",
-                  "Ignore the syllabus guidance",
-                  "Only guess without reading",
-                  "Skip straight to the final exam"
-                ],
-                'correct_index': 0,
-                'explanation': "Mastering foundational concepts and syllabus terminology ensures thorough comprehension in ${widget.subject['name']}."
-              },
-              {
-                'id': 'gen_q2_$i',
-                'prompt': "Which learning approach yields the highest mastery in this topic?",
-                'options': [
-                  "Passive memorization",
-                  "Active recall and multiple-choice practice",
-                  "Reading once without revision",
-                  "Skipping practice questions"
-                ],
-                'correct_index': 1,
-                'explanation': "Active recall and testing yourself regularly strengthens long-term memory."
-              }
-            ]
-          });
-        }
-      }
-
       setState(() {
         _allMaterials = filtered;
         _isLoading = false;
@@ -118,7 +77,7 @@ class _SubjectMaterialsScreenState extends State<SubjectMaterialsScreen> {
       final content = m['reading_content'] as String?;
       return content != null && content.trim().isNotEmpty;
     }).toList();
-    return list.isNotEmpty ? list : _allMaterials;
+    return list;
   }
 
   // Filter materials with Quizzes (all items having questions)
