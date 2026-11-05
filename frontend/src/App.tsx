@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { BrowserRouter, Routes, Route, useLocation } from 'react-router-dom';
 import { TopNav } from './components/layout/TopNav';
+import { AnimatedMovingBackground } from './components/layout/AnimatedMovingBackground';
 import { ProfileSwitcherModal } from './components/gamification/ProfileSwitcherModal';
 import { HomeScreen } from './views/HomeScreen';
 import { SubjectMaterialsScreen } from './views/SubjectMaterialsScreen';
@@ -20,24 +21,30 @@ function AppLayout() {
   const isCustomTestView = location.pathname.startsWith('/custom-test');
 
   return (
-    <div className="min-h-screen bg-dark-navy text-slate-100 flex flex-col font-sans">
-      <TopNav
-        onOpenProfileSwitcher={() => setIsProfileModalOpen(true)}
-        showBack={isQuizView || isSubjectView || isAnalyticsView || isCustomTestView}
-        backTitle={isQuizView ? 'Leave Quiz' : 'Curriculum Home'}
-      />
+    <div className="min-h-screen bg-[#0B0F19] text-slate-100 flex flex-col font-sans relative selection:bg-purple-500 selection:text-white">
+      {/* Cognix Pure Animated Hardware-Accelerated Background */}
+      <AnimatedMovingBackground />
 
-      <main className="flex-1 p-4 sm:p-6">
-        <Routes>
-          <Route path="/" element={<HomeScreen />} />
-          <Route path="/subject/:subjectId" element={<SubjectMaterialsScreen />} />
-          <Route path="/quiz/:materialId" element={<QuizRunnerScreen />} />
-          <Route path="/leaderboard" element={<LeaderboardScreen />} />
-          <Route path="/analytics" element={<PerformanceAnalyticsScreen />} />
-          <Route path="/custom-test" element={<CustomTestGeneratorScreen />} />
-          <Route path="/upload" element={<UploadPastPaperScreen />} />
-        </Routes>
-      </main>
+      {/* App Foreground Shell */}
+      <div className="relative z-10 flex flex-col min-h-screen">
+        <TopNav
+          onOpenProfileSwitcher={() => setIsProfileModalOpen(true)}
+          showBack={isQuizView || isSubjectView || isAnalyticsView || isCustomTestView}
+          backTitle={isQuizView ? 'Leave Quiz' : 'Curriculum Home'}
+        />
+
+        <main className="flex-1 p-4 sm:p-6 max-w-7xl w-full mx-auto">
+          <Routes>
+            <Route path="/" element={<HomeScreen />} />
+            <Route path="/subject/:subjectId" element={<SubjectMaterialsScreen />} />
+            <Route path="/quiz/:materialId" element={<QuizRunnerScreen />} />
+            <Route path="/leaderboard" element={<LeaderboardScreen />} />
+            <Route path="/analytics" element={<PerformanceAnalyticsScreen />} />
+            <Route path="/custom-test" element={<CustomTestGeneratorScreen />} />
+            <Route path="/upload" element={<UploadPastPaperScreen />} />
+          </Routes>
+        </main>
+      </div>
 
       <ProfileSwitcherModal
         isOpen={isProfileModalOpen}
