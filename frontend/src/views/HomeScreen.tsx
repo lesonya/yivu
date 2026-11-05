@@ -4,10 +4,8 @@ import { useUserStore } from '../store/useUserStore';
 import { useCurriculumStore } from '../store/useCurriculumStore';
 import {
   Sparkles,
-  ChevronRight,
   Flame,
   Star,
-  FileText,
   GraduationCap,
   BookOpen,
   Zap
@@ -41,20 +39,6 @@ export const HomeScreen: React.FC = () => {
     const sub = subjects.find(s => s.id === subId);
     if (sub) {
       handleSelectSubject(sub);
-    }
-  };
-
-  const getSubjectIcon = (iconName: string) => {
-    switch (iconName) {
-      case 'calculate': return '📐';
-      case 'auto_stories': return '📖';
-      case 'science': return '🔬';
-      case 'language': return '🗣️';
-      case 'public': return '🌍';
-      case 'palette': return '🎨';
-      case 'agriculture': return '🌱';
-      case 'self_improvement': return '🕊️';
-      default: return '📚';
     }
   };
 
@@ -198,43 +182,6 @@ export const HomeScreen: React.FC = () => {
               <span>Generate Practice Test</span>
             </button>
           </div>
-        </div>
-      </div>
-
-      {/* 2. SUBJECT CARDS GRID */}
-      <div>
-        <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
-          {subjects.map((sub) => (
-            <button
-              key={sub.id}
-              onClick={() => handleSelectSubject(sub)}
-              className="group bg-surface-navy hover:bg-slate-800/90 border border-border-navy hover:border-brand-cyan/60 p-5 rounded-2xl transition duration-200 text-left flex flex-col justify-between shadow-lg active:scale-[0.98]"
-            >
-              <div className="flex items-center justify-between mb-4">
-                <span className="text-3xl p-3 bg-dark-navy rounded-2xl border border-border-navy group-hover:scale-110 transition">
-                  {getSubjectIcon(sub.icon)}
-                </span>
-                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider bg-dark-navy px-2.5 py-1 rounded-md border border-border-navy">
-                  {sub.code}
-                </span>
-              </div>
-
-              <div>
-                <h3 className="text-base font-bold text-white group-hover:text-brand-cyan transition">
-                  {sub.name}
-                </h3>
-                <p className="text-xs text-slate-400 mt-1 flex items-center space-x-1.5">
-                  <FileText className="w-3.5 h-3.5" />
-                  <span>Exam Papers & Exercises</span>
-                </p>
-              </div>
-
-              <div className="mt-4 pt-3 border-t border-border-navy/60 flex items-center justify-between text-xs text-brand-cyan font-bold">
-                <span>Explore Materials</span>
-                <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
-              </div>
-            </button>
-          ))}
         </div>
       </div>
     </div>
