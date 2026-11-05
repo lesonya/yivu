@@ -251,7 +251,7 @@ export const HomeScreen: React.FC = () => {
             <span className="text-lg font-bold text-slate-100 uppercase flex items-center space-x-2">
               {/* @ts-ignore */}
               <iconify-icon icon="solar:bolt-bold-duotone" class="text-amber-400" width="18" height="18"></iconify-icon>
-              <span>Practice Pulse & Momentum</span>
+              <span>Momentum</span>
             </span>
             <div className="flex items-center space-x-1.5 text-amber-400 font-bold text-[11px] bg-amber-500/10 px-2.5 py-0.5 rounded-full border border-amber-500/20">
               {/* @ts-ignore */}
