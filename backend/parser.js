@@ -5,10 +5,43 @@ const mammoth = require('mammoth');
 
 function extractPdfText(pdfFilePath) {
   return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser(null, 1);
-    pdfParser.on('pdfParser_dataError', errData => reject(errData.parserError));
-    pdfParser.on('pdfParser_dataReady', () => {
-      resolve(pdfParser.getRawTextContent());
+    const pdfParser = new PDFParser();
+    pdfParser.on("pdfParser_dataError", err => reject(err));
+    pdfParser.on("pdfParser_dataReady", pdfData => {
+      const allLines = [];
+      for (let p = 0; p < pdfData.Pages.length; p++) {
+        const page = pdfData.Pages[p];
+        if (!page.Texts || page.Texts.length === 0) continue;
+
+        // Visual coordinate sorting: top-to-bottom (Y), left-to-right (X)
+        const sorted = [...page.Texts].sort((a, b) => {
+          if (Math.abs(a.y - b.y) < 0.35) return a.x - b.x;
+          return a.y - b.y;
+        });
+
+        let currentLine = [];
+        let currentY = -1;
+
+        for (const t of sorted) {
+          let text = '';
+          try {
+            text = decodeURIComponent(t.R[0].T);
+          } catch (e) {
+            try { text = unescape(t.R[0].T); } catch (e2) { text = t.R[0].T; }
+          }
+          if (currentY === -1 || Math.abs(t.y - currentY) < 0.35) {
+            currentLine.push(text);
+            currentY = t.y;
+          } else {
+            allLines.push(currentLine.join(' '));
+            currentLine = [text];
+            currentY = t.y;
+          }
+        }
+        if (currentLine.length > 0) allLines.push(currentLine.join(' '));
+        allLines.push(`----------------Page (${p}) Break----------------`);
+      }
+      resolve(allLines.join('\n'));
     });
     pdfParser.loadPDF(pdfFilePath);
   });
@@ -208,6 +241,16 @@ function parseQuestionsFromText(text, meta = {}, markingKeyMap = {}) {
       });
     }
   }
+
+  // Sort questions naturally by question number (Q1, Q2, ..., Q50)
+  questions.sort((a, b) => {
+    const numA = parseInt(a.question_number, 10);
+    const numB = parseInt(b.question_number, 10);
+    if (!isNaN(numA) && !isNaN(numB) && numA !== numB) {
+      return numA - numB;
+    }
+    return (a.question_number || '').localeCompare(b.question_number || '', undefined, { numeric: true });
+  });
 
   return questions;
 }
