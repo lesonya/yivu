@@ -2,7 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_dotenv/flutter_dotenv.dart';
 import 'core/theme/app_theme.dart';
-import 'features/home/presentation/home_screen.dart';
+import 'features/splash/presentation/splash_screen.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -34,7 +34,7 @@ class YivuApp extends StatelessWidget {
       theme: AppTheme.lightTabletTheme,
       darkTheme: AppTheme.darkTVTheme,
       themeMode: ThemeMode.dark, // Default to high-contrast Dark Navy (#0F172A)
-      home: const HomeScreen(),
+      home: const SplashScreen(),
     );
   }
 }

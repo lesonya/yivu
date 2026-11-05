@@ -187,3 +187,4 @@ if (!hasStd5Sci) {
 
 fs.writeFileSync(path, JSON.stringify(data, null, 2), 'utf8');
 console.log('Successfully written seed_materials.json!');
+

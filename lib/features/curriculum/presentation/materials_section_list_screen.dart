@@ -281,3 +281,4 @@ class MaterialsSectionListScreen extends StatelessWidget {
     );
   }
 }
+

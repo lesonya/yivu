@@ -388,11 +388,24 @@ class _QuizRunnerScreenState extends State<QuizRunnerScreen> {
                     child: Column(
                       crossAxisAlignment: CrossAxisAlignment.start,
                       children: [
-                        const Row(
+                        Row(
                           children: [
-                            Icon(Icons.smart_toy_rounded, color: AppTheme.tealAccent, size: 24),
-                            SizedBox(width: 8),
-                            Text(
+                            Container(
+                              width: 28,
+                              height: 28,
+                              padding: const EdgeInsets.all(2),
+                              decoration: BoxDecoration(
+                                color: AppTheme.surfaceNavy,
+                                shape: BoxShape.circle,
+                                border: Border.all(color: AppTheme.tealAccent.withValues(alpha: 0.6)),
+                              ),
+                              child: Image.asset(
+                                "resources/img/logo.png",
+                                fit: BoxFit.contain,
+                              ),
+                            ),
+                            const SizedBox(width: 10),
+                            const Text(
                               "Yivu AI Tutor says:",
                               style: TextStyle(
                                 color: AppTheme.tealAccent,
