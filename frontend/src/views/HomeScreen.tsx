@@ -15,7 +15,7 @@ import {
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
   const { activeProfile } = useUserStore();
-  const { selectedDivision, subjects, setDivision, fetchMaterials } = useCurriculumStore();
+  const { subjects, setDivision, fetchMaterials } = useCurriculumStore();
 
   useEffect(() => {
     setDivision(activeProfile.division);
@@ -119,37 +119,7 @@ export const HomeScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* 2. DIVISION SELECTOR TABS (Primary vs Secondary) */}
-      <div className="flex items-center justify-between border-b border-border-navy pb-3">
-        <div className="flex items-center space-x-2">
-          <button
-            onClick={() => setDivision('standards')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
-              selectedDivision === 'standards'
-                ? 'bg-brand-blue text-white shadow-lg'
-                : 'bg-surface-navy text-slate-400 hover:text-white border border-border-navy'
-            }`}
-          >
-            <span>Primary Curriculum (Standards 1 – 7)</span>
-          </button>
-          <button
-            onClick={() => setDivision('forms')}
-            className={`px-4 py-2 rounded-xl text-xs font-bold transition flex items-center space-x-2 ${
-              selectedDivision === 'forms'
-                ? 'bg-brand-blue text-white shadow-lg'
-                : 'bg-surface-navy text-slate-400 hover:text-white border border-border-navy'
-            }`}
-          >
-            <span>Secondary Curriculum (Forms 1 – 3)</span>
-          </button>
-        </div>
-
-        <div className="text-xs text-slate-400 font-medium hidden sm:block">
-          Select a subject to view Revision, Notes, and Exam Papers
-        </div>
-      </div>
-
-      {/* 3. SUBJECT GRID */}
+      {/* 2. SUBJECT GRID */}
       <div>
         <h2 className="text-sm font-bold text-white uppercase tracking-wider mb-3 flex items-center space-x-2">
           <Compass className="w-4 h-4 text-brand-cyan" />
