@@ -33,6 +33,16 @@ const PORT = process.env.PORT || 5050;
 app.use(cors());
 app.use(express.json());
 
+// Dedicated Health Check Endpoint for diagnostics and uptime monitors
+app.get('/api/health', (req, res) => {
+  res.json({
+    status: 'ok',
+    uptime: process.uptime(),
+    timestamp: new Date().toISOString(),
+    service: 'yivu-backend'
+  });
+});
+
 // 1. Admin Studio static route (http://localhost:5050/admin)
 app.get('/admin', (req, res) => {
   res.sendFile(path.join(__dirname, 'public', 'admin.html'));
