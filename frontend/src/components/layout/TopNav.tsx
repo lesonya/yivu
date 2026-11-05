@@ -26,7 +26,7 @@ export const TopNav: React.FC<TopNavProps> = ({
   };
 
   return (
-    <header className="sticky top-0 z-40 w-full px-6 py-4 flex items-center justify-between transition-all bg-transparent border-none">
+    <header className="relative z-40 w-full px-6 py-4 flex items-center justify-between transition-all bg-transparent border-none">
       <div className="max-w-7xl w-full mx-auto flex items-center justify-between">
         {/* Left: Brand or Back Button */}
         <div className="flex items-center space-x-3.5">
