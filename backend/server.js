@@ -248,9 +248,14 @@ app.post('/api/upload', upload.fields([
 
     // Extract text from paper
     let rawPaperText = '';
+    let paperCoordText = '';
+    let paperRawText = '';
     const paperExt = path.extname(paperFile.path).toLowerCase();
     if (paperExt === '.pdf') {
-      rawPaperText = await extractPdfText(paperFile.path);
+      const pdfRes = await extractPdfText(paperFile.path);
+      rawPaperText = pdfRes.text;
+      paperCoordText = pdfRes.coordText;
+      paperRawText = pdfRes.rawText;
     } else if (paperExt === '.docx') {
       rawPaperText = await extractDocxText(paperFile.path);
     } else {
@@ -263,7 +268,8 @@ app.post('/api/upload', upload.fields([
       const msExt = path.extname(markingFile.path).toLowerCase();
       let msText = '';
       if (msExt === '.pdf') {
-        msText = await extractPdfText(markingFile.path);
+        const msRes = await extractPdfText(markingFile.path);
+        msText = msRes.text;
       } else if (msExt === '.docx') {
         msText = await extractDocxText(markingFile.path);
       }
@@ -280,7 +286,14 @@ app.post('/api/upload', upload.fields([
       markingFilePath: markingFile ? markingFile.originalname : null
     };
 
-    const questions = parseQuestionsFromText(rawPaperText, meta, markingMap);
+    let questions = [];
+    if (paperExt === '.pdf' && paperRawText) {
+      const qCoord = parseQuestionsFromText(paperCoordText, meta, markingMap);
+      const qRaw = parseQuestionsFromText(paperRawText, meta, markingMap);
+      questions = qRaw.length > qCoord.length ? qRaw : qCoord;
+    } else {
+      questions = parseQuestionsFromText(rawPaperText, meta, markingMap);
+    }
 
     // Save into database
     insertPaper({
@@ -344,8 +357,12 @@ app.post('/api/upload-batch', upload.array('files', 50), async (req, res) => {
       const ext = path.extname(mf.path).toLowerCase();
       let text = '';
       try {
-        if (ext === '.pdf') text = await extractPdfText(mf.path);
-        else if (ext === '.docx') text = await extractDocxText(mf.path);
+        if (ext === '.pdf') {
+          const res = await extractPdfText(mf.path);
+          text = res.text;
+        } else if (ext === '.docx') {
+          text = await extractDocxText(mf.path);
+        }
         markingMapByFile[mf.originalname] = parseMarkingScheme(text);
       } catch (err) {
         console.warn(`Could not parse batch marking scheme ${mf.originalname}:`, err.message);
@@ -358,9 +375,14 @@ app.post('/api/upload-batch', upload.array('files', 50), async (req, res) => {
     for (const pf of questionPaperFiles) {
       const ext = path.extname(pf.path).toLowerCase();
       let rawText = '';
+      let paperCoordText = '';
+      let paperRawText = '';
       try {
         if (ext === '.pdf') {
-          rawText = await extractPdfText(pf.path);
+          const pdfRes = await extractPdfText(pf.path);
+          rawText = pdfRes.text;
+          paperCoordText = pdfRes.coordText;
+          paperRawText = pdfRes.rawText;
         } else if (ext === '.docx') {
           rawText = await extractDocxText(pf.path);
         } else {
@@ -402,7 +424,14 @@ app.post('/api/upload-batch', upload.array('files', 50), async (req, res) => {
         markingFilePath: matchedSchemeName
       };
 
-      const questions = parseQuestionsFromText(rawText, meta, matchedScheme || {});
+      let questions = [];
+      if (ext === '.pdf' && paperRawText) {
+        const qCoord = parseQuestionsFromText(paperCoordText, meta, matchedScheme || {});
+        const qRaw = parseQuestionsFromText(paperRawText, meta, matchedScheme || {});
+        questions = qRaw.length > qCoord.length ? qRaw : qCoord;
+      } else {
+        questions = parseQuestionsFromText(rawText, meta, matchedScheme || {});
+      }
 
       // Insert paper & questions
       insertPaper({

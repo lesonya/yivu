@@ -6,9 +6,30 @@ const mammoth = require('./node_modules/mammoth');
 
 function extractPdfText(pdfFilePath) {
   return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser();
-    pdfParser.on("pdfParser_dataError", err => reject(err));
-    pdfParser.on("pdfParser_dataReady", pdfData => {
+    const pCoord = new PDFParser();
+    const pRaw = new PDFParser(null, 1);
+    let coordText = '';
+    let rawText = '';
+    let coordDone = false;
+    let rawDone = false;
+    let failed = false;
+
+    pCoord.on("pdfParser_dataError", err => {
+      if (!failed && rawDone) {
+        resolve({ text: rawText, coordText: '', rawText });
+      } else if (!failed && !rawDone) {
+        failed = true;
+        reject(err);
+      }
+    });
+
+    pRaw.on("pdfParser_dataError", () => {
+      rawDone = true;
+      if (coordDone) resolve({ text: coordText, coordText, rawText: '' });
+    });
+
+    pCoord.on("pdfParser_dataReady", pdfData => {
+      coordDone = true;
       const allLines = [];
       for (let p = 0; p < pdfData.Pages.length; p++) {
         const page = pdfData.Pages[p];
@@ -42,9 +63,22 @@ function extractPdfText(pdfFilePath) {
         if (currentLine.length > 0) allLines.push(currentLine.join(' '));
         allLines.push(`----------------Page (${p}) Break----------------`);
       }
-      resolve(allLines.join('\n'));
+      coordText = allLines.join('\n');
+      if (rawDone) {
+        resolve({ text: coordText, coordText, rawText });
+      }
     });
-    pdfParser.loadPDF(pdfFilePath);
+
+    pRaw.on("pdfParser_dataReady", () => {
+      rawDone = true;
+      rawText = pRaw.getRawTextContent() || '';
+      if (coordDone) {
+        resolve({ text: coordText, coordText, rawText });
+      }
+    });
+
+    pCoord.loadPDF(pdfFilePath);
+    pRaw.loadPDF(pdfFilePath);
   });
 }
 
@@ -221,7 +255,7 @@ function parseQuestions(text, meta, markingKeyMap, markingFilePath) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    const qMatch = line.match(/^(\d+)([a-z]?(?:\.[i|v|x]+)?)[\.\)]\s*(.*)/i);
+    const qMatch = line.match(/^(\d+)\s*([a-z]?(?:\.[i|v|x]+)?)?\s*[\.\)]\s*(.*)/i);
     if (!qMatch) continue;
 
     const parentNum = qMatch[1];
@@ -321,7 +355,7 @@ function parseQuestions(text, meta, markingKeyMap, markingFilePath) {
     if (prompt.length >= 6) {
       seenQ.add(qFull);
       questions.push({
-        id: `q_${meta.gradeKey}_${meta.year}_${meta.subjectId}_${qFull}`,
+        id: `q_${meta.paperId || (meta.gradeKey + '_' + meta.year + '_' + meta.subjectId)}_${qFull}`,
         question_number: qFull,
         parent_question_number: parentNum,
         question_type: questionType,
@@ -401,7 +435,8 @@ async function main() {
     try {
       let msText = '';
       if (msFile.endsWith('.pdf')) {
-        msText = await extractPdfText(msFile);
+        const msRes = await extractPdfText(msFile);
+        msText = msRes.text;
       } else if (msFile.endsWith('.docx')) {
         msText = await extractDocxText(msFile);
       }
@@ -453,10 +488,15 @@ async function main() {
     processedHashes.add(hash);
 
     let rawText = '';
+    let coordText = '';
+    let rawContent = '';
     const ext = path.extname(paperFile).toLowerCase();
     try {
       if (ext === '.pdf') {
-        rawText = await extractPdfText(paperFile);
+        const pdfRes = await extractPdfText(paperFile);
+        rawText = pdfRes.text;
+        coordText = pdfRes.coordText;
+        rawContent = pdfRes.rawText;
       } else if (ext === '.docx' || ext === '.doc') {
         rawText = await extractDocxText(paperFile);
       } else if (ext === '.rtf') {
@@ -484,10 +524,19 @@ async function main() {
       });
     }
 
-    const questions = parseQuestions(rawText, meta, schemeMap, matchedSchemeFile ? path.relative(rootDir, matchedSchemeFile) : null);
-
     const filename = path.basename(paperFile, ext);
     const sanitizedId = `pp_${meta.gradeKey}_${meta.year}_${meta.subjectId}_${filename.replace(/[^a-zA-Z0-9]/g, '_').toLowerCase().slice(0, 30)}`;
+    meta.paperId = sanitizedId;
+
+    let questions = [];
+    const schemeFilePath = matchedSchemeFile ? path.relative(rootDir, matchedSchemeFile) : null;
+    if (ext === '.pdf' && rawContent) {
+      const qCoord = parseQuestions(coordText, meta, schemeMap, schemeFilePath);
+      const qRaw = parseQuestions(rawContent, meta, schemeMap, schemeFilePath);
+      questions = qRaw.length > qCoord.length ? qRaw : qCoord;
+    } else {
+      questions = parseQuestions(rawText, meta, schemeMap, schemeFilePath);
+    }
 
     const examContainer = {
       id: sanitizedId,

@@ -603,7 +603,35 @@
         document.getElementById('modalPaperMeta').textContent = `${paper.grade_key.toUpperCase().replace('_', ' ')} • ${formatSubjectName(paper.subject_id)} • ${paper.term} (${paper.questions.length} Questions)`;
 
         if (paper.questions.length === 0) {
-          qList.innerHTML = '<div class="py-12 text-center text-slate-400">No questions found in this paper.</div>';
+          const isPdf = (paper.source_file || '').toLowerCase().endsWith('.pdf');
+          const cleanTitleEsc = (paper.title || '').replace(/'/g, "\\'");
+          const cleanSourceEsc = (paper.source_file || '').replace(/'/g, "\\'");
+          qList.innerHTML = `
+            <div class="py-10 px-6 text-center max-w-lg mx-auto space-y-4">
+              <div class="w-14 h-14 mx-auto rounded-2xl bg-amber-500/10 border border-amber-500/30 flex items-center justify-center text-amber-400">
+                <i data-lucide="file-text" class="w-7 h-7"></i>
+              </div>
+              <div class="space-y-1">
+                <h4 class="text-base font-bold text-white">Scanned Image or Non-Text Document</h4>
+                <p class="text-xs text-slate-400 leading-relaxed">
+                  This document consists of scanned physical pages or raster images without an embedded text layer. Questions cannot be automatically extracted via text parsing.
+                </p>
+              </div>
+              <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                ${isPdf ? `
+                  <button onclick="openPdfViewer('${paper.id}', '${cleanTitleEsc}', '${cleanSourceEsc}')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-900/20">
+                    <i data-lucide="eye" class="w-4 h-4"></i>
+                    <span>Open & Read Original PDF</span>
+                  </button>
+                ` : ''}
+                <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-surfaceNavy hover:bg-borderNavy border border-borderNavy text-slate-200 font-semibold rounded-xl text-xs flex items-center space-x-1.5">
+                  <i data-lucide="plus-circle" class="w-4 h-4 text-purple-400"></i>
+                  <span>Add Questions Manually</span>
+                </button>
+              </div>
+            </div>
+          `;
+          lucide.createIcons();
           return;
         }
 

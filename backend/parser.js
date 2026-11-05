@@ -5,9 +5,30 @@ const mammoth = require('mammoth');
 
 function extractPdfText(pdfFilePath) {
   return new Promise((resolve, reject) => {
-    const pdfParser = new PDFParser();
-    pdfParser.on("pdfParser_dataError", err => reject(err));
-    pdfParser.on("pdfParser_dataReady", pdfData => {
+    const pCoord = new PDFParser();
+    const pRaw = new PDFParser(null, 1);
+    let coordText = '';
+    let rawText = '';
+    let coordDone = false;
+    let rawDone = false;
+    let failed = false;
+
+    pCoord.on("pdfParser_dataError", err => {
+      if (!failed && rawDone) {
+        resolve({ text: rawText, coordText: '', rawText: rawText });
+      } else if (!failed && !rawDone) {
+        failed = true;
+        reject(err);
+      }
+    });
+
+    pRaw.on("pdfParser_dataError", () => {
+      rawDone = true;
+      if (coordDone) resolve({ text: coordText, coordText, rawText: '' });
+    });
+
+    pCoord.on("pdfParser_dataReady", pdfData => {
+      coordDone = true;
       const allLines = [];
       for (let p = 0; p < pdfData.Pages.length; p++) {
         const page = pdfData.Pages[p];
@@ -41,9 +62,22 @@ function extractPdfText(pdfFilePath) {
         if (currentLine.length > 0) allLines.push(currentLine.join(' '));
         allLines.push(`----------------Page (${p}) Break----------------`);
       }
-      resolve(allLines.join('\n'));
+      coordText = allLines.join('\n');
+      if (rawDone) {
+        resolve({ text: coordText, coordText, rawText });
+      }
     });
-    pdfParser.loadPDF(pdfFilePath);
+
+    pRaw.on("pdfParser_dataReady", () => {
+      rawDone = true;
+      rawText = pRaw.getRawTextContent() || '';
+      if (coordDone) {
+        resolve({ text: coordText, coordText, rawText });
+      }
+    });
+
+    pCoord.loadPDF(pdfFilePath);
+    pRaw.loadPDF(pdfFilePath);
   });
 }
 
@@ -121,7 +155,7 @@ function parseQuestionsFromText(text, meta = {}, markingKeyMap = {}) {
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
 
-    const qMatch = line.match(/^(\d+)([a-z]?(?:\.[i|v|x]+)?)[\.\)]\s*(.*)/i);
+    const qMatch = line.match(/^(\d+)\s*([a-z]?(?:\.[i|v|x]+)?)?\s*[\.\)]\s*(.*)/i);
     if (!qMatch) continue;
 
     const parentNum = qMatch[1];
