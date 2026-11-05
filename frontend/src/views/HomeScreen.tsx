@@ -8,12 +8,17 @@ import {
   Star,
   GraduationCap,
   BookOpen,
-  Zap
+  Zap,
+  Trophy,
+  BarChart3,
+  ChevronRight,
+  TrendingUp,
+  Award
 } from 'lucide-react';
 
 export const HomeScreen: React.FC = () => {
   const navigate = useNavigate();
-  const { activeProfile, updateGrade } = useUserStore();
+  const { activeProfile, profiles, updateGrade } = useUserStore();
   const { subjects, setDivision, fetchMaterials } = useCurriculumStore();
   const [selectedSubjectId, setSelectedSubjectId] = useState<string>('');
 
@@ -55,12 +60,17 @@ export const HomeScreen: React.FC = () => {
     { key: 'form_3', label: 'Form 3 (JCE Candidate)' }
   ];
 
+  // Leaderboard ranking preview
+  const sortedProfiles = [...profiles].sort((a, b) => b.weeklyStars - a.weeklyStars);
+  const activeRank = sortedProfiles.findIndex(p => p.id === activeProfile.id) + 1;
+  const topLearner = sortedProfiles[0] || activeProfile;
+
   return (
-    <div className="space-y-6 max-w-7xl mx-auto pb-12">
-      {/* 1. TOP ROW: 4 BALANCED CARDS */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        {/* Column 1: Learner Info / Greeting */}
-        <div className="bg-gradient-to-br from-surface-navy to-slate-900 border border-border-navy p-5 rounded-2xl shadow-xl flex flex-col justify-between">
+    <div className="space-y-5 max-w-7xl mx-auto pb-12">
+      {/* 1st ROW: LEARNER INFO / GREETING, LEADERBOARD, ANALYTICS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 1.1 Learner Info / Greeting */}
+        <div className="bg-gradient-to-br from-surface-navy via-slate-900 to-indigo-950/40 border border-border-navy p-5 rounded-2xl shadow-xl flex flex-col justify-between">
           <div className="space-y-1.5">
             <div className="inline-flex items-center space-x-1.5 px-2.5 py-0.5 rounded-full bg-brand-blue/20 text-brand-cyan border border-brand-cyan/30 text-[10px] font-bold uppercase tracking-wider">
               <Sparkles className="w-3 h-3" />
@@ -69,18 +79,92 @@ export const HomeScreen: React.FC = () => {
             <h1 className="text-xl font-extrabold text-white tracking-tight truncate">
               Dumela, {activeProfile.displayName}! 🇧🇼
             </h1>
-            <p className="text-xs text-slate-300 line-clamp-2 leading-relaxed">
-              Active track: <span className="text-brand-cyan font-bold">{activeProfile.gradeKey.toUpperCase().replace('_', ' ')}</span>
+            <p className="text-xs text-slate-300 leading-relaxed">
+              Curriculum Track: <span className="text-brand-cyan font-bold">{activeProfile.gradeKey.toUpperCase().replace('_', ' ')}</span>
             </p>
           </div>
 
           <div className="pt-3 border-t border-border-navy/60 flex items-center justify-between text-[11px] text-slate-400">
-            <span>Botswana Curriculum</span>
-            <span className="font-bold text-white">PSLE / JCE</span>
+            <span>Target Syllabus</span>
+            <span className="font-bold text-white">Botswana PSLE / JCE</span>
           </div>
         </div>
 
-        {/* Column 2: Select Grade / Standard */}
+        {/* 1.2 Leaderboard Card */}
+        <div 
+          onClick={() => navigate('/leaderboard')}
+          className="group bg-surface-navy hover:bg-slate-800/90 border border-border-navy hover:border-gold-star/50 p-5 rounded-2xl shadow-xl flex flex-col justify-between cursor-pointer transition active:scale-[0.99]"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+              <Trophy className="w-4 h-4 text-gold-star" />
+              <span>National Leaderboard</span>
+            </span>
+            <span className="text-[10px] font-bold text-gold-star bg-amber-500/10 px-2 py-0.5 rounded border border-amber-500/30">
+              Rank #{activeRank || 1}
+            </span>
+          </div>
+
+          <div className="my-2.5 flex items-center justify-between bg-dark-navy p-2.5 rounded-xl border border-border-navy">
+            <div className="flex items-center space-x-2">
+              <span className="text-lg">👑</span>
+              <div>
+                <div className="text-[11px] font-bold text-white">{topLearner.displayName}</div>
+                <div className="text-[10px] text-slate-400">Current Leader</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-extrabold text-gold-star">⭐ {topLearner.weeklyStars}</div>
+              <div className="text-[10px] text-slate-400">Stars</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-gold-star font-bold pt-1">
+            <span>View Full Standings</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+          </div>
+        </div>
+
+        {/* 1.3 Analytics Card */}
+        <div 
+          onClick={() => navigate('/analytics')}
+          className="group bg-surface-navy hover:bg-slate-800/90 border border-border-navy hover:border-brand-cyan/50 p-5 rounded-2xl shadow-xl flex flex-col justify-between cursor-pointer transition active:scale-[0.99]"
+        >
+          <div className="flex items-center justify-between">
+            <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
+              <BarChart3 className="w-4 h-4 text-brand-cyan" />
+              <span>Attainment Analytics</span>
+            </span>
+            <div className="flex items-center space-x-1 text-emerald-400 text-[10px] font-bold bg-emerald-500/10 px-2 py-0.5 rounded border border-emerald-500/30">
+              <TrendingUp className="w-3 h-3" />
+              <span>Grade A Pace</span>
+            </div>
+          </div>
+
+          <div className="my-2.5 flex items-center justify-between bg-dark-navy p-2.5 rounded-xl border border-border-navy">
+            <div className="flex items-center space-x-2">
+              <Award className="w-4 h-4 text-brand-cyan" />
+              <div>
+                <div className="text-[11px] font-bold text-white">88% Average</div>
+                <div className="text-[10px] text-slate-400">Exam Attainment</div>
+              </div>
+            </div>
+            <div className="text-right">
+              <div className="text-xs font-extrabold text-brand-cyan">Mastery</div>
+              <div className="text-[10px] text-slate-400">Level 4</div>
+            </div>
+          </div>
+
+          <div className="flex items-center justify-between text-xs text-brand-cyan font-bold pt-1">
+            <span>Open Performance Dashboard</span>
+            <ChevronRight className="w-4 h-4 group-hover:translate-x-1 transition" />
+          </div>
+        </div>
+      </div>
+
+      {/* 2nd ROW: SELECT GRADE / STANDARD, SELECT SUBJECT, QUICK ACTION / STATS */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+        {/* 2.1 Select Grade / Standard */}
         <div className="bg-surface-navy border border-border-navy p-5 rounded-2xl shadow-xl flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -117,7 +201,7 @@ export const HomeScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Column 3: Select Subject (Quick Switcher / Jump) */}
+        {/* 2.2 Select Subject (Quick Switcher / Jump) */}
         <div className="bg-surface-navy border border-border-navy p-5 rounded-2xl shadow-xl flex flex-col justify-between">
           <div className="space-y-2">
             <div className="flex items-center justify-between">
@@ -150,7 +234,7 @@ export const HomeScreen: React.FC = () => {
           </div>
         </div>
 
-        {/* Column 4: Quick Action / Stats */}
+        {/* 2.3 Quick Action / Stats */}
         <div className="bg-surface-navy border border-border-navy p-5 rounded-2xl shadow-xl flex flex-col justify-between">
           <div className="flex items-center justify-between">
             <span className="text-xs font-bold text-slate-300 uppercase tracking-wider flex items-center space-x-1.5">
