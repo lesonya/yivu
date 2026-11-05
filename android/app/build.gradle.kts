@@ -38,6 +38,33 @@ android {
     }
 }
 
+tasks.whenTaskAdded {
+    if (name == "assembleRelease") {
+        doLast {
+            val outDir = layout.buildDirectory.dir("outputs/flutter-apk").get().asFile
+            val releaseApk = File(outDir, "app-release.apk")
+            if (releaseApk.exists()) {
+                val vName = android.defaultConfig.versionName ?: "1.0.0"
+                val versionedApk = File(outDir, "yivu-v${vName}-release.apk")
+                releaseApk.copyTo(versionedApk, overwrite = true)
+                println("Successfully created versioned APK: ${versionedApk.absolutePath}")
+            }
+        }
+    }
+    if (name == "assembleDebug") {
+        doLast {
+            val outDir = layout.buildDirectory.dir("outputs/flutter-apk").get().asFile
+            val debugApk = File(outDir, "app-debug.apk")
+            if (debugApk.exists()) {
+                val vName = android.defaultConfig.versionName ?: "1.0.0"
+                val versionedApk = File(outDir, "yivu-v${vName}-debug.apk")
+                debugApk.copyTo(versionedApk, overwrite = true)
+                println("Successfully created versioned APK: ${versionedApk.absolutePath}")
+            }
+        }
+    }
+}
+
 kotlin {
     compilerOptions {
         jvmTarget = org.jetbrains.kotlin.gradle.dsl.JvmTarget.JVM_17
