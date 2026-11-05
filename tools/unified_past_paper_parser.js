@@ -33,11 +33,32 @@ function sanitizeText(str) {
   if (!str) return '';
   let cleaned = str.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
 
-  // Fix words spaced letter by letter (e.g., "W o r k   o u t" -> "Work out")
-  // Only collapse spaces between single letters that belong to a word, preserving normal word spaces (double/multiple spaces)
-  cleaned = cleaned.replace(/\b([a-zA-Z]) ([a-zA-Z]) ([a-zA-Z]) ([a-zA-Z])\b/g, '$1$2$3$4');
-  cleaned = cleaned.replace(/\b([a-zA-Z]) ([a-zA-Z]) ([a-zA-Z])\b/g, '$1$2$3');
-  cleaned = cleaned.replace(/\b([a-zA-Z]) ([a-zA-Z])\b/g, '$1$2');
+  // If text exhibits wide OCR spacing with double/multi spaces between words and single spaces within words:
+  if (/\s{2,}/.test(cleaned)) {
+    const words = cleaned.split(/\s{2,}/);
+    cleaned = words.map(w => {
+      // Within each word chunk, collapse single spaces between letters/numbers
+      let prev = '';
+      let curr = w.trim();
+      while (prev !== curr) {
+        prev = curr;
+        curr = curr.replace(/([a-zA-Z0-9])\s+([a-zA-Z0-9])/g, '$1$2');
+      }
+      return curr;
+    }).filter(w => w.length > 0).join(' ');
+  }
+
+  // Also handle any remaining spaced single letters in lines that didn't have multi-space delimiters
+  let prev = '';
+  while (prev !== cleaned) {
+    prev = cleaned;
+    cleaned = cleaned.replace(/\b([a-zA-Z])\s+([a-zA-Z])\b/g, '$1$2');
+  }
+
+  // Trailing single and multi-letter suffixes
+  cleaned = cleaned.replace(/\b([a-zA-Z]{3,})\s+([sdt])\b/gi, '$1$2');
+  cleaned = cleaned.replace(/\b([a-zA-Z]{3,})\s+(ed|ly|es|er|en|th)\b/gi, '$1$2');
+  cleaned = cleaned.replace(/\b([a-zA-Z]{3,})\s+(ing|tion|ment|ness|able|ible)\b/gi, '$1$2');
 
   cleaned = cleaned.replace(/[ \t]+/g, ' ').trim();
 
