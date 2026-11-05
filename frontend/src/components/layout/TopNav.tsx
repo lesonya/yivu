@@ -50,9 +50,6 @@ export const TopNav: React.FC<TopNavProps> = ({
                   <span className="text-lg font-black tracking-tight text-white group-hover:text-transparent group-hover:bg-clip-text group-hover:bg-gradient-to-r group-hover:from-white group-hover:to-purple-300 transition">
                     yivu
                   </span>
-                  <span className="text-[10px] font-bold uppercase tracking-wider bg-purple-500/10 text-purple-300 px-2 py-0.5 rounded-full border border-purple-500/20">
-                    Cognix UI
-                  </span>
                 </div>
                 <p className="text-[11px] text-slate-400 font-medium">Botswana Cognitive Curriculum Hub</p>
               </div>
