@@ -90,30 +90,7 @@ function sanitizeText(str) {
   if (!str) return '';
   let cleaned = str.replace(/[\x00-\x1F\x7F-\x9F]/g, ' ');
 
-  // Multi-space word separation with intra-word single space collapse
-  if (/\s{2,}/.test(cleaned)) {
-    const words = cleaned.split(/\s{2,}/);
-    cleaned = words.map(w => {
-      let prev = '';
-      let curr = w.trim();
-      while (prev !== curr) {
-        prev = curr;
-        curr = curr.replace(/([a-zA-Z0-9])\s+([a-zA-Z0-9])/g, '$1$2');
-      }
-      return curr;
-    }).filter(w => w.length > 0).join(' ');
-  }
-
-  let prev = '';
-  while (prev !== cleaned) {
-    prev = cleaned;
-    cleaned = cleaned.replace(/\b([a-zA-Z])\s+([a-zA-Z])\b/g, '$1$2');
-  }
-
-  cleaned = cleaned.replace(/\b([a-zA-Z]{3,})\s+([sdt])\b/gi, '$1$2');
-  cleaned = cleaned.replace(/\b([a-zA-Z]{3,})\s+(ed|ly|es|er|en|th)\b/gi, '$1$2');
-  cleaned = cleaned.replace(/\b([a-zA-Z]{3,})\s+(ing|tion|ment|ness|able|ible)\b/gi, '$1$2');
-
+  // Collapse only multiple spaces/tabs into a single standard space
   cleaned = cleaned.replace(/[ \t]+/g, ' ').trim();
 
   // Convert mathematical formulas to LaTeX
