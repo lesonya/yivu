@@ -59,11 +59,6 @@ export const HomeScreen: React.FC = () => {
         {/* 1.1 Learner Info / Greeting */}
         <div className="cognix-card p-6 flex flex-col justify-between">
           <div className="space-y-3">
-            <div className="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-fuchsia-500/10 text-fuchsia-300 border border-fuchsia-500/20 text-[10px] font-semibold uppercase tracking-widest">
-              {/* @ts-ignore */}
-              <iconify-icon icon="solar:user-circle-bold-duotone" width="14" height="14"></iconify-icon>
-              <span>Cognitive Learner Node</span>
-            </div>
             <h1 className="text-2xl font-bold text-white tracking-tight">
               Dumela, {activeProfile.displayName}! 🇧🇼
             </h1>
