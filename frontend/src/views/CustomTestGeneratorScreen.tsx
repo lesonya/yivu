@@ -194,7 +194,7 @@ export const CustomTestGeneratorScreen: React.FC = () => {
             className="w-full py-3.5 bg-gradient-to-r from-brand-blue to-brand-cyan hover:from-blue-600 hover:to-cyan-600 text-white font-extrabold text-xs uppercase tracking-wider rounded-xl shadow-lg transition active:scale-98 flex items-center justify-center space-x-2"
           >
             <Play className="w-4 h-4 fill-current" />
-            <span>{isGenerating ? 'Assembling Test Questions...' : 'Start Custom Practice Session'}</span>
+            <span>{isGenerating ? 'Assembling Test Questions...' : 'Take Test'}</span>
           </button>
         </div>
       </div>

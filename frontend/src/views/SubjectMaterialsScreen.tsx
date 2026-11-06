@@ -232,7 +232,7 @@ export const SubjectMaterialsScreen: React.FC = () => {
                   className="flex items-center space-x-1.5 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 py-1.5 rounded-lg shadow transition active:scale-95"
                 >
                   <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Start Practice</span>
+                  <span>Take Test</span>
                 </button>
               </div>
             </div>
