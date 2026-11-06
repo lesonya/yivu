@@ -49,7 +49,7 @@ db.exec(`
 
 module.exports = {
   db,
-  
+
   // Helpers
   getAllPapers(filters = {}) {
     let sql = `
@@ -106,7 +106,7 @@ module.exports = {
     const paper = db.prepare('SELECT * FROM exam_papers WHERE id = ?').get(id);
     if (!paper) return null;
     const questions = db.prepare('SELECT * FROM questions WHERE paper_id = ? ORDER BY rowid ASC').all(id);
-    
+
     // Parse JSON fields
     paper.questions = questions.map(q => ({
       ...q,
