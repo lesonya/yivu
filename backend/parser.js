@@ -196,7 +196,7 @@ function parseQuestionsFromText(text, meta = {}, markingKeyMap = {}) {
     // Diagram detection
     const promptLower = prompt.toLowerCase();
     const hasDiagram = promptLower.includes('diagram') || promptLower.includes('shape below') || promptLower.includes('figure') || promptLower.includes('shown below') || promptLower.includes('picture') || promptLower.includes('chart') || promptLower.includes('graph');
-    
+
     let diagramFilename = null;
     let diagramDescription = null;
     if (hasDiagram) {

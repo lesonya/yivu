@@ -21,7 +21,11 @@ import {
   Volume2,
   VolumeX,
   Volume1,
-  FileCheck
+  FileCheck,
+  X,
+  Bot,
+  Lightbulb,
+  BookOpen
 } from 'lucide-react';
 
 export const QuizRunnerScreen: React.FC = () => {
@@ -45,6 +49,7 @@ export const QuizRunnerScreen: React.FC = () => {
   const [aiExplanation, setAiExplanation] = useState<string | null>(null);
   const [aiSource, setAiSource] = useState<string | null>(null);
   const [isAiLoading, setIsAiLoading] = useState(false);
+  const [isAiPanelOpen, setIsAiPanelOpen] = useState(false);
 
   // Sound effects mute state
   const [isMuted, setIsMuted] = useState(false);
@@ -102,6 +107,7 @@ export const QuizRunnerScreen: React.FC = () => {
     setSelectedAnswerIndex(index);
     setIsSubmitted(true);
     setAiExplanation(null);
+    setIsAiPanelOpen(false);
     setUserAnswers((prev) => ({ ...prev, [currentIndex]: index }));
 
     const isCorrect = index === currentQ.correct_index;
@@ -124,6 +130,7 @@ export const QuizRunnerScreen: React.FC = () => {
       setSelectedAnswerIndex(null);
       setIsSubmitted(false);
       setAiExplanation(null);
+      setIsAiPanelOpen(false);
     } else {
       handleFinishQuiz();
     }
@@ -178,6 +185,7 @@ export const QuizRunnerScreen: React.FC = () => {
   };
 
   const handleExplainWithAI = async () => {
+    setIsAiPanelOpen(true);
     setIsAiLoading(true);
     setAiExplanation(null);
 
@@ -415,7 +423,7 @@ export const QuizRunnerScreen: React.FC = () => {
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
   return (
-    <div className="max-w-3xl mx-auto space-y-6 pb-12">
+    <div className={`mx-auto space-y-6 pb-12 transition-all duration-300 ${isAiPanelOpen ? 'max-w-7xl' : 'max-w-3xl'}`}>
       {/* Top Question Tracker & Countdown Header */}
       <div className="flex items-center justify-between bg-surface-navy border border-border-navy p-4 rounded-2xl">
         <div className="flex items-center space-x-3">
@@ -460,118 +468,216 @@ export const QuizRunnerScreen: React.FC = () => {
         </div>
       </div>
 
-      {/* Question Card */}
-      <div className="bg-surface-navy border border-border-navy rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
-        <div>
-          <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
-            {currentQ.question_type || 'Multiple Choice Question'}
-          </span>
-          <h2 className="text-lg sm:text-xl font-bold text-white mt-1 leading-snug">
-            <MathRenderer text={currentQ.prompt} />
-          </h2>
-
-          {/* Visual Diagram Asset (if present) */}
-          {currentQ.has_diagram && (
-            <div className="mt-4 p-4 rounded-2xl bg-dark-navy border border-border-navy flex flex-col items-center justify-center text-center">
-              <div className="w-12 h-12 rounded-xl bg-surface-navy text-brand-cyan flex items-center justify-center mb-2">
-                <ImageIcon className="w-6 h-6" />
-              </div>
-              <p className="text-xs font-bold text-slate-300">
-                {currentQ.diagram_description || 'Visual examination diagram'}
-              </p>
-              <span className="text-[10px] text-slate-500 mt-0.5">
-                Ref: {currentQ.diagram_filename || 'curriculum_figure.png'}
-              </span>
-            </div>
-          )}
-        </div>
-
-        {/* Options List */}
-        <div className="space-y-3">
-          {(currentQ.options || []).map((option, idx) => {
-            let optionStyles = 'bg-dark-navy/80 border-border-navy hover:bg-slate-800 text-slate-200 focus:border-brand-cyan focus:bg-slate-800';
-
-            if (isSubmitted) {
-              if (idx === currentQ.correct_index) {
-                optionStyles = 'bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md';
-              } else if (idx === selectedAnswerIndex) {
-                optionStyles = 'bg-rose-950/80 border-rose-500 text-rose-200 shadow-md';
-              } else {
-                optionStyles = 'opacity-40 border-border-navy text-slate-500';
-              }
-            }
-
-            return (
-              <button
-                key={idx}
-                data-dpad-quiz-item
-                disabled={isSubmitted}
-                onClick={() => handleSelectAnswer(idx)}
-                className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition duration-150 outline-none active:scale-[0.99] ${optionStyles}`}
-              >
-                <div className="flex items-center space-x-3.5">
-                  <span className="w-8 h-8 rounded-xl bg-surface-navy border border-border-navy flex items-center justify-center text-xs font-bold text-white">
-                    {optionLetters[idx] || idx + 1}
+      {/* Main Runner Layout: Split View when AI Tutor is Open, Centered Single Column when Closed */}
+      <div className={isAiPanelOpen ? 'grid grid-cols-1 lg:grid-cols-12 gap-6 items-start' : 'space-y-6'}>
+        {/* Left Column: Question & Options */}
+        <div className={isAiPanelOpen ? 'lg:col-span-7 space-y-6' : 'space-y-6'}>
+          <div className="bg-surface-navy border border-border-navy rounded-3xl p-6 sm:p-8 shadow-xl space-y-6">
+            <div>
+              <div className="flex items-center justify-between">
+                <span className="text-[10px] font-bold text-slate-400 uppercase tracking-wider">
+                  {currentQ.question_type || 'Multiple Choice Question'}
+                </span>
+                {isAiPanelOpen && (
+                  <span className="hidden sm:inline-flex items-center space-x-1.5 text-[11px] font-bold text-purple-400 bg-purple-950/50 border border-purple-500/30 px-2.5 py-0.5 rounded-full">
+                    <Sparkles className="w-3 h-3" />
+                    <span>AI Tutor Mode Active</span>
                   </span>
-                  <span className="text-sm font-semibold">
-                    <MathRenderer text={option} />
+                )}
+              </div>
+              <h2 className="text-lg sm:text-xl font-bold text-white mt-1 leading-snug">
+                <MathRenderer text={currentQ.prompt} />
+              </h2>
+
+              {/* Visual Diagram Asset (if present) */}
+              {currentQ.has_diagram && (
+                <div className="mt-4 p-4 rounded-2xl bg-dark-navy border border-border-navy flex flex-col items-center justify-center text-center">
+                  <div className="w-12 h-12 rounded-xl bg-surface-navy text-brand-cyan flex items-center justify-center mb-2">
+                    <ImageIcon className="w-6 h-6" />
+                  </div>
+                  <p className="text-xs font-bold text-slate-300">
+                    {currentQ.diagram_description || 'Visual examination diagram'}
+                  </p>
+                  <span className="text-[10px] text-slate-500 mt-0.5">
+                    Ref: {currentQ.diagram_filename || 'curriculum_figure.png'}
                   </span>
                 </div>
+              )}
+            </div>
 
-                {isSubmitted && idx === currentQ.correct_index && (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                )}
-                {isSubmitted && idx === selectedAnswerIndex && idx !== currentQ.correct_index && (
-                  <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
-                )}
-              </button>
-            );
-          })}
+            {/* Options List */}
+            <div className="space-y-3">
+              {(currentQ.options || []).map((option, idx) => {
+                let optionStyles = 'bg-dark-navy/80 border-border-navy hover:bg-slate-800 text-slate-200 focus:border-brand-cyan focus:bg-slate-800';
+
+                if (isSubmitted) {
+                  if (idx === currentQ.correct_index) {
+                    optionStyles = 'bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md ring-1 ring-emerald-500/50';
+                  } else if (idx === selectedAnswerIndex) {
+                    optionStyles = 'bg-rose-950/80 border-rose-500 text-rose-200 shadow-md ring-1 ring-rose-500/50';
+                  } else {
+                    optionStyles = 'opacity-40 border-border-navy text-slate-500';
+                  }
+                }
+
+                return (
+                  <button
+                    key={idx}
+                    data-dpad-quiz-item
+                    disabled={isSubmitted}
+                    onClick={() => handleSelectAnswer(idx)}
+                    className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition duration-150 outline-none active:scale-[0.99] ${optionStyles}`}
+                  >
+                    <div className="flex items-center space-x-3.5">
+                      <span className="w-8 h-8 rounded-xl bg-surface-navy border border-border-navy flex items-center justify-center text-xs font-bold text-white shrink-0">
+                        {optionLetters[idx] || idx + 1}
+                      </span>
+                      <span className="text-sm font-semibold leading-relaxed">
+                        <MathRenderer text={option} />
+                      </span>
+                    </div>
+
+                    {isSubmitted && idx === currentQ.correct_index && (
+                      <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                    )}
+                    {isSubmitted && idx === selectedAnswerIndex && idx !== currentQ.correct_index && (
+                      <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
+                    )}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Action Controls & AI Tutor Button */}
+            {isSubmitted && (
+              <div className="pt-4 border-t border-border-navy/80 flex flex-wrap items-center justify-between gap-3">
+                <button
+                  onClick={handleExplainWithAI}
+                  disabled={isAiLoading}
+                  className={`flex items-center space-x-2 text-xs font-bold px-4 py-2.5 rounded-xl transition active:scale-95 ${
+                    isAiPanelOpen
+                      ? 'bg-purple-600/30 text-purple-200 border border-purple-400/50 shadow-inner'
+                      : 'text-purple-300 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40'
+                  }`}
+                >
+                  <Sparkles className="w-4 h-4 text-purple-400 animate-pulse" />
+                  <span>
+                    {isAiLoading
+                      ? 'Analyzing Botswana Syllabus...'
+                      : isAiPanelOpen
+                      ? 'AI Tutor Side-by-Side Open'
+                      : 'Explain with AI Tutor'}
+                  </span>
+                </button>
+
+                <button
+                  data-dpad-quiz-item
+                  onClick={handleNextQuestion}
+                  className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-2.5 rounded-xl shadow-lg transition active:scale-95 outline-none focus:ring-2 focus:ring-brand-cyan ml-auto"
+                >
+                  <span>{currentIndex + 1 < questions.length ? 'Next Question' : 'View Results'}</span>
+                  <ChevronRight className="w-4 h-4" />
+                </button>
+              </div>
+            )}
+          </div>
         </div>
 
-        {/* Action Controls & AI Tutor Button */}
-        {isSubmitted && (
-          <div className="pt-4 border-t border-border-navy/80 flex flex-wrap items-center justify-between gap-3">
-            <button
-              onClick={handleExplainWithAI}
-              disabled={isAiLoading}
-              className="flex items-center space-x-2 text-xs font-bold text-purple-300 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 px-4 py-2.5 rounded-xl transition active:scale-95"
-            >
-              <Sparkles className="w-4 h-4 text-purple-400" />
-              <span>{isAiLoading ? 'Analyzing Curriculum...' : 'Explain with AI Tutor'}</span>
-            </button>
+        {/* Right Column: AI Tutor Side Panel (Split View on Desktop / TV, Stacked on Mobile) */}
+        {isAiPanelOpen && (
+          <div className="lg:col-span-5 space-y-4 animate-in fade-in slide-in-from-right-4 duration-300">
+            <div className="bg-gradient-to-b from-slate-900/95 via-purple-950/40 to-slate-900 border border-purple-500/30 rounded-3xl p-6 shadow-2xl backdrop-blur-xl relative flex flex-col max-h-[85vh]">
+              {/* AI Tutor Panel Header */}
+              <div className="flex items-center justify-between pb-4 border-b border-purple-500/20">
+                <div className="flex items-center space-x-3">
+                  <div className="w-10 h-10 rounded-2xl bg-purple-500/20 border border-purple-400/30 flex items-center justify-center text-purple-300 shadow-inner">
+                    <Bot className="w-5 h-5 text-purple-300" />
+                  </div>
+                  <div>
+                    <div className="flex items-center space-x-2">
+                      <h3 className="text-sm font-bold text-white tracking-wide">Yivu AI Tutor</h3>
+                      <span className="inline-block w-2 h-2 rounded-full bg-emerald-400 animate-ping" />
+                    </div>
+                    <p className="text-[11px] text-purple-300/80 font-medium">
+                      Botswana Curriculum Breakdown
+                    </p>
+                  </div>
+                </div>
 
-            <button
-              data-dpad-quiz-item
-              onClick={handleNextQuestion}
-              className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-6 py-2.5 rounded-xl shadow-lg transition active:scale-95 outline-none focus:ring-2 focus:ring-brand-cyan"
-            >
-              <span>{currentIndex + 1 < questions.length ? 'Next Question' : 'View Results'}</span>
-              <ChevronRight className="w-4 h-4" />
-            </button>
-          </div>
-        )}
-
-        {/* AI Explanation Box */}
-        {aiExplanation && (
-          <div className="p-4 rounded-2xl bg-gradient-to-br from-purple-950/40 to-slate-900 border border-purple-500/40 text-purple-200 text-xs leading-relaxed font-medium space-y-2">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center space-x-2 font-bold text-purple-300 uppercase tracking-wider text-[11px]">
-                <Sparkles className="w-4 h-4 text-purple-400" />
-                <span>AI Tutor Syllabus Breakdown</span>
+                <div className="flex items-center space-x-2">
+                  <span className="text-[10px] uppercase tracking-wider font-extrabold px-2.5 py-0.5 rounded-full bg-purple-900/60 border border-purple-400/30 text-purple-300">
+                    {aiSource || 'Curriculum Engine'}
+                  </span>
+                  <button
+                    onClick={() => setIsAiPanelOpen(false)}
+                    title="Close AI Tutor Panel"
+                    className="p-1.5 rounded-xl bg-white/5 hover:bg-white/10 text-slate-400 hover:text-white border border-white/10 transition active:scale-95"
+                  >
+                    <X className="w-4 h-4" />
+                  </button>
+                </div>
               </div>
-              <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded bg-purple-900/60 border border-purple-400/30 text-purple-300">
-                {aiSource || 'Curriculum Engine'}
-              </span>
+
+              {/* Scrollable Tutor Body */}
+              <div className="overflow-y-auto py-4 space-y-4 pr-1 text-sm text-slate-200">
+                {isAiLoading ? (
+                  <div className="py-12 flex flex-col items-center justify-center space-y-3 text-center">
+                    <div className="w-8 h-8 border-3 border-purple-500 border-t-transparent rounded-full animate-spin" />
+                    <p className="text-xs font-semibold text-purple-200">
+                      Formulating pedagogical explanation for Grade {activeProfile.gradeKey.toUpperCase()}...
+                    </p>
+                    <span className="text-[11px] text-slate-400">Referencing official syllabus outcomes</span>
+                  </div>
+                ) : aiExplanation ? (
+                  <div className="space-y-4">
+                    {/* Key Curriculum Concept Card */}
+                    <div className="p-3.5 rounded-2xl bg-purple-950/30 border border-purple-500/20 flex items-start space-x-3">
+                      <Lightbulb className="w-5 h-5 text-amber-400 shrink-0 mt-0.5" />
+                      <div>
+                        <div className="text-xs font-bold text-white">Curriculum Guidance</div>
+                        <div className="text-xs text-purple-200/90 mt-0.5">
+                          Follow the exact logical steps below to master this examination objective.
+                        </div>
+                      </div>
+                    </div>
+
+                    {/* Step-by-Step Breakdown Content */}
+                    <div className="prose prose-invert max-w-none text-xs sm:text-sm leading-relaxed text-slate-200 space-y-2 whitespace-pre-line font-normal">
+                      <MathRenderer text={aiExplanation} />
+                    </div>
+
+                    {/* Botswana Attainment Note */}
+                    <div className="p-3 rounded-xl bg-white/[0.03] border border-white/10 flex items-center space-x-2.5 text-[11px] text-slate-400">
+                      <BookOpen className="w-4 h-4 text-brand-cyan shrink-0" />
+                      <span>Aligned to BEC PSLE / JCE / BGCSE curriculum assessment standards.</span>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="py-8 text-center text-slate-400 text-xs">
+                    Tap "Explain with AI Tutor" to generate detailed step-by-step guidance.
+                  </div>
+                )}
+              </div>
+
+              {/* Panel Footer */}
+              <div className="pt-3 border-t border-purple-500/20 flex items-center justify-between">
+                <span className="text-[11px] text-slate-400">
+                  Question {currentQ.question_number || currentIndex + 1} of {questions.length}
+                </span>
+                <button
+                  onClick={() => setIsAiPanelOpen(false)}
+                  className="px-4 py-1.5 rounded-xl bg-purple-600/30 hover:bg-purple-600/40 text-purple-200 border border-purple-500/40 text-xs font-bold transition active:scale-95"
+                >
+                  Got it, Continue
+                </button>
+              </div>
             </div>
-            <p className="whitespace-pre-line text-slate-200">
-              <MathRenderer text={aiExplanation} />
-            </p>
           </div>
         )}
       </div>
     </div>
   );
 };
+
 
 
