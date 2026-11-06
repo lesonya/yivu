@@ -265,11 +265,11 @@
 
       <!-- Modal Footer -->
       <div class="px-6 py-4 border-t border-borderNavy bg-darkNavy flex items-center justify-between">
-        <button onclick="deleteCurrentPaper()" class="text-rose-400 hover:text-rose-300 font-semibold text-xs flex items-center space-x-1.5 px-3 py-2 rounded-xl hover:bg-rose-950/30">
-          <i data-lucide="trash-2" class="w-4 h-4"></i>
-          <span>Delete Paper</span>
+        <button onclick="deleteCurrentPaper()" class="text-rose-400 hover:text-white bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 font-bold text-xs flex items-center space-x-1.5 px-3.5 py-2 rounded-xl transition shadow active:scale-95" title="Permanently delete from SQLite and seed materials">
+          <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+          <span>Delete Paper Completely</span>
         </button>
-        <button onclick="closePaperModal()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-4 py-2 rounded-xl">
+        <button onclick="closePaperModal()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-4 py-2 rounded-xl transition active:scale-95">
           Close
         </button>
       </div>
@@ -1014,9 +1014,18 @@
     }
 
     async function deleteCurrentPaper() {
-      if (!currentPaperId || !confirm("Are you sure you want to delete this entire exam paper and all its questions?")) return;
+      if (!currentPaperId) return;
+      const title = currentPaperData ? currentPaperData.title : 'this exam paper';
+      const promptConfirm = confirm(
+        `PERMANENT DELETION WARNING:\n\nAre you sure you want to completely delete "${title}" from the entire system?\n\nThis will permanently remove the paper, all its questions, and synchronize changes directly to both the active database and frontend seed materials.\n\nThis action cannot be undone.`
+      );
+      if (!promptConfirm) return;
+
       try {
-        await fetch(`/api/papers/${currentPaperId}`, { method: 'DELETE' });
+        const res = await fetch(`/api/papers/${currentPaperId}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+        const data = await res.json();
+        alert(data.message || 'Paper permanently deleted from the whole system.');
         closePaperModal();
         loadStats();
         loadPapers();

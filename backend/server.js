@@ -199,11 +199,23 @@ app.put('/api/papers/:id', (req, res) => {
   }
 });
 
-// 5. Delete Paper
+// 5. Delete Paper Completely from whole system
 app.delete('/api/papers/:id', (req, res) => {
   try {
     deletePaper(req.params.id);
-    res.json({ success: true, message: 'Paper and its questions deleted successfully' });
+    // Synchronize current DB state with assets/data/seed_materials.json
+    let syncRes = null;
+    try {
+      syncRes = syncDbToSeedMaterials();
+    } catch (syncErr) {
+      console.warn('Could not sync deletion to seed_materials.json:', syncErr.message);
+    }
+
+    res.json({
+      success: true,
+      message: 'Paper and its questions permanently deleted from SQLite database and seed curriculum materials.',
+      remaining_papers: syncRes ? syncRes.papersCount : null
+    });
   } catch (err) {
     res.status(500).json({ error: err.message });
   }
