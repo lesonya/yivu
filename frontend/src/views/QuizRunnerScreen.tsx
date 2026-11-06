@@ -65,17 +65,22 @@ export const QuizRunnerScreen: React.FC = () => {
     enabled: !isLoading && !isFinished
   });
 
-  const materialTitle = location.state?.material?.title || 'Examination Practice';
+  const [materialMeta, setMaterialMeta] = useState<any>(location.state?.material || null);
+
+  const materialTitle = materialMeta?.title || location.state?.material?.title || 'Examination Practice';
   const subjectName = location.state?.subjectName || 'Curriculum Subject';
-  const subjectId = location.state?.material?.subject_id || 'std_math';
+  const subjectId = materialMeta?.subject_id || location.state?.material?.subject_id || 'std_math';
 
   useEffect(() => {
     async function loadQuestions() {
       if (!materialId) return;
       setIsLoading(true);
       const paper = await getPaperById(materialId);
-      if (paper && paper.questions && paper.questions.length > 0) {
-        setQuestions(paper.questions);
+      if (paper) {
+        setMaterialMeta(paper);
+        if (paper.questions && paper.questions.length > 0) {
+          setQuestions(paper.questions);
+        }
       }
       setIsLoading(false);
     }
@@ -424,6 +429,38 @@ export const QuizRunnerScreen: React.FC = () => {
 
   return (
     <div className={`mx-auto space-y-6 pb-12 transition-all duration-300 ${isAiPanelOpen ? 'max-w-7xl' : 'max-w-3xl'}`}>
+      {/* 1. Paper Header Information Banner (Title, Grade, Subject, Total Questions, Allocated Time) */}
+      <div className="bg-gradient-to-r from-slate-900 via-surface-navy to-slate-900 border border-border-navy/80 p-5 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-cyan bg-brand-cyan/15 px-3 py-0.5 rounded-full border border-brand-cyan/30">
+              {activeProfile.gradeKey.toUpperCase().replace('_', ' ')}
+            </span>
+            <span className="text-[11px] font-bold text-slate-300 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
+              {subjectName}
+            </span>
+            <span className="text-[10px] text-slate-400 font-semibold uppercase">
+              • {materialMeta?.term || 'Term 1'} Assessment
+            </span>
+          </div>
+          <h1 className="text-base sm:text-lg font-bold text-white tracking-wide line-clamp-1">
+            {materialTitle}
+          </h1>
+        </div>
+
+        {/* Paper Metadata Badges */}
+        <div className="flex items-center space-x-3">
+          <div className="bg-dark-navy/90 border border-border-navy px-3 py-1.5 rounded-2xl text-center">
+            <div className="text-xs font-extrabold text-gold-star">{questions.length} Questions</div>
+            <div className="text-[9px] text-slate-400 uppercase font-semibold">Total Item Count</div>
+          </div>
+          <div className="bg-dark-navy/90 border border-border-navy px-3 py-1.5 rounded-2xl text-center">
+            <div className="text-xs font-extrabold text-amber-400">45 Minutes</div>
+            <div className="text-[9px] text-slate-400 uppercase font-semibold">Allocated Time</div>
+          </div>
+        </div>
+      </div>
+
       {/* Top Question Tracker & Countdown Header */}
       <div className="flex items-center justify-between bg-surface-navy border border-border-navy p-4 rounded-2xl">
         <div className="flex items-center space-x-3">
@@ -505,51 +542,85 @@ export const QuizRunnerScreen: React.FC = () => {
               )}
             </div>
 
-            {/* Options List */}
-            <div className="space-y-3">
-              {(currentQ.options || []).map((option, idx) => {
-                let optionStyles = 'bg-dark-navy/80 border-border-navy hover:bg-slate-800 text-slate-200 focus:border-brand-cyan focus:bg-slate-800';
+            {/* Options List for Multiple Choice OR Theory/Revision Direct Navigation */}
+            {currentQ.options && currentQ.options.length > 0 ? (
+              <div className="space-y-3">
+                {currentQ.options.map((option, idx) => {
+                  let optionStyles = 'bg-dark-navy/80 border-border-navy hover:bg-slate-800 text-slate-200 focus:border-brand-cyan focus:bg-slate-800';
 
-                if (isSubmitted) {
-                  if (idx === currentQ.correct_index) {
-                    optionStyles = 'bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md ring-1 ring-emerald-500/50';
-                  } else if (idx === selectedAnswerIndex) {
-                    optionStyles = 'bg-rose-950/80 border-rose-500 text-rose-200 shadow-md ring-1 ring-rose-500/50';
-                  } else {
-                    optionStyles = 'opacity-40 border-border-navy text-slate-500';
+                  if (isSubmitted) {
+                    if (idx === currentQ.correct_index) {
+                      optionStyles = 'bg-emerald-950/80 border-emerald-500 text-emerald-200 shadow-md ring-1 ring-emerald-500/50';
+                    } else if (idx === selectedAnswerIndex) {
+                      optionStyles = 'bg-rose-950/80 border-rose-500 text-rose-200 shadow-md ring-1 ring-rose-500/50';
+                    } else {
+                      optionStyles = 'opacity-40 border-border-navy text-slate-500';
+                    }
                   }
-                }
 
-                return (
+                  return (
+                    <button
+                      key={idx}
+                      data-dpad-quiz-item
+                      disabled={isSubmitted}
+                      onClick={() => handleSelectAnswer(idx)}
+                      className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition duration-150 outline-none active:scale-[0.99] ${optionStyles}`}
+                    >
+                      <div className="flex items-center space-x-3.5">
+                        <span className="w-8 h-8 rounded-xl bg-surface-navy border border-border-navy flex items-center justify-center text-xs font-bold text-white shrink-0">
+                          {optionLetters[idx] || idx + 1}
+                        </span>
+                        <span className="text-sm font-semibold leading-relaxed">
+                          <MathRenderer text={option} />
+                        </span>
+                      </div>
+
+                      {isSubmitted && idx === currentQ.correct_index && (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
+                      )}
+                      {isSubmitted && idx === selectedAnswerIndex && idx !== currentQ.correct_index && (
+                        <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
+                      )}
+                    </button>
+                  );
+                })}
+              </div>
+            ) : (
+              /* Theory / Structured Question or Revision Note Card */
+              <div className="p-4 rounded-2xl bg-dark-navy/60 border border-border-navy space-y-3">
+                <div className="flex items-center justify-between text-xs text-amber-400 font-semibold">
+                  <span>Structured Question / Curriculum Concept Item</span>
+                  <span className="text-[10px] bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
+                    Self-Paced Practice
+                  </span>
+                </div>
+                <p className="text-xs text-slate-400 leading-relaxed">
+                  Review the concept prompt above or use the AI Tutor to explore the official Botswana marking criteria.
+                </p>
+                <div className="pt-2 flex items-center justify-between gap-3">
                   <button
-                    key={idx}
-                    data-dpad-quiz-item
-                    disabled={isSubmitted}
-                    onClick={() => handleSelectAnswer(idx)}
-                    className={`w-full flex items-center justify-between p-4 rounded-2xl border text-left transition duration-150 outline-none active:scale-[0.99] ${optionStyles}`}
+                    onClick={handleExplainWithAI}
+                    disabled={isAiLoading}
+                    className="flex items-center space-x-2 text-xs font-bold text-purple-300 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 px-4 py-2 rounded-xl transition active:scale-95"
                   >
-                    <div className="flex items-center space-x-3.5">
-                      <span className="w-8 h-8 rounded-xl bg-surface-navy border border-border-navy flex items-center justify-center text-xs font-bold text-white shrink-0">
-                        {optionLetters[idx] || idx + 1}
-                      </span>
-                      <span className="text-sm font-semibold leading-relaxed">
-                        <MathRenderer text={option} />
-                      </span>
-                    </div>
-
-                    {isSubmitted && idx === currentQ.correct_index && (
-                      <CheckCircle2 className="w-5 h-5 text-emerald-400 flex-shrink-0" />
-                    )}
-                    {isSubmitted && idx === selectedAnswerIndex && idx !== currentQ.correct_index && (
-                      <XCircle className="w-5 h-5 text-rose-400 flex-shrink-0" />
-                    )}
+                    <Sparkles className="w-4 h-4 text-purple-400" />
+                    <span>Explain with AI Tutor</span>
                   </button>
-                );
-              })}
-            </div>
 
-            {/* Action Controls & AI Tutor Button */}
-            {isSubmitted && (
+                  <button
+                    data-dpad-quiz-item
+                    onClick={handleNextQuestion}
+                    className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-5 py-2 rounded-xl shadow transition active:scale-95"
+                  >
+                    <span>{currentIndex + 1 < questions.length ? 'Next Question' : 'View Results'}</span>
+                    <ChevronRight className="w-4 h-4" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Action Controls & AI Tutor Button for MCQs */}
+            {isSubmitted && currentQ.options && currentQ.options.length > 0 && (
               <div className="pt-4 border-t border-border-navy/80 flex flex-wrap items-center justify-between gap-3">
                 <button
                   onClick={handleExplainWithAI}

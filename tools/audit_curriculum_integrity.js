@@ -20,6 +20,12 @@ async function runMasterCurriculumAudit() {
       emptyGrades: [],
       targetCandidateYearsMissing: []
     },
+    curriculumClassification: {
+      cbtExamsCount: 0,
+      theoryPapersCount: 0,
+      studyNotesCount: 0,
+      papersNeedingReclassification: []
+    },
     questionTypes: {
       mcq: 0,
       shortAnswer: 0,
@@ -117,12 +123,44 @@ async function runMasterCurriculumAudit() {
     questionsByPaper.get(q.paper_id).push(q);
   }
 
-  // 3. Question Integrity, Diagrams, Options & Answers
+  // 3. Question Integrity, Diagrams, Options & Answers, and Curriculum Classification
   for (const p of papers) {
     const qs = questionsByPaper.get(p.id) || [];
     if (report.curriculumCoverage.byGrade[p.grade_key]) {
       report.curriculumCoverage.byGrade[p.grade_key].questionsCount += qs.length;
     }
+
+    // Classification Audit: Evaluate whether paper is CBT_EXAM, THEORY_PAPER, or STUDY_NOTES
+    const mcqsInPaper = qs.filter(q => {
+      let opts = [];
+      try { opts = JSON.parse(q.options_json); } catch(e) {}
+      return opts && opts.length >= 2;
+    }).length;
+    const titleLower = (p.title || '').toLowerCase();
+    const isNotesTitle = titleLower.includes('notes') || titleLower.includes('tplan') || titleLower.includes('textbook') || titleLower.includes('composition') || titleLower.includes('scheme') || titleLower.includes('marking') || titleLower.includes('package');
+
+    let expectedType = 'CBT_EXAM';
+    if (isNotesTitle || qs.length === 0) {
+      expectedType = 'STUDY_NOTES';
+      report.curriculumClassification.studyNotesCount++;
+    } else if (qs.length > 0 && (mcqsInPaper / qs.length) < 0.50) {
+      expectedType = 'THEORY_PAPER';
+      report.curriculumClassification.theoryPapersCount++;
+    } else {
+      report.curriculumClassification.cbtExamsCount++;
+    }
+
+    if (p.type !== expectedType) {
+      report.curriculumClassification.papersNeedingReclassification.push({
+        paperId: p.id,
+        title: p.title,
+        currentType: p.type || 'UNCLASSIFIED',
+        expectedType,
+        totalQuestions: qs.length,
+        mcqsCount: mcqsInPaper
+      });
+    }
+
     if (qs.length === 0) continue;
 
     // Check Question 1 start and sequences
@@ -258,7 +296,20 @@ async function runMasterCurriculumAudit() {
   console.log(`[CRITICAL] National Exam Candidate Years Missing: ${report.curriculumCoverage.targetCandidateYearsMissing.join(' & ')}`);
 
   console.log('\n---------------------------------------------------------------------------------');
-  console.log('5. QUESTION SEQUENCE & SPACING INTEGRITY');
+  console.log('5. CURRICULUM CLASSIFICATION INTEGRITY (CBT vs THEORY vs NOTES)');
+  console.log('---------------------------------------------------------------------------------');
+  console.log(`Classified Interactive CBT Exam Papers   : ${report.curriculumClassification.cbtExamsCount}`);
+  console.log(`Classified Theory / Structured Papers   : ${report.curriculumClassification.theoryPapersCount}`);
+  console.log(`Classified Study Notes & Curriculum Docs : ${report.curriculumClassification.studyNotesCount}`);
+  console.log(`[ALERT] Papers Needing Reclassification  : ${report.curriculumClassification.papersNeedingReclassification.length}`);
+  if (report.curriculumClassification.papersNeedingReclassification.length > 0) {
+    report.curriculumClassification.papersNeedingReclassification.slice(0, 5).forEach(m => {
+      console.log(`   - [${m.currentType} -> ${m.expectedType}] ${m.title} (MCQs: ${m.mcqsCount}/${m.totalQuestions})`);
+    });
+  }
+
+  console.log('\n---------------------------------------------------------------------------------');
+  console.log('6. QUESTION SEQUENCE & SPACING INTEGRITY');
   console.log('---------------------------------------------------------------------------------');
   console.log(`Papers Starting Correctly at Q1         : ${report.questionIntegrity.startsAtQ1}`);
   console.log(`[ALERT] Papers with Broken Starting Seq : ${report.questionIntegrity.brokenStartSequence.length}`);
@@ -269,7 +320,7 @@ async function runMasterCurriculumAudit() {
   console.log(`Collapsed / Fused Word Prompts           : ${report.questionIntegrity.collapsedPrompts.length}`);
 
   console.log('\n---------------------------------------------------------------------------------');
-  console.log('6. MULTIPLE CHOICE OPTIONS & INTERACTION ACCURACY');
+  console.log('7. MULTIPLE CHOICE OPTIONS & INTERACTION ACCURACY');
   console.log('---------------------------------------------------------------------------------');
   console.log(`Total Interactive MCQs                   : ${report.questionTypes.mcq}`);
   console.log(`Total Non-MCQ (Structured / Short Answer): ${report.questionTypes.shortAnswer + report.questionTypes.fillInBlank + report.questionTypes.longAnswer}`);
@@ -279,7 +330,7 @@ async function runMasterCurriculumAudit() {
   console.log(`MCQs with Completely Empty Options       : ${report.optionsIntegrity.emptyOrMissingOptions.length}`);
 
   console.log('\n---------------------------------------------------------------------------------');
-  console.log('7. ANSWER KEY & MARKING SCHEME ACCURACY');
+  console.log('8. ANSWER KEY & MARKING SCHEME ACCURACY');
   console.log('---------------------------------------------------------------------------------');
   console.log(`Questions with Verified Marking Scheme   : ${report.markingSchemeIntegrity.verifiedFromOfficialScheme}`);
   console.log(`[NOTICE] Papers Missing Marking Scheme   : ${report.markingSchemeIntegrity.papersNeedingOfficialScheme.length} (Need teacher answer upload)`);

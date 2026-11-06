@@ -52,13 +52,13 @@ export const SubjectMaterialsScreen: React.FC = () => {
     const titleLower = (m.title || '').toLowerCase();
 
     if (activeTab === 'exams') {
-      return typeUpper.includes('PAST_PAPER') || titleLower.includes('exam') || titleLower.includes('paper');
+      return typeUpper.includes('CBT') || typeUpper.includes('PAST_PAPER') || titleLower.includes('exam');
     }
     if (activeTab === 'revision') {
-      return typeUpper.includes('REVISION') || typeUpper.includes('MCQ') || titleLower.includes('practice') || titleLower.includes('revision');
+      return typeUpper.includes('THEORY') || typeUpper.includes('REVISION') || titleLower.includes('practice') || titleLower.includes('revision');
     }
     if (activeTab === 'notes') {
-      return Boolean(m.reading_content && m.reading_content.trim().length > 0);
+      return typeUpper.includes('NOTES') || Boolean(m.reading_content && m.reading_content.trim().length > 0);
     }
 
     return true;
@@ -69,9 +69,9 @@ export const SubjectMaterialsScreen: React.FC = () => {
       if (m.subject_id !== subjectId) return false;
       const typeUpper = (m.type || '').toUpperCase();
       const titleLower = (m.title || '').toLowerCase();
-      if (tab === 'exams') return typeUpper.includes('PAST_PAPER') || titleLower.includes('exam') || titleLower.includes('paper');
-      if (tab === 'revision') return typeUpper.includes('REVISION') || typeUpper.includes('MCQ') || titleLower.includes('practice') || titleLower.includes('revision');
-      if (tab === 'notes') return Boolean(m.reading_content && m.reading_content.trim().length > 0);
+      if (tab === 'exams') return typeUpper.includes('CBT') || typeUpper.includes('PAST_PAPER') || titleLower.includes('exam');
+      if (tab === 'revision') return typeUpper.includes('THEORY') || typeUpper.includes('REVISION') || titleLower.includes('practice') || titleLower.includes('revision');
+      if (tab === 'notes') return typeUpper.includes('NOTES') || Boolean(m.reading_content && m.reading_content.trim().length > 0);
       return true;
     }).length;
   };
@@ -118,33 +118,29 @@ export const SubjectMaterialsScreen: React.FC = () => {
         <div className="flex items-center space-x-1.5 bg-surface-navy p-1.5 rounded-xl border border-border-navy">
           <button
             onClick={() => setActiveTab('all')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === 'all' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${activeTab === 'all' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
+              }`}
           >
             All ({countForTab('all')})
           </button>
           <button
             onClick={() => setActiveTab('exams')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === 'exams' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${activeTab === 'exams' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
+              }`}
           >
             Exam Papers ({countForTab('exams')})
           </button>
           <button
             onClick={() => setActiveTab('revision')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === 'revision' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${activeTab === 'revision' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
+              }`}
           >
             Revision & Practice ({countForTab('revision')})
           </button>
           <button
             onClick={() => setActiveTab('notes')}
-            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${
-              activeTab === 'notes' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
-            }`}
+            className={`px-3.5 py-1.5 rounded-lg text-xs font-bold transition ${activeTab === 'notes' ? 'bg-brand-blue text-white shadow' : 'text-slate-400 hover:text-white'
+              }`}
           >
             Notes ({countForTab('notes')})
           </button>
@@ -227,13 +223,23 @@ export const SubjectMaterialsScreen: React.FC = () => {
                   <div />
                 )}
 
-                <button
-                  onClick={() => handleStartQuiz(mat)}
-                  className="flex items-center space-x-1.5 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 py-1.5 rounded-lg shadow transition active:scale-95"
-                >
-                  <Play className="w-3.5 h-3.5 fill-current" />
-                  <span>Take Test</span>
-                </button>
+                {mat.material_type === 'STUDY_NOTES' || mat.type === 'STUDY_NOTES' ? (
+                  <button
+                    onClick={() => setSelectedMaterialForNotes(mat)}
+                    className="flex items-center space-x-1.5 text-xs font-bold text-white bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 px-4 py-1.5 rounded-lg shadow transition active:scale-95"
+                  >
+                    <BookOpen className="w-3.5 h-3.5 fill-current" />
+                    <span>View Notes</span>
+                  </button>
+                ) : (
+                  <button
+                    onClick={() => handleStartQuiz(mat)}
+                    className="flex items-center space-x-1.5 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-4 py-1.5 rounded-lg shadow transition active:scale-95"
+                  >
+                    <Play className="w-3.5 h-3.5 fill-current" />
+                    <span>Take Test</span>
+                  </button>
+                )}
               </div>
             </div>
           ))}

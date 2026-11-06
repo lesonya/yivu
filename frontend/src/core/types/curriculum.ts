@@ -54,6 +54,7 @@ export interface LearningMaterial {
   term: string;
   title: string;
   type: string;
+  material_type?: string;
   reading_content?: string;
   source_file?: string;
   questions?: Question[];
