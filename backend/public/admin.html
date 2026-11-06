@@ -237,8 +237,13 @@
     <div class="bg-surfaceNavy border-l border-borderNavy w-full max-w-4xl h-full flex flex-col shadow-2xl">
       <!-- Modal Header -->
       <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
-        <div>
-          <h3 id="modalPaperTitle" class="text-base font-bold text-white truncate max-w-xl">Exam Paper Details</h3>
+        <div class="flex-1 mr-4">
+          <div class="flex items-center space-x-2">
+            <h3 id="modalPaperTitle" class="text-base font-bold text-white truncate max-w-xl">Exam Paper Details</h3>
+            <button onclick="openEditPaperModal()" class="p-1 rounded-lg hover:bg-slate-800 text-slate-400 hover:text-brandCyan transition" title="Edit Paper Title & Metadata">
+              <i data-lucide="edit-3" class="w-4 h-4"></i>
+            </button>
+          </div>
           <div class="flex items-center space-x-3 mt-1">
             <p id="modalPaperMeta" class="text-xs text-brandCyan font-semibold">STD 5 • Mathematics • Term 2</p>
             <span class="text-slate-600">•</span>
@@ -468,12 +473,146 @@
     </div>
   </div>
 
+  <!-- EDIT PAPER TITLE & METADATA MODAL -->
+  <div id="editPaperModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-surfaceNavy border border-borderNavy w-full max-w-lg rounded-2xl overflow-hidden shadow-2xl flex flex-col">
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+          <i data-lucide="edit" class="w-4 h-4 text-brandCyan"></i>
+          <span>Edit Paper Details</span>
+        </h3>
+        <button onclick="closeEditPaperModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="editPaperForm" onsubmit="handleSavePaper(event)" class="p-6 space-y-4 text-xs font-medium">
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Paper Title *</label>
+          <input type="text" id="editPaperTitle" name="title" required class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-100 font-semibold focus:border-brandCyan focus:outline-none">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Grade Level *</label>
+            <select id="editPaperGrade" name="grade_key" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="std_5">Standard 5</option>
+              <option value="std_4">Standard 4</option>
+              <option value="form_1">Form 1</option>
+              <option value="form_2">Form 2</option>
+              <option value="form_3">Form 3</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Term *</label>
+            <select id="editPaperTerm" name="term" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="Term 1">Term 1</option>
+              <option value="Term 2">Term 2</option>
+              <option value="Term 3">Term 3</option>
+            </select>
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Subject *</label>
+          <select id="editPaperSubject" name="subject_id" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+            <option value="std_math">Mathematics</option>
+            <option value="std_english">English</option>
+            <option value="std_science">Science</option>
+            <option value="std_setswana">Setswana</option>
+            <option value="std_social_studies">Social Studies</option>
+            <option value="std_capa">Creative & Performing Arts (CAPA)</option>
+            <option value="std_agriculture">Agriculture</option>
+            <option value="std_rme">Religious & Moral Education (RME)</option>
+          </select>
+        </div>
+
+        <div class="pt-3 border-t border-borderNavy flex justify-end space-x-2">
+          <button type="button" onclick="closeEditPaperModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-white">Cancel</button>
+          <button type="submit" id="btnSavePaper" class="px-5 py-2 bg-brandBlue hover:bg-blue-600 font-semibold text-white rounded-xl shadow-lg">Save Paper</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <!-- EDIT QUESTION MODAL -->
+  <div id="editQuestionModal" class="fixed inset-0 bg-black/70 backdrop-blur-sm z-50 hidden flex items-center justify-center p-4">
+    <div class="bg-surfaceNavy border border-borderNavy w-full max-w-2xl rounded-2xl overflow-hidden shadow-2xl flex flex-col max-h-[90vh]">
+      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between bg-darkNavy">
+        <h3 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
+          <i data-lucide="help-circle" class="w-4 h-4 text-purple-400"></i>
+          <span id="editQuestionModalTitle">Edit Question</span>
+        </h3>
+        <button onclick="closeEditQuestionModal()" class="p-1.5 text-slate-400 hover:text-white rounded-lg">
+          <i data-lucide="x" class="w-5 h-5"></i>
+        </button>
+      </div>
+
+      <form id="editQuestionForm" onsubmit="handleSaveQuestion(event)" class="p-6 space-y-4 text-xs font-medium overflow-y-auto">
+        <input type="hidden" id="editQuestionId">
+
+        <div class="grid grid-cols-3 gap-3">
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Question Number</label>
+            <input type="text" id="editQuestionNum" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-100 font-bold focus:border-brandCyan focus:outline-none">
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Question Type</label>
+            <select id="editQuestionType" onchange="toggleEditQuestionOptions()" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200">
+              <option value="MCQ">Multiple Choice (MCQ)</option>
+              <option value="SHORT_ANSWER">Short Answer / Theory</option>
+              <option value="TRUE_FALSE">True / False</option>
+              <option value="MATCHING">Matching</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-slate-300 font-semibold mb-1">Allocated Marks</label>
+            <input type="number" id="editQuestionMarks" min="1" max="50" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-100 font-semibold">
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Question Prompt *</label>
+          <textarea id="editQuestionPrompt" rows="3" required class="w-full bg-darkNavy border border-borderNavy rounded-xl p-3 text-slate-100 font-normal focus:border-brandCyan focus:outline-none leading-relaxed"></textarea>
+        </div>
+
+        <!-- Options Block (shown for MCQ) -->
+        <div id="editOptionsContainer" class="space-y-2 p-3.5 bg-darkNavy/60 rounded-xl border border-borderNavy">
+          <div class="flex items-center justify-between">
+            <label class="text-slate-300 font-bold">Multiple Choice Options & Correct Answer</label>
+            <span class="text-[10px] text-slate-400">Select the radio button for the correct answer</span>
+          </div>
+          <div class="space-y-2 pt-1" id="editOptionsList">
+            <!-- Populated dynamically: 4 inputs with radio buttons -->
+          </div>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Marking Scheme / Teacher Answer Criteria</label>
+          <textarea id="editQuestionAnswer" rows="2" placeholder="Official Botswana syllabus marking solution..." class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200 focus:border-brandCyan focus:outline-none"></textarea>
+        </div>
+
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Curriculum Explanation</label>
+          <textarea id="editQuestionExplanation" rows="2" placeholder="Pedagogical explanation for student review..." class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200 focus:border-brandCyan focus:outline-none"></textarea>
+        </div>
+
+        <div class="pt-3 border-t border-borderNavy flex justify-end space-x-2">
+          <button type="button" onclick="closeEditQuestionModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-white">Cancel</button>
+          <button type="submit" id="btnSaveQuestion" class="px-5 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 font-semibold text-white rounded-xl shadow-lg">Save Question</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
   <!-- JAVASCRIPT LOGIC -->
   <script>
     let currentPaperId = null;
     let currentPaperTitle = '';
     let currentPaperSourceFile = '';
     let searchTimeout = null;
+    let currentPaperData = null;
+    let currentQuestionsMap = new Map();
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
@@ -596,8 +735,11 @@
         const res = await fetch(`/api/papers/${id}`);
         const paper = await res.json();
 
+        currentPaperData = paper;
         currentPaperTitle = paper.title || '';
         currentPaperSourceFile = paper.source_file || '';
+        currentQuestionsMap.clear();
+        (paper.questions || []).forEach(q => currentQuestionsMap.set(q.id, q));
 
         document.getElementById('modalPaperTitle').textContent = paper.title;
         document.getElementById('modalPaperMeta').textContent = `${paper.grade_key.toUpperCase().replace('_', ' ')} • ${formatSubjectName(paper.subject_id)} • ${paper.term} (${paper.questions.length} Questions)`;
@@ -649,9 +791,14 @@
                   </span>
                   <span class="text-xs text-slate-400 font-semibold">[${q.marks} Mark${q.marks > 1 ? 's' : ''}]</span>
                 </div>
-                <button onclick="deleteQuestion('${q.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Delete Question">
-                  <i data-lucide="trash-2" class="w-4 h-4"></i>
-                </button>
+                <div class="flex items-center space-x-1">
+                  <button onclick="openEditQuestionModal('${q.id}')" class="text-slate-400 hover:text-brandCyan p-1 transition" title="Edit Question Prompt & Answers">
+                    <i data-lucide="edit" class="w-4 h-4"></i>
+                  </button>
+                  <button onclick="deleteQuestion('${q.id}')" class="text-slate-500 hover:text-rose-400 p-1 transition" title="Delete Question">
+                    <i data-lucide="trash-2" class="w-4 h-4"></i>
+                  </button>
+                </div>
               </div>
 
               <!-- Question Prompt -->
@@ -699,6 +846,171 @@
     function closePaperModal() {
       document.getElementById('paperModal').classList.add('hidden');
       currentPaperId = null;
+      currentPaperData = null;
+      currentQuestionsMap.clear();
+    }
+
+    // --- EDIT PAPER TITLE & METADATA HANDLERS ---
+    function openEditPaperModal() {
+      if (!currentPaperData) return;
+      document.getElementById('editPaperTitle').value = currentPaperData.title || '';
+      document.getElementById('editPaperGrade').value = currentPaperData.grade_key || 'std_5';
+      document.getElementById('editPaperTerm').value = currentPaperData.term || 'Term 1';
+      document.getElementById('editPaperSubject').value = currentPaperData.subject_id || 'std_math';
+      document.getElementById('editPaperModal').classList.remove('hidden');
+    }
+
+    function closeEditPaperModal() {
+      document.getElementById('editPaperModal').classList.add('hidden');
+    }
+
+    async function handleSavePaper(e) {
+      e.preventDefault();
+      if (!currentPaperId) return;
+
+      const title = document.getElementById('editPaperTitle').value.trim();
+      const grade_key = document.getElementById('editPaperGrade').value;
+      const term = document.getElementById('editPaperTerm').value;
+      const subject_id = document.getElementById('editPaperSubject').value;
+
+      const btn = document.getElementById('btnSavePaper');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const res = await fetch(`/api/papers/${currentPaperId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ title, grade_key, term, subject_id })
+        });
+
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+
+        closeEditPaperModal();
+        await viewPaper(currentPaperId);
+        loadPapers();
+      } catch (err) {
+        alert('Failed to update paper: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Paper';
+      }
+    }
+
+    // --- EDIT QUESTION HANDLERS ---
+    function openEditQuestionModal(qId) {
+      const q = currentQuestionsMap.get(qId);
+      if (!q) return;
+
+      document.getElementById('editQuestionId').value = q.id;
+      document.getElementById('editQuestionModalTitle').textContent = `Edit Question Q${q.question_number}`;
+      document.getElementById('editQuestionNum').value = q.question_number || '1';
+      document.getElementById('editQuestionType').value = q.question_type || 'MCQ';
+      document.getElementById('editQuestionMarks').value = q.marks || 1;
+      document.getElementById('editQuestionPrompt').value = q.prompt || '';
+      document.getElementById('editQuestionAnswer').value = q.marking_scheme ? (q.marking_scheme.correct_answer || '') : '';
+      document.getElementById('editQuestionExplanation').value = q.explanation || '';
+
+      renderEditOptions(q);
+      toggleEditQuestionOptions();
+
+      document.getElementById('editQuestionModal').classList.remove('hidden');
+    }
+
+    function renderEditOptions(q) {
+      const container = document.getElementById('editOptionsList');
+      const opts = (q.options && q.options.length > 0) ? q.options : ['', '', '', ''];
+      const correctIdx = typeof q.correct_index === 'number' ? q.correct_index : 0;
+
+      container.innerHTML = [0, 1, 2, 3].map(i => {
+        const letter = String.fromCharCode(65 + i);
+        const val = opts[i] || '';
+        const isChecked = i === correctIdx ? 'checked' : '';
+        return `
+          <div class="flex items-center space-x-2">
+            <label class="flex items-center space-x-1.5 cursor-pointer shrink-0">
+              <input type="radio" name="editCorrectOpt" value="${i}" ${isChecked} class="w-4 h-4 text-emerald-500 focus:ring-0">
+              <span class="w-5 h-5 rounded-md bg-slate-800 text-slate-300 font-bold flex items-center justify-center text-[10px]">${letter}</span>
+            </label>
+            <input type="text" id="editOptVal_${i}" value="${val.replace(/"/g, '&quot;')}" placeholder="Choice ${letter} text..." class="flex-1 bg-darkNavy border border-borderNavy rounded-xl p-2 text-slate-200 focus:border-brandCyan focus:outline-none text-xs">
+          </div>
+        `;
+      }).join('');
+    }
+
+    function toggleEditQuestionOptions() {
+      const type = document.getElementById('editQuestionType').value;
+      const box = document.getElementById('editOptionsContainer');
+      if (type === 'MCQ') {
+        box.classList.remove('hidden');
+      } else {
+        box.classList.add('hidden');
+      }
+    }
+
+    function closeEditQuestionModal() {
+      document.getElementById('editQuestionModal').classList.add('hidden');
+    }
+
+    async function handleSaveQuestion(e) {
+      e.preventDefault();
+      const qId = document.getElementById('editQuestionId').value;
+      if (!qId) return;
+
+      const question_number = document.getElementById('editQuestionNum').value.trim();
+      const question_type = document.getElementById('editQuestionType').value;
+      const marks = parseInt(document.getElementById('editQuestionMarks').value, 10) || 1;
+      const prompt = document.getElementById('editQuestionPrompt').value.trim();
+      const answerText = document.getElementById('editQuestionAnswer').value.trim();
+      const explanation = document.getElementById('editQuestionExplanation').value.trim();
+
+      const updates = {
+        question_number,
+        question_type,
+        marks,
+        prompt,
+        explanation
+      };
+
+      if (question_type === 'MCQ') {
+        const selectedRadio = document.querySelector('input[name="editCorrectOpt"]:checked');
+        const correct_index = selectedRadio ? parseInt(selectedRadio.value, 10) : 0;
+        const options = [0, 1, 2, 3].map(i => {
+          const el = document.getElementById(`editOptVal_${i}`);
+          return el ? el.value.trim() : '';
+        });
+        updates.options = options;
+        updates.correct_index = correct_index;
+      }
+
+      if (answerText) {
+        updates.marking_scheme = {
+          correct_answer: answerText,
+          grading_criteria: [explanation || `Award ${marks} mark(s) according to curriculum standards.`]
+        };
+      }
+
+      const btn = document.getElementById('btnSaveQuestion');
+      btn.disabled = true;
+      btn.textContent = 'Saving...';
+
+      try {
+        const res = await fetch(`/api/questions/${qId}`, {
+          method: 'PUT',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(updates)
+        });
+
+        if (!res.ok) throw new Error('Server returned ' + res.status);
+
+        closeEditQuestionModal();
+        await viewPaper(currentPaperId);
+      } catch (err) {
+        alert('Failed to update question: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.textContent = 'Save Question';
+      }
     }
 
     async function deleteCurrentPaper() {
