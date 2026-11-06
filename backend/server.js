@@ -745,12 +745,12 @@ app.post('/api/papers/:id/ocr', async (req, res) => {
       return res.status(404).json({ error: `Physical source document not found on disk for "${paper.title}".` });
     }
 
-    const pdfBuffer = fs.readFileSync(diskPath);
-    const base64Data = pdfBuffer.toString('base64');
+    const ext = path.extname(diskPath).toLowerCase();
+    let contents = [];
 
     const promptText = `
 You are an expert OCR and curriculum question parser for the Botswana National Examination Council (BEC) curriculum.
-Extract all examination questions from this scanned document.
+Extract all examination questions from this document.
 Return ONLY valid JSON matching this exact structure, with no markdown code fences or backticks:
 {
   "questions": [
@@ -768,25 +768,82 @@ Return ONLY valid JSON matching this exact structure, with no markdown code fenc
 }
 `;
 
-    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
-    const geminiRes = await fetch(geminiUrl, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        contents: [
+    if (ext === '.pdf') {
+      const pdfBuffer = fs.readFileSync(diskPath);
+      const base64Data = pdfBuffer.toString('base64');
+      contents = [
+        {
+          parts: [
+            {
+              inline_data: {
+                mime_type: 'application/pdf',
+                data: base64Data
+              }
+            },
+            { text: promptText }
+          ]
+        }
+      ];
+    } else if (ext === '.docx' || ext === '.doc') {
+      // For DOCX documents, extract the raw text content using mammoth first, then send text to Gemini
+      let docText = '';
+      try {
+        docText = await extractDocxText(diskPath);
+      } catch (docErr) {
+        return res.status(500).json({ error: `Failed to read Word document (.docx): ${docErr.message}` });
+      }
+
+      if (!docText || docText.trim().length === 0) {
+        return res.status(400).json({ error: 'Word document (.docx) contains no readable text.' });
+      }
+
+      contents = [
+        {
+          parts: [
+            {
+              text: `${promptText}\n\nDOCUMENT TEXT CONTENT:\n${docText}`
+            }
+          ]
+        }
+      ];
+    } else {
+      // Other text/image formats fallback
+      const fileBuffer = fs.readFileSync(diskPath);
+      const base64Data = fileBuffer.toString('base64');
+      let mimeType = 'application/octet-stream';
+      if (['.png', '.jpg', '.jpeg', '.webp'].includes(ext)) {
+        mimeType = ext === '.png' ? 'image/png' : 'image/jpeg';
+        contents = [
           {
             parts: [
               {
                 inline_data: {
-                  mime_type: 'application/pdf',
+                  mime_type: mimeType,
                   data: base64Data
                 }
               },
               { text: promptText }
             ]
           }
-        ]
-      })
+        ];
+      } else {
+        // Plain text
+        const textContent = fileBuffer.toString('utf8');
+        contents = [
+          {
+            parts: [
+              { text: `${promptText}\n\nDOCUMENT TEXT CONTENT:\n${textContent}` }
+            ]
+          }
+        ];
+      }
+    }
+
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+    const geminiRes = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ contents })
     });
 
     if (!geminiRes.ok) {
