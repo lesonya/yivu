@@ -54,8 +54,8 @@ export const QuizRunnerScreen: React.FC = () => {
   // Sound effects mute state
   const [isMuted, setIsMuted] = useState(false);
 
-  // Timed Examination Mode: 45 Minutes Standard Countdown (2700s)
-  const [timeRemainingSeconds, setTimeRemainingSeconds] = useState(2700);
+  // Timed Examination Mode: 60 Minutes Standard Countdown (3600s)
+  const [timeRemainingSeconds, setTimeRemainingSeconds] = useState(3600);
   const [isTimerRunning, setIsTimerRunning] = useState(false);
   const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
   const startTimeRef = useRef<number>(Date.now());
@@ -473,7 +473,7 @@ export const QuizRunnerScreen: React.FC = () => {
             <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/10 text-center">
               <div className="text-xl font-extrabold text-amber-400 flex items-center justify-center space-x-1.5">
                 <Clock className="w-5 h-5" />
-                <span>45 Mins</span>
+                <span>60 Mins</span>
               </div>
               <div className="text-[11px] text-slate-400 font-bold uppercase mt-1">Allocated Time</div>
             </div>
