@@ -4,6 +4,36 @@ const path = require('path');
 const fs = require('fs');
 const multer = require('multer');
 
+// Automatically load environment variables from .env
+function loadEnv() {
+  const envPaths = [
+    path.resolve(__dirname, '../.env'),
+    path.resolve(__dirname, '.env')
+  ];
+  for (const envPath of envPaths) {
+    if (fs.existsSync(envPath)) {
+      try {
+        const lines = fs.readFileSync(envPath, 'utf8').split(/\r?\n/);
+        for (const line of lines) {
+          const trimmed = line.trim();
+          if (!trimmed || trimmed.startsWith('#')) continue;
+          const match = trimmed.match(/^([^=]+)=(.*)$/);
+          if (match) {
+            const key = match[1].trim();
+            const val = match[2].trim().replace(/^['"]|['"]$/g, '');
+            if (!process.env[key]) {
+              process.env[key] = val;
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Error reading env file:', e.message);
+      }
+    }
+  }
+}
+loadEnv();
+
 const {
   db,
   getAllPapers,
@@ -674,7 +704,165 @@ app.post('/api/actions/restore-defaults', (req, res) => {
   }
 });
 
-// 15. AI Question Explainer & Tutor endpoint (Gemini API with fallback)
+// 16. Optical Character Recognition (OCR) via Gemini Vision API for Scanned Exam Papers
+app.post('/api/papers/:id/ocr', async (req, res) => {
+  try {
+    const paper = getPaperById(req.params.id);
+    if (!paper) {
+      return res.status(404).json({ error: 'Paper not found' });
+    }
+
+    const apiKey = process.env.GEMINI_API_KEY || process.env.OPENAI_API_KEY;
+    if (!apiKey) {
+      return res.status(400).json({ error: 'GEMINI_API_KEY is not configured in .env' });
+    }
+
+    // Resolve physical source document on disk
+    let diskPath = null;
+    const candidates = [
+      paper.source_file,
+      path.resolve(__dirname, '..', paper.source_file || ''),
+      path.resolve(__dirname, '../resources/past-papers-1', paper.source_file || ''),
+      path.resolve(__dirname, 'uploads', paper.source_file || '')
+    ];
+
+    if (paper.source_file) {
+      const fileName = path.basename(paper.source_file);
+      candidates.push(path.resolve(__dirname, '../resources/past-papers-1/std_5/pastpapersstd5', fileName));
+      candidates.push(path.resolve(__dirname, '../resources/past-papers-1/std_4', fileName));
+    }
+
+    for (const c of candidates) {
+      if (c && fs.existsSync(c) && fs.statSync(c).isFile()) {
+        diskPath = c;
+        break;
+      }
+    }
+
+    if (!diskPath) {
+      return res.status(404).json({ error: `Physical source document not found on disk for "${paper.title}".` });
+    }
+
+    const pdfBuffer = fs.readFileSync(diskPath);
+    const base64Data = pdfBuffer.toString('base64');
+
+    const promptText = `
+You are an expert OCR and curriculum question parser for the Botswana National Examination Council (BEC) curriculum.
+Extract all examination questions from this scanned document.
+Return ONLY valid JSON matching this exact structure, with no markdown code fences or backticks:
+{
+  "questions": [
+    {
+      "question_number": "1",
+      "question_type": "MCQ", // or "SHORT_ANSWER" if open ended
+      "prompt": "Full question prompt text",
+      "options": ["Choice A", "Choice B", "Choice C", "Choice D"], // empty [] if short answer
+      "correct_index": 0, // 0 for A, 1 for B, etc. (infer most plausible if answers not marked)
+      "marks": 1,
+      "explanation": "Brief Botswana syllabus reason or solution step",
+      "correct_answer": "Model answer string"
+    }
+  ]
+}
+`;
+
+    const geminiUrl = `https://generativelanguage.googleapis.com/v1beta/models/gemini-3.8-flash:generateContent?key=${apiKey}`;
+    const geminiRes = await fetch(geminiUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        contents: [
+          {
+            parts: [
+              {
+                inline_data: {
+                  mime_type: 'application/pdf',
+                  data: base64Data
+                }
+              },
+              { text: promptText }
+            ]
+          }
+        ]
+      })
+    });
+
+    if (!geminiRes.ok) {
+      const errText = await geminiRes.text();
+      return res.status(502).json({ error: `Gemini API returned error: ${geminiRes.status} - ${errText}` });
+    }
+
+    const data = await geminiRes.json();
+    const rawReply = data.candidates?.[0]?.content?.parts?.[0]?.text || '';
+    
+    // Clean reply of any markdown code blocks
+    const cleanedJson = rawReply.replace(/```json/gi, '').replace(/```/g, '').trim();
+    let parsedData = null;
+    try {
+      parsedData = JSON.parse(cleanedJson);
+    } catch (parseErr) {
+      return res.status(500).json({
+        error: 'Gemini generated invalid JSON: ' + parseErr.message,
+        raw_output: rawReply.slice(0, 500)
+      });
+    }
+
+    const extractedQuestions = parsedData.questions || [];
+    if (extractedQuestions.length === 0) {
+      return res.json({ success: true, count: 0, message: 'Gemini OCR scanned the pages but identified 0 question items.' });
+    }
+
+    // Insert extracted questions into database
+    let insertedCount = 0;
+    for (let i = 0; i < extractedQuestions.length; i++) {
+      const q = extractedQuestions[i];
+      const qId = `q_ocr_${paper.id}_${Date.now()}_${i + 1}`;
+      insertQuestion({
+        id: qId,
+        paper_id: paper.id,
+        question_number: q.question_number || String(i + 1),
+        parent_question_number: q.question_number || String(i + 1),
+        question_type: q.question_type || (q.options && q.options.length > 0 ? 'MCQ' : 'SHORT_ANSWER'),
+        prompt: q.prompt || 'Question Prompt',
+        marks: q.marks || 1,
+        options: q.options || [],
+        correct_index: typeof q.correct_index === 'number' ? q.correct_index : 0,
+        explanation: q.explanation || `${paper.title}: Curriculum solution step.`,
+        has_diagram: false,
+        diagram_filename: null,
+        diagram_description: null,
+        confidence: 'HIGH',
+        marking_scheme: {
+          source_marking_file_path: 'gemini-vision-ocr',
+          correct_answer: q.correct_answer || (q.options ? q.options[q.correct_index || 0] : 'Curriculum Solution'),
+          grading_criteria: [q.explanation || 'Award full marks according to curriculum standards.']
+        }
+      });
+      insertedCount++;
+    }
+
+    // Reclassify paper to CBT_EXAM if questions are mostly MCQs
+    const mcqRatio = extractedQuestions.filter(q => q.options && q.options.length >= 2).length / extractedQuestions.length;
+    const newType = mcqRatio >= 0.5 ? 'CBT_EXAM' : 'THEORY_PAPER';
+    db.prepare('UPDATE exam_papers SET type = ? WHERE id = ?').run(newType, paper.id);
+
+    // Sync to seed_materials.json
+    try {
+      syncDbToSeedMaterials();
+    } catch (sErr) {
+      console.warn('Sync warning:', sErr.message);
+    }
+
+    res.json({
+      success: true,
+      count: insertedCount,
+      classified_type: newType,
+      message: `Gemini Vision successfully extracted and added ${insertedCount} questions via OCR!`
+    });
+  } catch (err) {
+    res.status(500).json({ error: err.message });
+  }
+});
 app.post('/api/ai/explain', async (req, res) => {
   try {
     const { grade_key, subject_name, prompt, options, correct_index, selected_index, syllabus_explanation } = req.body;

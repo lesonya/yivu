@@ -264,11 +264,21 @@
       </div>
 
       <!-- Modal Footer -->
-      <div class="px-6 py-4 border-t border-borderNavy bg-darkNavy flex items-center justify-between">
-        <button onclick="deleteCurrentPaper()" class="text-rose-400 hover:text-white bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 font-bold text-xs flex items-center space-x-1.5 px-3.5 py-2 rounded-xl transition shadow active:scale-95" title="Permanently delete from SQLite and seed materials">
-          <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
-          <span>Delete Paper Completely</span>
-        </button>
+      <div class="px-6 py-4 border-t border-borderNavy bg-darkNavy flex flex-wrap items-center justify-between gap-2">
+        <div class="flex items-center space-x-2">
+          <button onclick="handleOcrPaper()" id="btnOcrPaper" class="text-purple-300 hover:text-white bg-purple-950/40 hover:bg-purple-900/60 border border-purple-500/40 font-bold text-xs flex items-center space-x-1.5 px-3.5 py-2 rounded-xl transition shadow active:scale-95" title="Extract questions from scanned pages using Gemini Vision API">
+            <i data-lucide="sparkles" class="w-4 h-4 text-purple-400"></i>
+            <span>Add Using OCR</span>
+          </button>
+          <button onclick="openAddQuestionModal()" class="text-brandCyan hover:text-white bg-blue-950/40 hover:bg-blue-900/60 border border-brandCyan/40 font-bold text-xs flex items-center space-x-1.5 px-3.5 py-2 rounded-xl transition shadow active:scale-95" title="Add question manually">
+            <i data-lucide="plus-circle" class="w-4 h-4 text-brandCyan"></i>
+            <span>Add Question</span>
+          </button>
+          <button onclick="deleteCurrentPaper()" class="text-rose-400 hover:text-white bg-rose-950/40 hover:bg-rose-900/60 border border-rose-500/40 font-bold text-xs flex items-center space-x-1.5 px-3.5 py-2 rounded-xl transition shadow active:scale-95" title="Permanently delete from SQLite and seed materials">
+            <i data-lucide="trash-2" class="w-4 h-4 text-rose-400"></i>
+            <span>Delete Paper Completely</span>
+          </button>
+        </div>
         <button onclick="closePaperModal()" class="bg-slate-700 hover:bg-slate-600 text-white text-xs font-semibold px-4 py-2 rounded-xl transition active:scale-95">
           Close
         </button>
@@ -995,21 +1005,96 @@
       btn.textContent = 'Saving...';
 
       try {
-        const res = await fetch(`/api/questions/${qId}`, {
-          method: 'PUT',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(updates)
-        });
+        let res;
+        if (qId) {
+          // Update existing question
+          res = await fetch(`/api/questions/${qId}`, {
+            method: 'PUT',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+          });
+        } else {
+          // Create new question on current paper
+          res = await fetch(`/api/papers/${currentPaperId}/questions`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(updates)
+          });
+        }
 
         if (!res.ok) throw new Error('Server returned ' + res.status);
 
         closeEditQuestionModal();
         await viewPaper(currentPaperId);
+        loadStats();
+        loadPapers();
       } catch (err) {
-        alert('Failed to update question: ' + err.message);
+        alert('Failed to save question: ' + err.message);
       } finally {
         btn.disabled = false;
         btn.textContent = 'Save Question';
+      }
+    }
+
+    // --- ADD QUESTION MANUALLY HANDLERS ---
+    function openAddQuestionModal() {
+      if (!currentPaperId) return;
+
+      const currentCount = currentQuestionsMap.size;
+      const nextNum = String(currentCount + 1);
+
+      document.getElementById('editQuestionId').value = '';
+      document.getElementById('editQuestionModalTitle').textContent = `Add New Question Q${nextNum}`;
+      document.getElementById('editQuestionNum').value = nextNum;
+      document.getElementById('editQuestionType').value = 'MCQ';
+      document.getElementById('editQuestionMarks').value = 1;
+      document.getElementById('editQuestionPrompt').value = '';
+      document.getElementById('editQuestionAnswer').value = '';
+      document.getElementById('editQuestionExplanation').value = '';
+
+      renderEditOptions({ options: ['', '', '', ''], correct_index: 0 });
+      toggleEditQuestionOptions();
+
+      document.getElementById('editQuestionModal').classList.remove('hidden');
+    }
+
+    // --- GEMINI VISION OCR HANDLER ---
+    async function handleOcrPaper() {
+      if (!currentPaperId) return;
+      const title = currentPaperData ? currentPaperData.title : 'this paper';
+
+      const promptConfirm = confirm(
+        `GEMINI VISION OCR EXTRACTION:\n\nExtract questions from scanned photocopy pages of "${title}" using Gemini Vision API?\n\nThis will send the original document pages to Gemini Vision, detect exam questions, multiple choice options, and answers, and automatically populate this paper.\n\nProceed?`
+      );
+      if (!promptConfirm) return;
+
+      const btn = document.getElementById('btnOcrPaper');
+      const originalText = btn.innerHTML;
+      btn.disabled = true;
+      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-purple-300"></i><span>Scanning with Gemini OCR...</span>';
+      lucide.createIcons();
+
+      try {
+        const res = await fetch(`/api/papers/${currentPaperId}/ocr`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' }
+        });
+
+        const data = await res.json();
+        if (!res.ok) {
+          throw new Error(data.error || 'Server returned ' + res.status);
+        }
+
+        alert(data.message || `Successfully extracted ${data.count} questions via Gemini OCR!`);
+        await viewPaper(currentPaperId);
+        loadStats();
+        loadPapers();
+      } catch (err) {
+        alert('OCR Extraction Failed: ' + err.message);
+      } finally {
+        btn.disabled = false;
+        btn.innerHTML = originalText;
+        lucide.createIcons();
       }
     }
 
