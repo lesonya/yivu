@@ -206,13 +206,14 @@ app.get('/api/papers/:id/source', (req, res) => {
 // 4. Update Paper Metadata
 app.put('/api/papers/:id', (req, res) => {
   try {
-    const { title, term, grade_key, subject_id, reading_content } = req.body;
+    const { title, term, grade_key, subject_id, type, reading_content } = req.body;
     db.prepare(`
       UPDATE exam_papers 
       SET title = coalesce(?, title),
           term = coalesce(?, term),
           grade_key = coalesce(?, grade_key),
           subject_id = coalesce(?, subject_id),
+          type = coalesce(?, type),
           reading_content = coalesce(?, reading_content),
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
@@ -221,9 +222,16 @@ app.put('/api/papers/:id', (req, res) => {
       term !== undefined ? term : null,
       grade_key !== undefined ? grade_key : null,
       subject_id !== undefined ? subject_id : null,
+      type !== undefined ? type : null,
       reading_content !== undefined ? reading_content : null,
       req.params.id
     );
+
+    try {
+      syncDbToSeedMaterials();
+    } catch (syncErr) {
+      console.warn('Could not sync update to seed_materials.json:', syncErr.message);
+    }
 
     res.json({ success: true, message: 'Paper updated successfully' });
   } catch (err) {

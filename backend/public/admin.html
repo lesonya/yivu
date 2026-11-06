@@ -579,6 +579,15 @@
           </select>
         </div>
 
+        <div>
+          <label class="block text-slate-300 font-semibold mb-1">Paper Type & Curriculum Runner Mode *</label>
+          <select id="editPaperType" name="type" class="w-full bg-darkNavy border border-borderNavy rounded-xl p-2.5 text-slate-200 font-semibold focus:border-brandCyan focus:outline-none">
+            <option value="CBT_EXAM">⏱️ CBT Exam (Multiple Choice - 60 min countdown timer & score card)</option>
+            <option value="THEORY_PAPER">📝 Theory Paper (Structured - answer writing space & marking key)</option>
+            <option value="STUDY_NOTES">📚 Study Notes / Revision Summary (Curriculum concept review)</option>
+          </select>
+        </div>
+
         <div class="pt-3 border-t border-borderNavy flex justify-end space-x-2">
           <button type="button" onclick="closeEditPaperModal()" class="px-4 py-2 bg-slate-700 hover:bg-slate-600 rounded-xl text-white">Cancel</button>
           <button type="submit" id="btnSavePaper" class="px-5 py-2 bg-brandBlue hover:bg-blue-600 font-semibold text-white rounded-xl shadow-lg">Save Paper</button>
@@ -849,8 +858,12 @@
         currentQuestionsMap.clear();
         (paper.questions || []).forEach(q => currentQuestionsMap.set(q.id, q));
 
+        const typeBadge = paper.type === 'CBT_EXAM' 
+          ? '⏱️ CBT Exam' 
+          : (paper.type === 'THEORY_PAPER' ? '📝 Theory Paper' : '📚 Study Notes');
+
         document.getElementById('modalPaperTitle').textContent = paper.title;
-        document.getElementById('modalPaperMeta').textContent = `${paper.grade_key.toUpperCase().replace('_', ' ')} • ${formatSubjectName(paper.subject_id)} • ${paper.term} (${paper.questions.length} Questions)`;
+        document.getElementById('modalPaperMeta').textContent = `${paper.grade_key.toUpperCase().replace('_', ' ')} • ${formatSubjectName(paper.subject_id)} • ${paper.term} • ${typeBadge} (${paper.questions.length} Questions)`;
 
         if (paper.questions.length === 0) {
           const isPdf = (paper.source_file || '').toLowerCase().endsWith('.pdf');
@@ -969,6 +982,7 @@
       document.getElementById('editPaperGrade').value = currentPaperData.grade_key || 'std_5';
       document.getElementById('editPaperTerm').value = currentPaperData.term || 'Term 1';
       document.getElementById('editPaperSubject').value = currentPaperData.subject_id || 'std_math';
+      document.getElementById('editPaperType').value = currentPaperData.type || 'CBT_EXAM';
       document.getElementById('editPaperModal').classList.remove('hidden');
     }
 
@@ -984,6 +998,7 @@
       const grade_key = document.getElementById('editPaperGrade').value;
       const term = document.getElementById('editPaperTerm').value;
       const subject_id = document.getElementById('editPaperSubject').value;
+      const type = document.getElementById('editPaperType').value;
 
       const btn = document.getElementById('btnSavePaper');
       btn.disabled = true;
@@ -993,7 +1008,7 @@
         const res = await fetch(`/api/papers/${currentPaperId}`, {
           method: 'PUT',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title, grade_key, term, subject_id })
+          body: JSON.stringify({ title, grade_key, term, subject_id, type })
         });
 
         if (!res.ok) throw new Error('Server returned ' + res.status);
