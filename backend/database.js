@@ -81,7 +81,24 @@ module.exports = {
       sql += ' WHERE ' + conditions.join(' AND ');
     }
 
-    sql += ' GROUP BY p.id ORDER BY p.grade_key DESC, p.title ASC';
+    // Dynamic Ordering
+    let orderBy = 'p.grade_key DESC, p.title ASC';
+    const sortField = filters.sort_by;
+    const sortOrder = (filters.sort_order || 'ASC').toUpperCase() === 'DESC' ? 'DESC' : 'ASC';
+
+    if (sortField === 'grade') {
+      orderBy = `p.grade_key ${sortOrder}, p.title ASC`;
+    } else if (sortField === 'subject') {
+      orderBy = `p.subject_id ${sortOrder}, p.title ASC`;
+    } else if (sortField === 'questions') {
+      orderBy = `question_count ${sortOrder}, p.title ASC`;
+    } else if (sortField === 'title') {
+      orderBy = `p.title ${sortOrder}`;
+    } else if (sortField === 'term') {
+      orderBy = `p.term ${sortOrder}, p.title ASC`;
+    }
+
+    sql += ` GROUP BY p.id ORDER BY ${orderBy}`;
     return db.prepare(sql).all(...params);
   },
 

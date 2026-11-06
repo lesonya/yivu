@@ -131,7 +131,9 @@ app.get('/api/papers', (req, res) => {
       grade_key: req.query.grade_key,
       subject_id: req.query.subject_id,
       term: req.query.term,
-      search: req.query.search
+      search: req.query.search,
+      sort_by: req.query.sort_by,
+      sort_order: req.query.sort_order
     };
     const papers = getAllPapers(filters);
     res.json(papers);

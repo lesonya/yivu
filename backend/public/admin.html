@@ -202,22 +202,64 @@
 
     <!-- PAPERS LIST TABLE -->
     <div class="bg-surfaceNavy border border-borderNavy rounded-2xl overflow-hidden shadow-xl">
-      <div class="px-6 py-4 border-b border-borderNavy flex items-center justify-between">
+      <div class="px-6 py-4 border-b border-borderNavy flex flex-wrap items-center justify-between gap-3">
         <h2 class="text-sm font-bold text-white uppercase tracking-wider flex items-center space-x-2">
           <i data-lucide="file-text" class="w-4 h-4 text-brandCyan"></i>
           <span>Curriculum Exam Papers (<span id="papersFilteredCount">0</span>)</span>
         </h2>
+
+        <!-- Sorting Selector Dropdown -->
+        <div class="flex items-center space-x-2">
+          <span class="text-xs text-slate-400 font-semibold flex items-center space-x-1">
+            <i data-lucide="arrow-up-down" class="w-3.5 h-3.5 text-brandCyan"></i>
+            <span>Sort by:</span>
+          </span>
+          <select id="sortBySelect" onchange="handleSortChange(this.value)" class="bg-darkNavy border border-borderNavy rounded-xl px-3 py-1.5 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brandCyan">
+            <option value="grade_desc">Grade (Highest First)</option>
+            <option value="grade_asc">Grade (Lowest First)</option>
+            <option value="subject_asc">Subject (A-Z)</option>
+            <option value="questions_desc">Number of Questions (Most First)</option>
+            <option value="questions_asc">Number of Questions (Least First)</option>
+            <option value="title_asc">Title (A-Z)</option>
+            <option value="term_asc">Term (Term 1 - 3)</option>
+          </select>
+        </div>
       </div>
 
       <div class="overflow-x-auto">
         <table class="w-full text-left text-xs">
-          <thead class="bg-darkNavy/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-borderNavy">
+          <thead class="bg-darkNavy/50 text-slate-400 uppercase tracking-wider font-semibold border-b border-borderNavy select-none">
             <tr>
-              <th class="px-6 py-3.5">Grade</th>
-              <th class="px-6 py-3.5">Subject</th>
-              <th class="px-6 py-3.5">Term</th>
-              <th class="px-6 py-3.5">Paper Title & Source</th>
-              <th class="px-6 py-3.5 text-center">Questions</th>
+              <th onclick="toggleColumnSort('grade')" class="px-6 py-3.5 cursor-pointer hover:text-white transition">
+                <div class="flex items-center space-x-1">
+                  <span>Grade</span>
+                  <span id="sortIcon_grade" class="text-[10px] text-slate-500">↕</span>
+                </div>
+              </th>
+              <th onclick="toggleColumnSort('subject')" class="px-6 py-3.5 cursor-pointer hover:text-white transition">
+                <div class="flex items-center space-x-1">
+                  <span>Subject</span>
+                  <span id="sortIcon_subject" class="text-[10px] text-slate-500">↕</span>
+                </div>
+              </th>
+              <th onclick="toggleColumnSort('term')" class="px-6 py-3.5 cursor-pointer hover:text-white transition">
+                <div class="flex items-center space-x-1">
+                  <span>Term</span>
+                  <span id="sortIcon_term" class="text-[10px] text-slate-500">↕</span>
+                </div>
+              </th>
+              <th onclick="toggleColumnSort('title')" class="px-6 py-3.5 cursor-pointer hover:text-white transition">
+                <div class="flex items-center space-x-1">
+                  <span>Paper Title & Source</span>
+                  <span id="sortIcon_title" class="text-[10px] text-slate-500">↕</span>
+                </div>
+              </th>
+              <th onclick="toggleColumnSort('questions')" class="px-6 py-3.5 text-center cursor-pointer hover:text-white transition">
+                <div class="flex items-center justify-center space-x-1">
+                  <span>Questions</span>
+                  <span id="sortIcon_questions" class="text-[10px] text-slate-500">↕</span>
+                </div>
+              </th>
               <th class="px-6 py-3.5 text-right">Actions</th>
             </tr>
           </thead>
@@ -623,12 +665,66 @@
     let searchTimeout = null;
     let currentPaperData = null;
     let currentQuestionsMap = new Map();
+    let currentSortBy = 'grade';
+    let currentSortOrder = 'DESC';
 
     document.addEventListener('DOMContentLoaded', () => {
       lucide.createIcons();
       loadStats();
       loadPapers();
     });
+
+    function handleSortChange(val) {
+      const parts = val.split('_');
+      currentSortBy = parts[0];
+      currentSortOrder = (parts[1] || 'asc').toUpperCase();
+      updateSortHeaderIcons();
+      loadPapers();
+    }
+
+    function toggleColumnSort(col) {
+      if (currentSortBy === col) {
+        currentSortOrder = currentSortOrder === 'ASC' ? 'DESC' : 'ASC';
+      } else {
+        currentSortBy = col;
+        currentSortOrder = (col === 'questions' || col === 'grade') ? 'DESC' : 'ASC';
+      }
+
+      // Sync dropdown
+      const selectVal = `${currentSortBy}_${currentSortOrder.toLowerCase()}`;
+      const sel = document.getElementById('sortBySelect');
+      if (sel) {
+        let match = false;
+        for (let i = 0; i < sel.options.length; i++) {
+          if (sel.options[i].value === selectVal) {
+            sel.selectedIndex = i;
+            match = true;
+            break;
+          }
+        }
+        if (!match) {
+          sel.value = selectVal;
+        }
+      }
+
+      updateSortHeaderIcons();
+      loadPapers();
+    }
+
+    function updateSortHeaderIcons() {
+      const cols = ['grade', 'subject', 'term', 'title', 'questions'];
+      cols.forEach(c => {
+        const iconEl = document.getElementById(`sortIcon_${c}`);
+        if (!iconEl) return;
+        if (currentSortBy === c) {
+          iconEl.textContent = currentSortOrder === 'ASC' ? '▲' : '▼';
+          iconEl.className = 'text-[10px] text-brandCyan font-bold';
+        } else {
+          iconEl.textContent = '↕';
+          iconEl.className = 'text-[10px] text-slate-500';
+        }
+      });
+    }
 
     async function loadStats() {
       try {
@@ -652,6 +748,8 @@
       if (subject) params.append('subject_id', subject);
       if (term) params.append('term', term);
       if (search) params.append('search', search);
+      if (currentSortBy) params.append('sort_by', currentSortBy);
+      if (currentSortOrder) params.append('sort_order', currentSortOrder);
 
       const tbody = document.getElementById('papersTableBody');
       tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Loading...</td></tr>';
