@@ -43,6 +43,8 @@ export const QuizRunnerScreen: React.FC = () => {
   const [earnedStars, setEarnedStars] = useState(0);
   const [correctAnswersCount, setCorrectAnswersCount] = useState(0);
   const [userAnswers, setUserAnswers] = useState<Record<number, number>>({});
+  const [shortAnswers, setShortAnswers] = useState<Record<number, string>>({});
+  const [revealedSolutions, setRevealedSolutions] = useState<Record<number, boolean>>({});
   const [isReviewMode, setIsReviewMode] = useState(false);
   const [isLoading, setIsLoading] = useState(true);
   const [isFinished, setIsFinished] = useState(false);
@@ -406,6 +408,8 @@ export const QuizRunnerScreen: React.FC = () => {
                 setIsFinished(false);
                 setAiExplanation(null);
                 setUserAnswers({});
+                setShortAnswers({});
+                setRevealedSolutions({});
               }}
               className="w-full flex items-center justify-center space-x-2 py-2.5 bg-amber-950/60 hover:bg-amber-900/60 border border-amber-500/40 text-amber-300 font-bold text-xs rounded-xl shadow transition active:scale-95"
             >
@@ -654,31 +658,91 @@ export const QuizRunnerScreen: React.FC = () => {
                 })}
               </div>
             ) : (
-              /* Theory / Structured Question or Revision Note Card */
-              <div className="p-4 rounded-2xl bg-dark-navy/60 border border-border-navy space-y-3">
-                <div className="flex items-center justify-between text-xs text-amber-400 font-semibold">
-                  <span>Structured Question / Curriculum Concept Item</span>
-                  <span className="text-[10px] bg-amber-400/10 px-2 py-0.5 rounded border border-amber-400/20">
-                    Self-Paced Practice
+              /* Theory / Structured Question or Revision Note Card with Answer Input */
+              <div className="p-5 rounded-2xl bg-dark-navy/80 border border-border-navy space-y-4">
+                <div className="flex items-center justify-between text-xs font-semibold">
+                  <span className="text-brand-cyan flex items-center space-x-1.5">
+                    <BookOpen className="w-4 h-4 text-brand-cyan" />
+                    <span>Structured / Short Answer Response</span>
+                  </span>
+                  <span className="text-[10px] bg-brand-cyan/10 text-brand-cyan px-2.5 py-0.5 rounded-full border border-brand-cyan/20 font-bold">
+                    [{currentQ.marks || 1} Mark{(currentQ.marks || 1) > 1 ? 's' : ''}]
                   </span>
                 </div>
-                <p className="text-xs text-slate-400 leading-relaxed">
-                  Review the concept prompt above or use the AI Tutor to explore the official Botswana marking criteria.
-                </p>
-                <div className="pt-2 flex items-center justify-between gap-3">
-                  <button
-                    onClick={handleExplainWithAI}
-                    disabled={isAiLoading}
-                    className="flex items-center space-x-2 text-xs font-bold text-purple-300 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 px-4 py-2 rounded-xl transition active:scale-95"
-                  >
-                    <Sparkles className="w-4 h-4 text-purple-400" />
-                    <span>Explain with AI Tutor</span>
-                  </button>
+
+                {/* Answer Input Area */}
+                <div className="space-y-2">
+                  <label className="block text-xs font-semibold text-slate-300">
+                    Write Your Answer:
+                  </label>
+                  <textarea
+                    rows={3}
+                    value={shortAnswers[currentIndex] || ''}
+                    onChange={(e) => {
+                      const val = e.target.value;
+                      setShortAnswers((prev) => ({ ...prev, [currentIndex]: val }));
+                    }}
+                    placeholder="Type your explanation or calculation here..."
+                    className="w-full bg-surface-navy border border-border-navy rounded-xl p-3.5 text-sm text-slate-100 placeholder-slate-500 focus:outline-none focus:border-brand-cyan focus:ring-1 focus:ring-brand-cyan transition duration-150 resize-y"
+                  />
+                </div>
+
+                {/* Solution & Marking Scheme Reveal */}
+                {revealedSolutions[currentIndex] && (
+                  <div className="p-4 rounded-xl bg-purple-950/40 border border-purple-500/30 text-xs text-purple-200 space-y-2 animate-in fade-in duration-200">
+                    <div className="font-bold flex items-center space-x-1.5 text-purple-300">
+                      <Lightbulb className="w-4 h-4 text-purple-400" />
+                      <span>Botswana Syllabus Marking Scheme & Model Answer:</span>
+                    </div>
+                    <div className="text-white font-medium pl-5 leading-relaxed">
+                      {currentQ.marking_scheme?.correct_answer || currentQ.explanation || 'Refer to the curriculum grading guidelines above.'}
+                    </div>
+                    {currentQ.marking_scheme?.grading_criteria && currentQ.marking_scheme.grading_criteria.length > 0 && (
+                      <ul className="list-disc list-inside text-slate-300 pl-5 space-y-1 text-[11px]">
+                        {currentQ.marking_scheme.grading_criteria.map((crit, cIdx) => (
+                          <li key={cIdx}>{crit}</li>
+                        ))}
+                      </ul>
+                    )}
+                  </div>
+                )}
+
+                {/* Action Buttons */}
+                <div className="pt-2 flex flex-wrap items-center justify-between gap-3 border-t border-border-navy/60">
+                  <div className="flex items-center space-x-2">
+                    <button
+                      type="button"
+                      onClick={() => {
+                        setRevealedSolutions((prev) => ({ ...prev, [currentIndex]: !prev[currentIndex] }));
+                      }}
+                      className="flex items-center space-x-1.5 text-xs font-semibold text-slate-300 hover:text-white bg-surface-navy hover:bg-slate-700/60 border border-border-navy px-3.5 py-2 rounded-xl transition active:scale-95"
+                    >
+                      <Lightbulb className="w-3.5 h-3.5 text-amber-400" />
+                      <span>{revealedSolutions[currentIndex] ? 'Hide Answer Key' : 'Check Marking Scheme'}</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={handleExplainWithAI}
+                      disabled={isAiLoading}
+                      className="flex items-center space-x-1.5 text-xs font-bold text-purple-300 bg-purple-950/40 hover:bg-purple-900/50 border border-purple-500/40 px-3.5 py-2 rounded-xl transition active:scale-95"
+                    >
+                      <Sparkles className="w-3.5 h-3.5 text-purple-400" />
+                      <span>Explain with AI Tutor</span>
+                    </button>
+                  </div>
 
                   <button
                     data-dpad-quiz-item
-                    onClick={handleNextQuestion}
-                    className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-5 py-2 rounded-xl shadow transition active:scale-95"
+                    type="button"
+                    onClick={() => {
+                      if (shortAnswers[currentIndex] && shortAnswers[currentIndex].trim().length > 0) {
+                        setEarnedXP((prev) => prev + 5);
+                        addXP(5);
+                      }
+                      handleNextQuestion();
+                    }}
+                    className="flex items-center space-x-2 text-xs font-bold text-white bg-gradient-to-r from-brand-blue to-blue-600 hover:from-blue-600 hover:to-blue-700 px-5 py-2.5 rounded-xl shadow-lg transition active:scale-95 ml-auto"
                   >
                     <span>{currentIndex + 1 < questions.length ? 'Next Question' : 'View Results'}</span>
                     <ChevronRight className="w-4 h-4" />
