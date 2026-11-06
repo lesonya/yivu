@@ -56,7 +56,8 @@ export const QuizRunnerScreen: React.FC = () => {
 
   // Timed Examination Mode: 45 Minutes Standard Countdown (2700s)
   const [timeRemainingSeconds, setTimeRemainingSeconds] = useState(2700);
-  const [isTimerRunning, setIsTimerRunning] = useState(true);
+  const [isTimerRunning, setIsTimerRunning] = useState(false);
+  const [hasStartedQuiz, setHasStartedQuiz] = useState(false);
   const startTimeRef = useRef<number>(Date.now());
 
   // Enable Smart TV / Keyboard D-pad navigation across option buttons
@@ -427,40 +428,107 @@ export const QuizRunnerScreen: React.FC = () => {
 
   const optionLetters = ['A', 'B', 'C', 'D', 'E', 'F'];
 
-  return (
-    <div className={`mx-auto space-y-6 pb-12 transition-all duration-300 ${isAiPanelOpen ? 'max-w-7xl' : 'max-w-3xl'}`}>
-      {/* 1. Paper Header Information Banner (Title, Grade, Subject, Total Questions, Allocated Time) */}
-      <div className="bg-gradient-to-r from-slate-900 via-surface-navy to-slate-900 border border-border-navy/80 p-5 rounded-3xl shadow-xl flex flex-wrap items-center justify-between gap-4">
-        <div className="space-y-1">
-          <div className="flex flex-wrap items-center gap-2">
-            <span className="text-[11px] font-extrabold uppercase tracking-wider text-brand-cyan bg-brand-cyan/15 px-3 py-0.5 rounded-full border border-brand-cyan/30">
+  // 1. Initial Briefing / Cover Slide (Header Information Screen)
+  if (!hasStartedQuiz) {
+    return (
+      <div className="max-w-3xl mx-auto space-y-6 pb-12 animate-in fade-in duration-300">
+        <div className="cognix-card p-8 sm:p-10 text-center space-y-6 border border-white/10 shadow-2xl relative overflow-hidden">
+          {/* Decorative ambient glows */}
+          <div className="absolute top-0 right-0 w-72 h-72 bg-brand-blue/15 rounded-full blur-3xl pointer-events-none" />
+          <div className="absolute bottom-0 left-0 w-72 h-72 bg-brand-cyan/15 rounded-full blur-3xl pointer-events-none" />
+
+          {/* Badge chips */}
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <span className="text-xs font-extrabold uppercase tracking-wider text-brand-cyan bg-brand-cyan/15 px-3 py-1 rounded-full border border-brand-cyan/30">
               {activeProfile.gradeKey.toUpperCase().replace('_', ' ')}
             </span>
-            <span className="text-[11px] font-bold text-slate-300 bg-white/5 px-2.5 py-0.5 rounded-full border border-white/10">
+            <span className="text-xs font-bold text-white bg-white/10 px-3 py-1 rounded-full border border-white/10">
               {subjectName}
             </span>
-            <span className="text-[10px] text-slate-400 font-semibold uppercase">
-              • {materialMeta?.term || 'Term 1'} Assessment
+            <span className="text-xs text-slate-300 font-semibold bg-white/5 px-3 py-1 rounded-full border border-white/10">
+              {materialMeta?.term || 'Term 1'} Assessment
             </span>
           </div>
-          <h1 className="text-base sm:text-lg font-bold text-white tracking-wide line-clamp-1">
-            {materialTitle}
-          </h1>
-        </div>
 
-        {/* Paper Metadata Badges */}
-        <div className="flex items-center space-x-3">
-          <div className="bg-dark-navy/90 border border-border-navy px-3 py-1.5 rounded-2xl text-center">
-            <div className="text-xs font-extrabold text-gold-star">{questions.length} Questions</div>
-            <div className="text-[9px] text-slate-400 uppercase font-semibold">Total Item Count</div>
+          {/* Paper Title */}
+          <div>
+            <h1 className="text-xl sm:text-2xl font-extrabold text-white leading-snug">
+              {materialTitle}
+            </h1>
+            <p className="text-xs sm:text-sm text-slate-300 mt-2 max-w-xl mx-auto">
+              Botswana National Curriculum examination assessment. Review the test parameters below before proceeding to Question 1.
+            </p>
           </div>
-          <div className="bg-dark-navy/90 border border-border-navy px-3 py-1.5 rounded-2xl text-center">
-            <div className="text-xs font-extrabold text-amber-400">45 Minutes</div>
-            <div className="text-[9px] text-slate-400 uppercase font-semibold">Allocated Time</div>
+
+          {/* Key Parameters Cards */}
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3.5 pt-2">
+            <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/10 text-center">
+              <div className="text-xl font-extrabold text-white flex items-center justify-center space-x-1.5">
+                <FileCheck className="w-5 h-5 text-brand-cyan" />
+                <span>{questions.length}</span>
+              </div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase mt-1">Total Questions</div>
+            </div>
+
+            <div className="bg-slate-950/50 p-4 rounded-2xl border border-white/10 text-center">
+              <div className="text-xl font-extrabold text-amber-400 flex items-center justify-center space-x-1.5">
+                <Clock className="w-5 h-5" />
+                <span>45 Mins</span>
+              </div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase mt-1">Allocated Time</div>
+            </div>
+
+            <div className="col-span-2 sm:col-span-1 bg-slate-950/50 p-4 rounded-2xl border border-white/10 text-center">
+              <div className="text-xl font-extrabold text-gold-star flex items-center justify-center space-x-1.5">
+                <Star className="w-5 h-5 fill-current" />
+                <span>+{questions.length * 10} XP</span>
+              </div>
+              <div className="text-[11px] text-slate-400 font-bold uppercase mt-1">Attainment Goal</div>
+            </div>
+          </div>
+
+          {/* Rules / Examination Guidelines */}
+          <div className="p-4 rounded-2xl bg-white/[0.03] border border-white/10 text-left text-xs text-slate-300 space-y-2">
+            <div className="font-bold text-white flex items-center space-x-2">
+              <BookOpen className="w-4 h-4 text-brand-cyan" />
+              <span>Examination Guidelines</span>
+            </div>
+            <ul className="list-disc list-inside space-y-1 text-slate-400 text-[11px] leading-relaxed">
+              <li>Read each question carefully before submitting your answer.</li>
+              <li>You may use the <strong>AI Tutor</strong> for step-by-step curriculum explanations.</li>
+              <li>Timer starts immediately when you tap <strong>Proceed to Question 1</strong>.</li>
+            </ul>
+          </div>
+
+          {/* Actions */}
+          <div className="pt-2 flex flex-col sm:flex-row items-center justify-center gap-3">
+            <button
+              onClick={() => navigate(-1)}
+              className="w-full sm:w-auto px-6 py-3 rounded-2xl bg-slate-800/80 hover:bg-slate-800 text-slate-300 hover:text-white font-bold text-xs transition active:scale-95 border border-white/10"
+            >
+              Back to Materials
+            </button>
+            <button
+              data-dpad-quiz-item
+              onClick={() => {
+                setHasStartedQuiz(true);
+                setIsTimerRunning(true);
+                startTimeRef.current = Date.now();
+                soundManager.playCorrect();
+              }}
+              className="w-full sm:w-auto flex items-center justify-center space-x-2 bg-gradient-to-r from-brand-blue via-blue-600 to-brand-cyan hover:opacity-95 text-white font-extrabold text-xs py-3.5 px-8 rounded-2xl shadow-[0_0_25px_rgba(59,130,246,0.35)] transition transform active:scale-95"
+            >
+              <span>Proceed to Question 1</span>
+              <ChevronRight className="w-4 h-4" />
+            </button>
           </div>
         </div>
       </div>
+    );
+  }
 
+  return (
+    <div className={`mx-auto space-y-6 pb-12 transition-all duration-300 ${isAiPanelOpen ? 'max-w-7xl' : 'max-w-3xl'}`}>
       {/* Top Question Tracker & Countdown Header */}
       <div className="flex items-center justify-between bg-surface-navy border border-border-navy p-4 rounded-2xl">
         <div className="flex items-center space-x-3">
