@@ -868,13 +868,17 @@
                 </p>
               </div>
               <div class="pt-2 flex flex-col sm:flex-row items-center justify-center gap-2">
+                <button onclick="handleOcrPaper()" class="px-4 py-2 bg-gradient-to-r from-purple-600 to-indigo-600 hover:from-purple-500 hover:to-indigo-500 text-white font-semibold rounded-xl text-xs flex items-center space-x-1.5 shadow-lg shadow-purple-900/20 active:scale-95 transition">
+                  <i data-lucide="sparkles" class="w-4 h-4 text-purple-200"></i>
+                  <span>Add Using OCR</span>
+                </button>
                 ${isPdf ? `
-                  <button onclick="openPdfViewer('${paper.id}', '${cleanTitleEsc}', '${cleanSourceEsc}')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-900/20">
+                  <button onclick="openPdfViewer('${paper.id}', '${cleanTitleEsc}', '${cleanSourceEsc}')" class="px-4 py-2 bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white font-semibold rounded-xl text-xs flex items-center space-x-1.5 shadow-lg shadow-emerald-900/20 active:scale-95 transition">
                     <i data-lucide="eye" class="w-4 h-4"></i>
                     <span>Open & Read Original PDF</span>
                   </button>
                 ` : ''}
-                <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-surfaceNavy hover:bg-borderNavy border border-borderNavy text-slate-200 font-semibold rounded-xl text-xs flex items-center space-x-1.5">
+                <button onclick="openAddQuestionModal()" class="px-4 py-2 bg-surfaceNavy hover:bg-borderNavy border border-borderNavy text-slate-200 font-semibold rounded-xl text-xs flex items-center space-x-1.5 active:scale-95 transition">
                   <i data-lucide="plus-circle" class="w-4 h-4 text-purple-400"></i>
                   <span>Add Questions Manually</span>
                 </button>
@@ -1156,21 +1160,32 @@
       document.getElementById('editQuestionModal').classList.remove('hidden');
     }
 
-    // --- GEMINI VISION OCR HANDLER ---
+    // --- GEMINI VISION OCR HANDLER (Auto-proceed with no blocking confirmation prompts) ---
     async function handleOcrPaper() {
       if (!currentPaperId) return;
-      const title = currentPaperData ? currentPaperData.title : 'this paper';
-
-      const promptConfirm = confirm(
-        `GEMINI VISION OCR EXTRACTION:\n\nExtract questions from scanned photocopy pages of "${title}" using Gemini Vision API?\n\nThis will send the original document pages to Gemini Vision, detect exam questions, multiple choice options, and answers, and automatically populate this paper.\n\nProceed?`
-      );
-      if (!promptConfirm) return;
 
       const btn = document.getElementById('btnOcrPaper');
-      const originalText = btn.innerHTML;
-      btn.disabled = true;
-      btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-purple-300"></i><span>Scanning with Gemini OCR...</span>';
-      lucide.createIcons();
+      const originalText = btn ? btn.innerHTML : '';
+      if (btn) {
+        btn.disabled = true;
+        btn.innerHTML = '<i data-lucide="loader-2" class="w-4 h-4 animate-spin text-purple-300"></i><span>Scanning with Gemini OCR...</span>';
+        lucide.createIcons();
+      }
+
+      // Show in-modal status banner if present
+      const qList = document.getElementById('modalQuestionsList');
+      if (qList && currentQuestionsMap.size === 0) {
+        qList.innerHTML = `
+          <div class="py-16 text-center space-y-3">
+            <div class="w-12 h-12 mx-auto rounded-xl bg-purple-500/20 border border-purple-500/40 flex items-center justify-center text-purple-300">
+              <i data-lucide="loader-2" class="w-6 h-6 animate-spin text-purple-400"></i>
+            </div>
+            <p class="text-sm font-bold text-white">Extracting Exam Questions via Gemini OCR...</p>
+            <p class="text-xs text-purple-300">Auto-detecting prompts, options, and model answers from the source document.</p>
+          </div>
+        `;
+        lucide.createIcons();
+      }
 
       try {
         const res = await fetch(`/api/papers/${currentPaperId}/ocr`, {
@@ -1183,16 +1198,19 @@
           throw new Error(data.error || 'Server returned ' + res.status);
         }
 
-        alert(data.message || `Successfully extracted ${data.count} questions via Gemini OCR!`);
+        // Auto-refresh questions list and metadata directly without blocking alert modals
         await viewPaper(currentPaperId);
         loadStats();
         loadPapers();
       } catch (err) {
         alert('OCR Extraction Failed: ' + err.message);
+        if (currentPaperId) viewPaper(currentPaperId);
       } finally {
-        btn.disabled = false;
-        btn.innerHTML = originalText;
-        lucide.createIcons();
+        if (btn) {
+          btn.disabled = false;
+          btn.innerHTML = originalText;
+          lucide.createIcons();
+        }
       }
     }
 
