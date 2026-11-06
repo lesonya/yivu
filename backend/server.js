@@ -184,7 +184,14 @@ app.put('/api/papers/:id', (req, res) => {
           reading_content = coalesce(?, reading_content),
           updated_at = CURRENT_TIMESTAMP
       WHERE id = ?
-    `).run(title, term, grade_key, subject_id, reading_content, req.params.id);
+    `).run(
+      title !== undefined ? title : null,
+      term !== undefined ? term : null,
+      grade_key !== undefined ? grade_key : null,
+      subject_id !== undefined ? subject_id : null,
+      reading_content !== undefined ? reading_content : null,
+      req.params.id
+    );
 
     res.json({ success: true, message: 'Paper updated successfully' });
   } catch (err) {
