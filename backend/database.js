@@ -72,6 +72,10 @@ module.exports = {
       conditions.push('p.term = ?');
       params.push(filters.term);
     }
+    if (filters.type) {
+      conditions.push('p.type = ?');
+      params.push(filters.type);
+    }
     if (filters.search) {
       conditions.push('(p.title LIKE ? OR p.reading_content LIKE ?)');
       params.push(`%${filters.search}%`, `%${filters.search}%`);
@@ -94,6 +98,8 @@ module.exports = {
       orderBy = `question_count ${sortOrder}, p.title ASC`;
     } else if (sortField === 'title') {
       orderBy = `p.title ${sortOrder}`;
+    } else if (sortField === 'type') {
+      orderBy = `p.type ${sortOrder}, p.title ASC`;
     } else if (sortField === 'term') {
       orderBy = `p.term ${sortOrder}, p.title ASC`;
     }

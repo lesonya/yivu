@@ -191,6 +191,14 @@
           <option value="Term 2">Term 2</option>
           <option value="Term 3">Term 3</option>
         </select>
+
+        <!-- Paper Type Filter -->
+        <select id="filterType" onchange="loadPapers()" class="bg-darkNavy border border-borderNavy rounded-xl px-3.5 py-2 text-xs font-semibold text-slate-200 focus:outline-none focus:border-brandCyan">
+          <option value="">All Types</option>
+          <option value="CBT_EXAM">⏱️ CBT Exam</option>
+          <option value="THEORY_PAPER">📝 Theory Paper</option>
+          <option value="STUDY_NOTES">📚 Study Notes</option>
+        </select>
       </div>
 
       <!-- Search Box -->
@@ -218,6 +226,7 @@
             <option value="grade_desc">Grade (Highest First)</option>
             <option value="grade_asc">Grade (Lowest First)</option>
             <option value="subject_asc">Subject (A-Z)</option>
+            <option value="type_asc">Paper Type (A-Z)</option>
             <option value="questions_desc">Number of Questions (Most First)</option>
             <option value="questions_asc">Number of Questions (Least First)</option>
             <option value="title_asc">Title (A-Z)</option>
@@ -246,6 +255,12 @@
                 <div class="flex items-center space-x-1">
                   <span>Term</span>
                   <span id="sortIcon_term" class="text-[10px] text-slate-500">↕</span>
+                </div>
+              </th>
+              <th onclick="toggleColumnSort('type')" class="px-6 py-3.5 cursor-pointer hover:text-white transition">
+                <div class="flex items-center space-x-1">
+                  <span>Type</span>
+                  <span id="sortIcon_type" class="text-[10px] text-slate-500">↕</span>
                 </div>
               </th>
               <th onclick="toggleColumnSort('title')" class="px-6 py-3.5 cursor-pointer hover:text-white transition">
@@ -721,7 +736,7 @@
     }
 
     function updateSortHeaderIcons() {
-      const cols = ['grade', 'subject', 'term', 'title', 'questions'];
+      const cols = ['grade', 'subject', 'term', 'type', 'title', 'questions'];
       cols.forEach(c => {
         const iconEl = document.getElementById(`sortIcon_${c}`);
         if (!iconEl) return;
@@ -750,18 +765,20 @@
       const grade = document.getElementById('filterGrade').value;
       const subject = document.getElementById('filterSubject').value;
       const term = document.getElementById('filterTerm').value;
+      const type = document.getElementById('filterType') ? document.getElementById('filterType').value : '';
       const search = document.getElementById('searchInput').value;
 
       const params = new URLSearchParams();
       if (grade) params.append('grade_key', grade);
       if (subject) params.append('subject_id', subject);
       if (term) params.append('term', term);
+      if (type) params.append('type', type);
       if (search) params.append('search', search);
       if (currentSortBy) params.append('sort_by', currentSortBy);
       if (currentSortOrder) params.append('sort_order', currentSortOrder);
 
       const tbody = document.getElementById('papersTableBody');
-      tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-8 text-center text-slate-400">Loading...</td></tr>';
+      tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-slate-400">Loading...</td></tr>';
 
       try {
         const res = await fetch(`/api/papers?${params.toString()}`);
@@ -769,13 +786,19 @@
         document.getElementById('papersFilteredCount').textContent = papers.length;
 
         if (papers.length === 0) {
-          tbody.innerHTML = '<tr><td colspan="6" class="px-6 py-12 text-center text-slate-400">No exam papers found matching criteria.</td></tr>';
+          tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-12 text-center text-slate-400">No exam papers found matching criteria.</td></tr>';
           return;
         }
 
         tbody.innerHTML = papers.map(p => {
           const gradeBadge = p.grade_key === 'std_5' ? 'bg-amber-500/20 text-amber-300 border-amber-500/30' : 'bg-cyan-500/20 text-cyan-300 border-cyan-500/30';
           const subjectName = formatSubjectName(p.subject_id);
+          const typeBadge = p.type === 'CBT_EXAM'
+            ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-blue-500/15 text-blue-300 border border-blue-500/30" title="Computer-Based Test (Timed MCQ)">⏱️ CBT Exam</span>'
+            : (p.type === 'THEORY_PAPER'
+              ? '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-purple-500/15 text-purple-300 border border-purple-500/30" title="Theory / Structured Short Answer">📝 Theory</span>'
+              : '<span class="inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold bg-emerald-500/15 text-emerald-300 border border-emerald-500/30" title="Study Notes & Revision">📚 Notes</span>');
+
           return `
             <tr class="hover:bg-slate-800/40 transition">
               <td class="px-6 py-4">
@@ -785,6 +808,7 @@
               </td>
               <td class="px-6 py-4 font-semibold text-slate-200">${subjectName}</td>
               <td class="px-6 py-4 text-slate-300">${p.term}</td>
+              <td class="px-6 py-4 whitespace-nowrap">${typeBadge}</td>
               <td class="px-6 py-4 max-w-md">
                 <div class="text-white font-medium truncate" title="${p.title}">${p.title}</div>
                 <div class="flex items-center space-x-2 mt-1">
@@ -818,7 +842,7 @@
 
         lucide.createIcons();
       } catch (err) {
-        tbody.innerHTML = `<tr><td colspan="6" class="px-6 py-8 text-center text-rose-400">Error loading papers: ${err.message}</td></tr>`;
+        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-rose-400">Error loading papers: ${err.message}</td></tr>`;
       }
     }
 
